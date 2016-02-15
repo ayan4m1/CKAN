@@ -1,3 +1,6 @@
+.build/
+tools/
+Core/Meta.cs
 build/
 /.vs/
 Screenshots/
@@ -17,6 +20,7 @@ ks2ckan.exe
 netkan.exe
 *.exe.config
 *.exe.mdb
+*.pdb
 .*.swp
 .fatten.out
 *.resources
