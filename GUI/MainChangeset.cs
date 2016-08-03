@@ -74,13 +74,13 @@ namespace CKAN
         /// It arranges the changeset in a human-friendly order
         /// The requested mod is listed first, it's dependencies right after it
         /// So we get for example "ModuleRCSFX" directly after "USI Exploration Pack"
-        /// 
+        ///
         /// It is very likely that this is forward-compatible with new ChangeTypes's,
         /// like a a "reconfigure" changetype, but only the future will tell
         /// </summary>
         /// <param name="changes">Every leftover ModChange that should be sorted</param>
         /// <param name="parent"></param>
-        private void CreateSortedModList(IEnumerable<ModChange> changes, ModChange parent=null)
+        private void CreateSortedModList(IEnumerable<ModChange> changes, ModChange parent = null)
         {
             foreach (ModChange change in changes)
             {
@@ -125,6 +125,5 @@ namespace CKAN
             UpdateChangesDialog(null, installWorker);
             ShowWaitDialog();
         }
-
     }
 }

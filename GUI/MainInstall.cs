@@ -431,31 +431,44 @@ namespace CKAN
             }
         }
 
-        /// <summary>
-        /// Tries to get every mod in the Dictionary, which can be installed
-        /// It also transforms the Recommender list to a string
-        /// </summary>
-        /// <param name="mods"></param>
-        /// <returns></returns>
-        private Dictionary<CkanModule, string> GetShowableMods(Dictionary<string, List<string>> mods)
+        private void UpdateRecommendedDialog(Dictionary<string, List<string>> mods, bool suggested = false)
         {
-            Dictionary<CkanModule, string> modules = new Dictionary<CkanModule, string>();
-
-            var opts = new RelationshipResolverOptions
+            if (!suggested)
             {
-                with_all_suggests = false,
-                with_recommends = false,
-                with_suggests = false,
-                without_enforce_consistency = false,
-                without_toomanyprovides_kraken = true
-            };
-            
+                RecommendedDialogLabel.Text =
+                    "The following modules have been recommended by one or more of the chosen modules:";
+                RecommendedModsListView.Columns[1].Text = "Recommended by:";
+                RecommendedModsToggleCheckbox.Text = "(De-)select all recommended mods.";
+                RecommendedModsToggleCheckbox.Checked = true;
+                tabController.RenameTab("ChooseRecommendedModsTabPage", "Choose recommended mods");
+            }
+            else
+            {
+                RecommendedDialogLabel.Text =
+                    "The following modules have been suggested by one or more of the chosen modules:";
+                RecommendedModsListView.Columns[1].Text = "Suggested by:";
+                RecommendedModsToggleCheckbox.Text = "(De-)select all suggested mods.";
+                RecommendedModsToggleCheckbox.Checked = false;
+                tabController.RenameTab("ChooseRecommendedModsTabPage", "Choose suggested mods");
+            }
+
+            RecommendedModsListView.Items.Clear();
+
             foreach (var pair in mods)
             {
                 CkanModule module;
 
                 try
                 {
+                    var opts = new RelationshipResolverOptions
+                    {
+                        with_all_suggests = false,
+                        with_recommends = false,
+                        with_suggests = false,
+                        without_enforce_consistency = false,
+                        without_toomanyprovides_kraken = true
+                    };
+
                     var resolver = new RelationshipResolver(new List<string> { pair.Key }, opts,
                         RegistryManager.Instance(manager.CurrentInstance).registry, CurrentInstance.Version());
                     if (!resolver.ModList().Any())
@@ -475,40 +488,29 @@ namespace CKAN
                 {
                     continue;
                 }
-                modules.Add(module, String.Join(",", pair.Value.ToArray()));
-            }
-            return modules;
-        }
 
-        private void UpdateRecommendedDialog(Dictionary<CkanModule, string> mods, bool suggested = false)
-        {
-            if (!suggested)
-            {
-                RecommendedDialogLabel.Text =
-                    "The following modules have been recommended by one or more of the chosen modules:";
-                RecommendedModsListView.Columns[1].Text = "Recommended by:";
-                RecommendedModsToggleCheckbox.Text = "(De-)select all recommended mods.";
-                RecommendedModsToggleCheckbox.Checked=true;
-                tabController.RenameTab("ChooseRecommendedModsTabPage", "Choose recommended mods");
-            }
-            else
-            {
-                RecommendedDialogLabel.Text =
-                    "The following modules have been suggested by one or more of the chosen modules:";
-                RecommendedModsListView.Columns[1].Text = "Suggested by:";
-                RecommendedModsToggleCheckbox.Text = "(De-)select all suggested mods.";
-                RecommendedModsToggleCheckbox.Checked=false;
-                tabController.RenameTab("ChooseRecommendedModsTabPage", "Choose suggested mods");
-            }
-
-            RecommendedModsListView.Items.Clear();
-            foreach (var pair in mods)
-            {
-                CkanModule module = pair.Key;
-                ListViewItem item = new ListViewItem {Tag = module, Checked = !suggested, Text = pair.Key.name};
+                ListViewItem item = new ListViewItem {Tag = module, Checked = !suggested, Text = pair.Key};
 
 
-                ListViewItem.ListViewSubItem recommendedBy = new ListViewItem.ListViewSubItem() { Text = pair.Value };
+                ListViewItem.ListViewSubItem recommendedBy = new ListViewItem.ListViewSubItem();
+                string recommendedByString = "";
+
+                bool first = true;
+                foreach (string mod in pair.Value)
+                {
+                    if (!first)
+                    {
+                        recommendedByString += ", ";
+                    }
+                    else
+                    {
+                        first = false;
+                    }
+
+                    recommendedByString += mod;
+                }
+
+                recommendedBy.Text = recommendedByString;
 
                 item.SubItems.Add(recommendedBy);
 

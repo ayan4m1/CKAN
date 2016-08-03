@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -40,6 +39,7 @@ namespace CKAN
         //Ugly Hack. Possible fix is to alter the relationship provider so we can use a loop
         //over reason for to find a user requested mod. Or, you know, pass in a handler to it.
         private readonly ConcurrentStack<GUIMod> last_mod_to_have_install_toggled = new ConcurrentStack<GUIMod>();
+
         public async Task<CkanModule> TooManyModsProvide(TooManyModsProvideKraken kraken)
         {
             //We want LMtHIT to be the last user selection. If we alter this handling a too many provides
@@ -58,7 +58,7 @@ namespace CKAN
             if (module == null)
             {
                 last_mod_to_have_install_toggled.TryPeek(out mod);
-                MarkModForInstall(mod.Identifier,uncheck:true);
+                MarkModForInstall(mod.Identifier, uncheck: true);
             }
             Util.Invoke(this, () =>
             {
@@ -69,7 +69,7 @@ namespace CKAN
                 tabController.ShowTab("ManageModsTabPage");
             });
 
-            if(module!=null)
+            if (module != null)
                 MarkModForInstall(module.identifier);
 
             last_mod_to_have_install_toggled.TryPop(out mod);

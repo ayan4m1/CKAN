@@ -1,4 +1,8 @@
-﻿using System;
+﻿using CKAN.Exporters;
+using CKAN.Properties;
+using CKAN.Types;
+using log4net;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -8,10 +12,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using CKAN.Exporters;
-using CKAN.Properties;
-using CKAN.Types;
-using log4net;
 using Timer = System.Windows.Forms.Timer;
 
 namespace CKAN
@@ -38,8 +38,6 @@ namespace CKAN
 
     public partial class Main
     {
-        private static readonly ILog log = LogManager.GetLogger(typeof(Main));
-
         public delegate void ModChangedCallback(CkanModule module, GUIModChangeType change);
 
         public static event ModChangedCallback modChangedCallback;
@@ -447,7 +445,7 @@ namespace CKAN
         {
             foreach (DataGridViewRow row in ModList.Rows)
             {
-                var mod = ((GUIMod) row.Tag);
+                var mod = ((GUIMod)row.Tag);
                 if (mod.HasUpdate && row.Cells[1] is DataGridViewCheckBoxCell)
                 {
                     MarkModForUpdate(mod.Identifier);
@@ -465,7 +463,7 @@ namespace CKAN
 
             this.AddStatusMessage("");
 
-            ModInfoTabControl.Enabled = module!=null;
+            ModInfoTabControl.Enabled = module != null;
             if (module == null) return;
 
             NavSelectMod(module);
@@ -585,11 +583,11 @@ namespace CKAN
             {
                 case Keys.Home:
                     // First row
-                    cell = ModList.Rows [0].Cells [2];
+                    cell = ModList.Rows[0].Cells[2];
                     break;
                 case Keys.End:
                     // Last row
-                    cell = ModList.Rows [ModList.Rows.Count - 1].Cells [2];
+                    cell = ModList.Rows[ModList.Rows.Count - 1].Cells[2];
                     break;
             }
             if (cell != null)
@@ -619,7 +617,7 @@ namespace CKAN
                     var gui_mod = ((GUIMod)current_row.Tag);
                     if (gui_mod.IsInstallable())
                     {
-                        MarkModForInstall(gui_mod.Identifier,uncheck:gui_mod.IsInstallChecked);
+                        MarkModForInstall(gui_mod.Identifier, uncheck: gui_mod.IsInstallChecked);
                     }
                 }
                 e.Handled = true;
@@ -709,7 +707,7 @@ namespace CKAN
                 {
                     case 0:
                         gui_mod.SetInstallChecked(row);
-                        if(gui_mod.IsInstallChecked)
+                        if (gui_mod.IsInstallChecked)
                             last_mod_to_have_install_toggled.Push(gui_mod);
                         break;
                     case 1:
@@ -857,11 +855,9 @@ namespace CKAN
                 return null;
             }
 
-
-            var module = ((GUIMod) selected_item.Tag);
+            var module = ((GUIMod)selected_item.Tag);
             return module;
         }
-
 
         private void launchKSPToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -872,7 +868,7 @@ namespace CKAN
             }
 
             var binary = split[0];
-            var args = string.Join(" ",split.Skip(1));
+            var args = string.Join(" ", split.Skip(1));
 
             try
             {
@@ -915,11 +911,9 @@ namespace CKAN
             Enabled = true;
         }
 
-
-
         private void installFromckanToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            OpenFileDialog open_file_dialog = new OpenFileDialog {Filter = Resources.CKANFileFilter};
+            OpenFileDialog open_file_dialog = new OpenFileDialog { Filter = Resources.CKANFileFilter };
 
             if (open_file_dialog.ShowDialog() == DialogResult.OK)
             {
@@ -952,7 +946,7 @@ namespace CKAN
 
                 var changeset = new List<ModChange>();
                 changeset.Add(new ModChange(
-                    new GUIMod(module,registry_manager.registry,CurrentInstance.Version()),
+                    new GUIMod(module, registry_manager.registry, CurrentInstance.Version()),
                     GUIModChangeType.Install, null));
 
                 menuStrip1.Enabled = false;
@@ -1052,7 +1046,7 @@ namespace CKAN
             FocusMod(e.Node.Name, true);
         }
 
-        private void FocusMod(string key, bool exactMatch, bool showAsFirst=false)
+        private void FocusMod(string key, bool exactMatch, bool showAsFirst = false)
         {
             DataGridViewRow current_row = ModList.CurrentRow;
             int currentIndex = current_row != null ? current_row.Index : 0;
@@ -1068,7 +1062,7 @@ namespace CKAN
                 }
                 else
                 {
-                    row_match = mod.Name.StartsWith(key, StringComparison.OrdinalIgnoreCase) || 
+                    row_match = mod.Name.StartsWith(key, StringComparison.OrdinalIgnoreCase) ||
                         mod.Abbrevation.StartsWith(key, StringComparison.OrdinalIgnoreCase) ||
                         mod.Identifier.StartsWith(key, StringComparison.OrdinalIgnoreCase);
                 }
@@ -1205,7 +1199,6 @@ namespace CKAN
         public Action<string, object[]> displayMessage;
         public Action<string, object[]> displayError;
         public DisplayYesNo displayYesNo;
-
 
         protected override bool DisplayYesNoDialog(string message)
         {

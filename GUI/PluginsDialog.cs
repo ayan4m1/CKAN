@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 using System.Windows.Forms;
 
 namespace CKAN
@@ -126,6 +125,5 @@ namespace CKAN
                 RefreshDormantPlugins();
             }
         }
-
     }
 }

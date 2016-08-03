@@ -1,12 +1,11 @@
-﻿using System;
+﻿using CKAN.Versioning;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows.Forms;
-using CKAN.Versioning;
 
 namespace CKAN
 {
@@ -56,7 +55,7 @@ namespace CKAN
         /// </summary>
         private string DefaultSorter(DataGridViewRow row)
         {
-                return row.Cells[this.configuration.SortByColumnIndex].Value.ToString();
+            return row.Cells[this.configuration.SortByColumnIndex].Value.ToString();
         }
 
         /// <summary>
@@ -109,13 +108,13 @@ namespace CKAN
             GUIMod selected_mod = null;
             if (ModList.CurrentRow != null)
             {
-                selected_mod = (GUIMod) ModList.CurrentRow.Tag;
+                selected_mod = (GUIMod)ModList.CurrentRow.Tag;
             }
 
             ModList.Rows.Clear();
             foreach (var row in rows)
             {
-                var mod = ((GUIMod) row.Tag);
+                var mod = ((GUIMod)row.Tag);
                 row.Visible = mainModList.IsVisible(mod);
             }
 
@@ -139,7 +138,6 @@ namespace CKAN
         {
             Util.Invoke(this, () => _UpdateModsList(repo_updated));
         }
-
 
         private void _UpdateModsList(bool repo_updated)
         {
@@ -232,12 +230,11 @@ namespace CKAN
             Util.Invoke(this, () => _MarkModForUpdate(identifier));
         }
 
-
         public void _MarkModForUpdate(string identifier)
         {
             foreach (DataGridViewRow row in ModList.Rows)
             {
-                var mod = (GUIMod) row.Tag;
+                var mod = (GUIMod)row.Tag;
                 if (mod.Identifier == identifier)
                 {
                     (row.Cells[1] as DataGridViewCheckBoxCell).Value = true;
@@ -257,9 +254,9 @@ namespace CKAN
             //Hacky workaround for https://bugzilla.xamarin.com/show_bug.cgi?id=24372
             if (Platform.IsMono && !Platform.IsMonoFour)
             {
-                var first_row_index = typeof (MainModListGUI).BaseType
+                var first_row_index = typeof(MainModListGUI).BaseType
                     .GetField("first_row_index", BindingFlags.NonPublic | BindingFlags.Instance);
-                var value = (int) first_row_index.GetValue(this);
+                var value = (int)first_row_index.GetValue(this);
                 if (value < 0 || value >= Rows.Count)
                 {
                     first_row_index.SetValue(this, 0);
@@ -298,6 +295,7 @@ namespace CKAN
         public delegate Task<CkanModule> HandleTooManyProvides(TooManyModsProvideKraken kraken);
 
         public event ModFiltersUpdatedEvent ModFiltersUpdated;
+
         public ReadOnlyCollection<GUIMod> Modules { get; set; }
 
         public GUIModFilter ModFilter
@@ -394,7 +392,6 @@ namespace CKAN
             var installed_modules =
                 registry.InstalledModules.Select(imod => imod.Module).ToDictionary(mod => mod.identifier, mod => mod);
 
-
             bool handled_all_to_many_provides = false;
             while (!handled_all_to_many_provides)
             {
@@ -430,8 +427,7 @@ namespace CKAN
                 }
             }
 
-
-            foreach (var dependency in registry.FindReverseDependencies(modules_to_remove.Select(mod=>mod.identifier)))
+            foreach (var dependency in registry.FindReverseDependencies(modules_to_remove.Select(mod => mod.identifier)))
             {
                 //TODO This would be a good place to have a event that alters the row's graphics to show it will be removed
                 CkanModule module_by_version = registry.GetModuleByVersion(installed_modules[dependency].identifier,
@@ -447,7 +443,6 @@ namespace CKAN
                 resolver.ModList()
                     .Select(m => new ModChange(new GUIMod(m, registry, version), GUIModChangeType.Install, resolver.ReasonFor(m))));
 
-
             return changeSet;
         }
 
@@ -460,7 +455,6 @@ namespace CKAN
             var isVisible = nameMatchesFilter && modMatchesType && authorMatchesFilter && abstractMatchesFilter;
             return isVisible;
         }
-
 
         public int CountModsByFilter(GUIModFilter filter)
         {
@@ -497,7 +491,6 @@ namespace CKAN
         /// <param name="refreshAll">If set to <c>true</c> then always rebuild the list from scratch</param>
         public IEnumerable<DataGridViewRow> ConstructModList(IEnumerable<GUIMod> modules, bool refreshAll = false)
         {
-
             if (refreshAll || full_list_of_mod_rows == null)
             {
                 full_list_of_mod_rows = new Dictionary<string, DataGridViewRow>();
@@ -516,31 +509,31 @@ namespace CKAN
             foreach (var mod in rowsToUpdate)
             {
                 full_list_of_mod_rows.Remove(mod.Identifier);
-                var item = new DataGridViewRow {Tag = mod};
+                var item = new DataGridViewRow { Tag = mod };
 
                 var installed_cell = mod.IsInstallable()
-                    ? (DataGridViewCell) new DataGridViewCheckBoxCell()
+                    ? (DataGridViewCell)new DataGridViewCheckBoxCell()
                     : new DataGridViewTextBoxCell();
 
                 installed_cell.Value = mod.IsInstallable()
-                    ? (object) mod.IsInstalled
+                    ? (object)mod.IsInstalled
                     : (mod.IsAutodetected ? "AD" : "-");
 
                 var update_cell = mod.HasUpdate && !mod.IsAutodetected
                     ? new DataGridViewCheckBoxCell()
-                    : (DataGridViewCell) new DataGridViewTextBoxCell();
+                    : (DataGridViewCell)new DataGridViewTextBoxCell();
 
                 update_cell.Value = !mod.IsInstallable() || !mod.HasUpdate
                     ? "-"
-                    : (object) false;
+                    : (object)false;
 
-                var name_cell = new DataGridViewTextBoxCell {Value = mod.Name};
-                var author_cell = new DataGridViewTextBoxCell {Value = mod.Authors};
-                var installed_version_cell = new DataGridViewTextBoxCell {Value = mod.InstalledVersion};
-                var latest_version_cell = new DataGridViewTextBoxCell {Value = mod.LatestVersion};
-                var description_cell = new DataGridViewTextBoxCell {Value = mod.Abstract};
-                var KSPCompatibility_cell = new DataGridViewTextBoxCell {Value = mod.KSPCompatibility};
-                var size_cell = new DataGridViewTextBoxCell {Value = mod.DownloadSize};
+                var name_cell = new DataGridViewTextBoxCell { Value = mod.Name };
+                var author_cell = new DataGridViewTextBoxCell { Value = mod.Authors };
+                var installed_version_cell = new DataGridViewTextBoxCell { Value = mod.InstalledVersion };
+                var latest_version_cell = new DataGridViewTextBoxCell { Value = mod.LatestVersion };
+                var description_cell = new DataGridViewTextBoxCell { Value = mod.Abstract };
+                var KSPCompatibility_cell = new DataGridViewTextBoxCell { Value = mod.KSPCompatibility };
+                var size_cell = new DataGridViewTextBoxCell { Value = mod.DownloadSize };
 
                 item.Cells.AddRange(installed_cell, update_cell,
                     name_cell, author_cell,
@@ -551,7 +544,6 @@ namespace CKAN
                 installed_cell.ReadOnly = !mod.IsInstallable();
                 update_cell.ReadOnly = !mod.IsInstallable() || !mod.HasUpdate;
 
-                
                 full_list_of_mod_rows.Add(mod.Identifier, item);
             }
             return full_list_of_mod_rows.Values;
@@ -573,7 +565,6 @@ namespace CKAN
         {
             return mod.Abstract.IndexOf(ModDescriptionFilter, StringComparison.InvariantCultureIgnoreCase) != -1;
         }
-
 
         private bool IsModInFilter(GUIMod m)
         {
@@ -598,7 +589,6 @@ namespace CKAN
             }
             throw new Kraken("Unknown filter type in IsModInFilter");
         }
-
 
         public static Dictionary<GUIMod, string> ComputeConflictsFromModList(IRegistryQuerier registry,
             IEnumerable<ModChange> change_set, KspVersion ksp_version)
