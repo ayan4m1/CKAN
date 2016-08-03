@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
-using System.Windows.Forms;
-using System.IO;
 using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Windows.Forms;
 
 namespace CKAN
 {
@@ -27,7 +27,7 @@ namespace CKAN
 
             Util.Invoke(MetadataModuleNameLabel, () => MetadataModuleNameLabel.Text = gui_module.Name);
             Util.Invoke(MetadataModuleVersionLabel, () => MetadataModuleVersionLabel.Text = gui_module.LatestVersion.ToString());
-            Util.Invoke(MetadataModuleLicenseLabel, () => MetadataModuleLicenseLabel.Text = string.Join(", ",module.license));
+            Util.Invoke(MetadataModuleLicenseLabel, () => MetadataModuleLicenseLabel.Text = string.Join(", ", module.license));
             Util.Invoke(MetadataModuleAuthorLabel, () => MetadataModuleAuthorLabel.Text = gui_module.Authors);
             Util.Invoke(MetadataModuleAbstractLabel, () => MetadataModuleAbstractLabel.Text = module.@abstract);
             Util.Invoke(MetadataIdentifierLabel, () => MetadataIdentifierLabel.Text = module.identifier);
@@ -165,17 +165,15 @@ namespace CKAN
 
         private void _UpdateModDependencyGraph()
         {
-            var module = (CkanModule) ModInfoTabControl.Tag;
+            var module = (CkanModule)ModInfoTabControl.Tag;
             dependencyGraphRootModule = module;
-
 
             if (ModuleRelationshipType.SelectedIndex == -1)
             {
                 ModuleRelationshipType.SelectedIndex = 0;
             }
 
-            var relationshipType = (RelationshipType) ModuleRelationshipType.SelectedIndex;
-
+            var relationshipType = (RelationshipType)ModuleRelationshipType.SelectedIndex;
 
             alreadyVisited.Clear();
 

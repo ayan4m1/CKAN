@@ -1,82 +1,85 @@
+using log4net;
 using System;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
-using log4net;
 
 namespace CKAN
 {
     public class KSPPathUtils
     {
-        private static readonly ILog log = LogManager.GetLogger(typeof(KSPPathUtils));
+        private static readonly ILog Log = LogManager.GetLogger(typeof(KSPPathUtils));
 
         /// <summary>
-        /// Finds Steam on the current machine.
+        /// Finds the KSP path under a Steam Library. Returns null if the folder cannot be located.
         /// </summary>
-        /// <returns>The path to Steam, or null if not found</returns>
-        public static string SteamPath()
+        /// <param name="steam_path">Steam Library Path</param>
+        /// <returns>The KSP path.</returns>
+        public static string KSPDirectory(string steam_path)
         {
-            // First check the registry.
+            // There are several possibilities for the path under Linux.
+            // Try with the uppercase version.
+            string ksp_path = Path.Combine(steam_path, "SteamApps", "common", "Kerbal Space Program");
 
-            const string reg_key = @"HKEY_CURRENT_USER\Software\Valve\Steam";
-            const string reg_value = @"SteamPath";
-
-            log.DebugFormat("Checking {0}\\{1} for Steam path", reg_key, reg_value);
-
-            var steam = (string)Microsoft.Win32.Registry.GetValue(reg_key, reg_value, null);
-
-            // If that directory exists, we've found Steam!
-            if (steam != null && Directory.Exists(steam))
+            if (Directory.Exists(ksp_path))
             {
-                log.InfoFormat("Found Steam at {0}", steam);
-                return steam;
+                return ksp_path;
             }
 
-            log.Debug("Couldn't find Steam via registry key, trying other locations...");
+            // Try with the lowercase version.
+            ksp_path = Path.Combine(steam_path, "steamapps", "common", "Kerbal Space Program");
+
+            if (Directory.Exists(ksp_path))
+            {
+                return ksp_path;
+            }
+
+            return null;
+        }
 
             // Not in the registry, or missing file, but that's cool. This should find it on Linux
-            steam = Path.Combine(
+            var steamPath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.Personal),
                 ".local",
                 "share",
                 "Steam"
             );
 
-            log.DebugFormat("Looking for Steam in {0}", steam);
+            Log.DebugFormat("Looking for Steam in {0}", steamPath);
 
-            if (Directory.Exists(steam))
+            if (Directory.Exists(steamPath))
             {
-                log.InfoFormat("Found Steam at {0}", steam);
-                return steam;
+                Log.InfoFormat("Found Steam at {0}", steamPath);
+                return steamPath;
             }
 
             // Try an alternative path.
-            steam = Path.Combine(
+            steamPath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.Personal),
                 ".steam",
                 "steam"
             );
 
-            log.DebugFormat("Looking for Steam in {0}", steam);
+            Log.DebugFormat("Looking for Steam in {0}", steamPath);
 
-            if (Directory.Exists(steam))
+            if (Directory.Exists(steamPath))
             {
-                log.InfoFormat("Found Steam at {0}", steam);
-                return steam;
+                Log.InfoFormat("Found Steam at {0}", steamPath);
+                return steamPath;
             }
 
             // Ok - Perhaps we're running OSX?
-
-            steam = Path.Combine(
+            steamPath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.Personal),
                 Path.Combine("Library", "Application Support", "Steam")
                 );
 
-            log.DebugFormat("Looking for Steam in {0}", steam);
+            Log.DebugFormat("Looking for Steam in {0}", steamPath);
 
-            if (Directory.Exists(steam))
+            if (Directory.Exists(steamPath))
             {
-                log.InfoFormat("Found Steam at {0}", steam);
-                return steam;
+                Log.InfoFormat("Found Steam at {0}", steamPath);
+                return steamPath;
             }
 
             log.Info("Steam not found on this system.");
@@ -117,17 +120,19 @@ namespace CKAN
         /// <returns>The KSP path.</returns>
         public static string KSPSteamPath()
         {
-            // Attempt to get the Steam path.
-            string steamPath = SteamPath();
-
-            if (steamPath == null)
+            string steamDir = null;
+            using (var registry = new Win32Registry())
             {
-                return null;
+                steamDir = registry.FindSteamPath();
+                if (steamDir == null)
+                {
+                    return null;
+                }
             }
 
-            //Default steam libary
-            string installPath = KSPDirectory(steamPath);
-            if(installPath != null)
+            //Default steam library
+            string installPath = KSPDirectory(steamDir);
+            if (installPath != null)
             {
                 return installPath;
             }
@@ -189,7 +194,7 @@ namespace CKAN
 
         /// <summary>
         /// Gets the leading path elements. Ex: /a/b/c returns /a/b
-        /// 
+        ///
         /// Returns empty string if there is no leading path. (Eg: "Example.dll" -> "");
         /// </summary>
         /// <returns>The leading path elements.</returns>
@@ -198,10 +203,11 @@ namespace CKAN
         {
             path = NormalizePath(path);
 
-            if (Regex.IsMatch(path, "/"))
+            if (path.Contains('/'))
             {
                 return Regex.Replace(path, @"(^.*)/.+", "$1");
             }
+
             return String.Empty;
         }
 
@@ -232,7 +238,7 @@ namespace CKAN
                 );
             }
 
-            if (! path.StartsWith(root))
+            if (!path.StartsWith(root))
             {
                 throw new PathErrorKraken(
                     path,
@@ -242,7 +248,7 @@ namespace CKAN
                     )
                 );
             }
-        
+
             // The +1 here is because root will never have
             // a trailing slash.
             return path.Remove(0, root.Length + 1);

@@ -77,7 +77,7 @@ namespace Tests.Core.Types
             var v2 = new CKAN.Version("v6a5");
             Assert.That(v2.IsLessThan(v1));
             Assert.That(v1.IsGreaterThan(v2));
-            Assert.That(! v1.IsEqualTo(v2));
+            Assert.That(!v1.IsEqualTo(v2));
         }
 
         [Test]
@@ -287,6 +287,5 @@ namespace Tests.Core.Types
             Assert.AreEqual("", str.firstRemainder);
             Assert.AreEqual("", str.secondRemainder);
         }
-
     }
 }

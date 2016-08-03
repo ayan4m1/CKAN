@@ -9,10 +9,10 @@ using System.Windows.Forms;
 namespace CKAN
 {
     using ModChanges = List<ModChange>;
+
     public partial class Main
     {
         private BackgroundWorker installWorker;
-
 
         // used to signal the install worker that the user canceled the install process
         // this may happen on the recommended/suggested mods dialogs
@@ -28,7 +28,7 @@ namespace CKAN
             ClearLog();
 
             var opts =
-                (KeyValuePair<ModChanges, RelationshipResolverOptions>) e.Argument;
+                (KeyValuePair<ModChanges, RelationshipResolverOptions>)e.Argument;
 
             IRegistryQuerier registry = RegistryManager.Instance(manager.CurrentInstance).registry;
             ModuleInstaller installer = ModuleInstaller.GetInstance(CurrentInstance, GUI.user);
@@ -88,7 +88,6 @@ namespace CKAN
             tabController.ShowTab("WaitTabPage");
             tabController.SetTabLock(true);
 
-
             var downloader = new NetAsyncModulesDownloader(GUI.user);
             cancelCallback = () =>
             {
@@ -100,7 +99,6 @@ namespace CKAN
             //TODO: Cancellation should be handelt in the ModuleInstaller
             using (var transaction = CkanTransaction.CreateTransactionScope())
             {
-
                 //Set the result to false/failed in case we return
                 e.Result = new KeyValuePair<bool, ModChanges>(false, opts.Key);
                 SetDescription("Uninstalling selected mods");
@@ -145,7 +143,7 @@ namespace CKAN
             e.Result = new KeyValuePair<bool, ModChanges>(!installCanceled, opts.Key);
         }
 
-        private void AddMod(IEnumerable<RelationshipDescriptor> relations, Dictionary<string, List<string>> chooseAble, 
+        private void AddMod(IEnumerable<RelationshipDescriptor> relations, Dictionary<string, List<string>> chooseAble,
             string identifier, IRegistryQuerier registry)
         {
             if (relations == null)
@@ -191,15 +189,15 @@ namespace CKAN
             {
                 Util.Invoke(this, () => UpdateRecommendedDialog(selectable, suggest));
 
-                tabController.ShowTab("ChooseRecommendedModsTabPage", 3);
-                tabController.SetTabLock(true);
+                m_TabController.ShowTab("ChooseRecommendedModsTabPage", 3);
+                m_TabController.SetTabLock(true);
 
                 lock (this)
                 {
                     Monitor.Wait(this);
                 }
 
-                tabController.SetTabLock(false);
+                m_TabController.SetTabLock(false);
             }
         }
 
@@ -227,20 +225,20 @@ namespace CKAN
             }
             catch (FileExistsKraken ex)
             {
-                if (ex.owningModule != null)
+                if (ex.owning_module != null)
                 {
                     GUI.user.RaiseMessage(
                         "\r\nOh no! We tried to overwrite a file owned by another mod!\r\n" +
                         "Please try a `ckan update` and try again.\r\n\r\n" +
                         "If this problem re-occurs, then it maybe a packaging bug.\r\n" +
                         "Please report it at:\r\n\r\n" +
-                        "https://github.com/KSP-CKAN/NetKAN/issues/new\r\n\r\n" +
+                        "https://github.com/KSP-CKAN/CKAN/issues/new\r\n\r\n" +
                         "Please including the following information in your report:\r\n\r\n" +
                         "File           : {0}\r\n" +
                         "Installing Mod : {1}\r\n" +
                         "Owning Mod     : {2}\r\n" +
                         "CKAN Version   : {3}\r\n",
-                        ex.filename, ex.installingModule, ex.owningModule,
+                        ex.filename, ex.installing_module, ex.owning_module,
                         Meta.Version()
                         );
                 }
@@ -255,7 +253,7 @@ namespace CKAN
                         "If you wish to install {0} via the CKAN,\r\n" +
                         "then please manually uninstall the mod which owns:\r\n\r\n" +
                         "{1}\r\n\r\n" + "and try again.\r\n",
-                        ex.installingModule, ex.filename
+                        ex.installing_module, ex.filename
                         );
                 }
 
@@ -290,6 +288,7 @@ namespace CKAN
             }
             return true;
         }
+
         private bool InstallList(HashSet<string> toInstall, RelationshipResolverOptions options, IDownloader downloader)
         {
             if (toInstall.Any())
@@ -314,7 +313,7 @@ namespace CKAN
             UpdateModsList();
             tabController.SetTabLock(false);
 
-            var result = (KeyValuePair<bool, ModChanges>) e.Result;
+            var result = (KeyValuePair<bool, ModChanges>)e.Result;
 
             if (result.Key)
             {
@@ -434,7 +433,7 @@ namespace CKAN
                     "The following modules have been recommended by one or more of the chosen modules:";
                 RecommendedModsListView.Columns[1].Text = "Recommended by:";
                 RecommendedModsToggleCheckbox.Text = "(De-)select all recommended mods.";
-                RecommendedModsToggleCheckbox.Checked=true;
+                RecommendedModsToggleCheckbox.Checked = true;
                 tabController.RenameTab("ChooseRecommendedModsTabPage", "Choose recommended mods");
             }
             else
@@ -443,10 +442,9 @@ namespace CKAN
                     "The following modules have been suggested by one or more of the chosen modules:";
                 RecommendedModsListView.Columns[1].Text = "Suggested by:";
                 RecommendedModsToggleCheckbox.Text = "(De-)select all suggested mods.";
-                RecommendedModsToggleCheckbox.Checked=false;
+                RecommendedModsToggleCheckbox.Checked = false;
                 tabController.RenameTab("ChooseRecommendedModsTabPage", "Choose suggested mods");
             }
-
 
             RecommendedModsListView.Items.Clear();
 
@@ -465,7 +463,7 @@ namespace CKAN
                         without_toomanyprovides_kraken = true
                     };
 
-                    var resolver = new RelationshipResolver(new List<string> {pair.Key}, opts,
+                    var resolver = new RelationshipResolver(new List<string> { pair.Key }, opts,
                         RegistryManager.Instance(manager.CurrentInstance).registry, CurrentInstance.Version());
                     if (!resolver.ModList().Any())
                     {
@@ -510,7 +508,7 @@ namespace CKAN
 
                 item.SubItems.Add(recommendedBy);
 
-                ListViewItem.ListViewSubItem description = new ListViewItem.ListViewSubItem {Text = module.@abstract};
+                ListViewItem.ListViewSubItem description = new ListViewItem.ListViewSubItem { Text = module.@abstract };
 
                 item.SubItems.Add(description);
 
@@ -524,7 +522,7 @@ namespace CKAN
             {
                 if (item.Checked)
                 {
-                    var identifier = ((CkanModule) item.Tag).identifier;
+                    var identifier = ((CkanModule)item.Tag).identifier;
                     toInstall.Add(identifier);
                 }
             }
