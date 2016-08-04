@@ -16,7 +16,7 @@ namespace CKAN.NetKAN.Extensions
         /// <param name="token">The value of the property to write if it does not exist.</param>
         public static void SafeAdd(this JObject jobject, string propertyName, JToken token)
         {
-            if (String.IsNullOrWhiteSpace(propertyName))
+            if (string.IsNullOrWhiteSpace(propertyName))
             {
                 Log.Warn("Asked to set a property named null on a JSON object!");
                 return;

@@ -24,7 +24,7 @@ namespace CKAN
             get { return Win32Registry.AutoStartInstance; }
             private set
             {
-                if (!String.IsNullOrEmpty(value) && !HasInstance(value))
+                if (!string.IsNullOrEmpty(value) && !HasInstance(value))
                 {
                     throw new InvalidKSPInstanceKraken(value);
                 }
@@ -188,7 +188,7 @@ namespace CKAN
         {
             // Discard null, empty strings and white space only strings.
             // Look for the current name in the list of loaded instances.
-            return !String.IsNullOrWhiteSpace(name) && !HasInstance(name);
+            return !string.IsNullOrWhiteSpace(name) && !HasInstance(name);
         }
 
         /// <summary>

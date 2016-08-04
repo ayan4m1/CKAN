@@ -272,7 +272,7 @@ namespace CKAN.CmdLine
                 string defaultInstance = Manager.Win32Registry.AutoStartInstance;
                 int defaultInstancePresent = 0;
 
-                if (!String.IsNullOrWhiteSpace(defaultInstance))
+                if (!string.IsNullOrWhiteSpace(defaultInstance))
                 {
                     defaultInstancePresent = 1;
                 }
@@ -288,7 +288,7 @@ namespace CKAN.CmdLine
                 }
 
                 // Mark the default intance for the user.
-                if (!String.IsNullOrWhiteSpace(defaultInstance))
+                if (!string.IsNullOrWhiteSpace(defaultInstance))
                 {
                     keys[0] = Manager.Instances.IndexOfKey(defaultInstance);
                 }
