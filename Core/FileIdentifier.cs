@@ -1,38 +1,29 @@
 ﻿using ICSharpCode.SharpZipLib.GZip;
+using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace CKAN
 {
     public static class FileIdentifier
     {
         /// <summary>
-        /// Checks if the file is of type ASCII.
+        /// Determine if there are any EASCII or Unicode characters in the supplied stream.
         /// </summary>
-        /// <returns><c>true</c>, if most likely ASCII, <c>false</c> otherwise.</returns>
+        /// <returns><c>true</c> if all characters are ASCII, <c>false</c> otherwise.</returns>
         /// <param name="stream">Stream to the file.</param>
         private static bool CheckASCII(Stream stream)
         {
-            // Rewind the stream to the origin of the file.
-            stream.Seek(0, SeekOrigin.Begin);
+            var rawByteCount = stream.Length;
+            var asciiByteCount = -1L;
 
-            // Define the buffer.
-            byte[] buffer = new byte[1024 * 32];
-
-            // Read as many bytes as possible.
-            int bytes_read = stream.Read(buffer, 0, buffer.Length);
-
-            // Look for a 0 termination char before the end.
-            for (int i = 0; i < bytes_read - 1; i++)
+            using (var reader = new StreamReader(stream))
             {
-                if (buffer[i] == 0)
-                {
-                    return false;
-                }
+                asciiByteCount = Encoding.ASCII.GetBytes(reader.ReadToEnd()).Length;
             }
 
-            // Most likely an ASCII file.
-            return true;
+            return rawByteCount == asciiByteCount;
         }
 
         /// <summary>
@@ -149,7 +140,7 @@ namespace CKAN
         /// <param name="stream">Open stream to the file.</param>
         public static FileType IdentifyFile(Stream stream)
         {
-            FileType type = FileType.Unknown;
+            var type = FileType.Unknown;
 
             // Check the input.
             if (stream == null || !stream.CanSeek)
@@ -162,9 +153,9 @@ namespace CKAN
             {
                 // This may contain a tar file inside, create a new stream and check.
                 stream.Seek(0, SeekOrigin.Begin);
-                using (var deflatedStream = new GZipInputStream(stream))
+                using (var archive = new GZipInputStream(stream))
                 {
-                    type = CheckTar(deflatedStream) ? FileType.TarGz : FileType.GZip;
+                    type = CheckTar(archive) ? FileType.TarGz : FileType.GZip;
                 }
             }
             else if (CheckTar(stream))
