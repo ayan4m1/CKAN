@@ -19,7 +19,7 @@ namespace CKAN
     /// <summary>
     ///     Everything for dealing with KSP itself.
     /// </summary>
-    public class KSP : IDisposable
+    public sealed class KSP : IDisposable
     {
         public IUser User { get; set; }
 
