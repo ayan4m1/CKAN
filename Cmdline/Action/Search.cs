@@ -17,7 +17,7 @@ namespace CKAN.CmdLine
             SearchOptions options = (SearchOptions)raw_options;
 
             // Check the input.
-            if (String.IsNullOrWhiteSpace(options.search_term))
+            if (string.IsNullOrWhiteSpace(options.search_term))
             {
                 user.RaiseError("No search term?");
 
@@ -63,7 +63,7 @@ namespace CKAN.CmdLine
                 // Extract the description. This is an optional field and may be null.
                 string mod_description = String.Empty;
 
-                if (!String.IsNullOrEmpty(mod.description))
+                if (!string.IsNullOrEmpty(mod.description))
                 {
                     mod_description = mod.description;
                 }
