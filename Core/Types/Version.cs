@@ -182,7 +182,7 @@ namespace CKAN
 
         internal static Comparison StringComp(string v1, string v2)
         {
-            var comp = new Comparison {remainder1 = "", remainder2 = ""};
+            var comp = new Comparison { firstRemainder = "", secondRemainder = ""};
 
             // Our starting assumptions are that both versions are completely
             // strings, with no remainder. We'll then check if they're not.

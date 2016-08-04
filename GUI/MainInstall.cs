@@ -189,15 +189,15 @@ namespace CKAN
             {
                 Util.Invoke(this, () => UpdateRecommendedDialog(selectable, suggest));
 
-                m_TabController.ShowTab("ChooseRecommendedModsTabPage", 3);
-                m_TabController.SetTabLock(true);
+                tabController.ShowTab("ChooseRecommendedModsTabPage", 3);
+                tabController.SetTabLock(true);
 
                 lock (this)
                 {
                     Monitor.Wait(this);
                 }
 
-                m_TabController.SetTabLock(false);
+                tabController.SetTabLock(false);
             }
         }
 
@@ -225,7 +225,7 @@ namespace CKAN
             }
             catch (FileExistsKraken ex)
             {
-                if (ex.owning_module != null)
+                if (ex.owningModule != null)
                 {
                     GUI.user.RaiseMessage(
                         "\r\nOh no! We tried to overwrite a file owned by another mod!\r\n" +
@@ -238,7 +238,7 @@ namespace CKAN
                         "Installing Mod : {1}\r\n" +
                         "Owning Mod     : {2}\r\n" +
                         "CKAN Version   : {3}\r\n",
-                        ex.filename, ex.installing_module, ex.owning_module,
+                        ex.filename, ex.installingModule, ex.owningModule,
                         Meta.Version()
                         );
                 }
@@ -253,7 +253,7 @@ namespace CKAN
                         "If you wish to install {0} via the CKAN,\r\n" +
                         "then please manually uninstall the mod which owns:\r\n\r\n" +
                         "{1}\r\n\r\n" + "and try again.\r\n",
-                        ex.installing_module, ex.filename
+                        ex.installingModule, ex.filename
                         );
                 }
 

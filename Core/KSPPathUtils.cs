@@ -17,26 +17,6 @@ namespace CKAN
         /// <returns>The KSP path.</returns>
         public static string KSPDirectory(string steam_path)
         {
-            // There are several possibilities for the path under Linux.
-            // Try with the uppercase version.
-            string ksp_path = Path.Combine(steam_path, "SteamApps", "common", "Kerbal Space Program");
-
-            if (Directory.Exists(ksp_path))
-            {
-                return ksp_path;
-            }
-
-            // Try with the lowercase version.
-            ksp_path = Path.Combine(steam_path, "steamapps", "common", "Kerbal Space Program");
-
-            if (Directory.Exists(ksp_path))
-            {
-                return ksp_path;
-            }
-
-            return null;
-        }
-
             // Not in the registry, or missing file, but that's cool. This should find it on Linux
             var steamPath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.Personal),
@@ -82,36 +62,8 @@ namespace CKAN
                 return steamPath;
             }
 
-            log.Info("Steam not found on this system.");
+            Log.Info("Steam not found on this system.");
             return null;
-        }
-
-        /// <summary>
-        /// Finds the KSP path under a Steam Libary. Returns null if the folder cannot be located.
-        /// </summary>
-        /// <param name="steamPath">Steam Libary Path</param>
-        /// <returns>The KSP path.</returns>
-        public static string KSPDirectory(string steamPath)
-        {
-            // There are several possibilities for the path under Linux.
-            // Try with the uppercase version.
-            string installPath = Path.Combine(steamPath, "SteamApps", "common", "Kerbal Space Program");
-
-            if (Directory.Exists(installPath))
-            {
-                return installPath;
-            }
-
-            // Try with the lowercase version.
-            installPath = Path.Combine(steamPath, "steamapps", "common", "Kerbal Space Program");
-
-            if (Directory.Exists(installPath))
-            {
-                return installPath;
-            }
-
-            return null;
-
         }
 
         /// <summary>
@@ -138,10 +90,10 @@ namespace CKAN
             }
 
             //Attempt to find through config file
-            string configPath = Path.Combine(steamPath, "config", "config.vdf");
+            string configPath = Path.Combine(steamDir, "config", "config.vdf");
             if (File.Exists(configPath))
             {
-                log.InfoFormat("Found Steam config file at {0}", configPath);
+                Log.InfoFormat("Found Steam config file at {0}", configPath);
                 StreamReader reader = new StreamReader(configPath);
                 string line;
                 while ((line = reader.ReadLine()) != null)
@@ -155,12 +107,12 @@ namespace CKAN
 
                         if (split_line.Length > 3)
                         {
-                            log.DebugFormat("Found a Steam Libary Location at {0}", split_line[3]);
+                            Log.DebugFormat("Found a Steam Libary Location at {0}", split_line[3]);
 
                             installPath = KSPDirectory(split_line[3]);
                             if (installPath != null)
                             {
-                                log.InfoFormat("Found a KSP install at {0}", installPath);
+                                Log.InfoFormat("Found a KSP install at {0}", installPath);
                                 return installPath;
                             }
                         }

@@ -141,7 +141,7 @@ namespace CKAN
 
         private void _UpdateModsList(bool repo_updated)
         {
-            log.Debug("Updating the mod list");
+            Log.Debug("Updating the mod list");
 
             KspVersion version = CurrentInstance.Version();
             IRegistryQuerier registry = RegistryManager.Instance(CurrentInstance).registry;
