@@ -372,9 +372,9 @@ namespace CKAN
                 catch (FileExistsKraken kraken)
                 {
                     // Decorate the kraken with our module and re-throw
-                    kraken.filename = ksp.ToRelativeGameDir(kraken.filename);
+                    kraken.filename = _ksp.ToRelativeGameDir(kraken.filename);
                     kraken.installingModule = module;
-                    kraken.owningModule = registry_manager.registry.FileOwner(kraken.filename);
+                    kraken.owningModule = _registryManager.registry.FileOwner(kraken.filename);
                     throw;
                 }
 

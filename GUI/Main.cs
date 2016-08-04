@@ -38,6 +38,8 @@ namespace CKAN
 
     public partial class Main
     {
+        private static readonly ILog Log = LogManager.GetLogger(typeof(Main));
+
         public delegate void ModChangedCallback(CkanModule module, GUIModChangeType change);
 
         public static event ModChangedCallback modChangedCallback;
@@ -154,7 +156,7 @@ namespace CKAN
 
         public Main(string[] cmdlineArgs, GUIUser User, bool showConsole)
         {
-            log.Info("Starting the GUI");
+            Log.Info("Starting the GUI");
             commandLineArgs = cmdlineArgs;
             currentUser = User;
 
@@ -265,7 +267,7 @@ namespace CKAN
 
             if (!configuration.CheckForUpdatesOnLaunchNoNag)
             {
-                log.Debug("Asking user if they wish for autoupdates");
+                Log.Debug("Asking user if they wish for autoupdates");
                 if (new AskUserForAutoUpdatesDialog().ShowDialog() == DialogResult.OK)
                 {
                     configuration.CheckForUpdatesOnLaunch = true;
@@ -281,14 +283,14 @@ namespace CKAN
             {
                 try
                 {
-                    log.Info("Making autoupdate call");
+                    Log.Info("Making autoupdate call");
                     AutoUpdate.Instance.FetchLatestReleaseInfo();
                     var latest_version = AutoUpdate.Instance.LatestVersion;
                     var current_version = new Version(Meta.Version());
 
                     if (AutoUpdate.Instance.IsFetched() && latest_version.IsGreaterThan(current_version))
                     {
-                        log.Debug("Found higher ckan version");
+                        Log.Debug("Found higher ckan version");
                         var release_notes = AutoUpdate.Instance.ReleaseNotes;
                         var dialog = new NewUpdateDialog(latest_version.ToString(), release_notes);
                         if (dialog.ShowDialog() == DialogResult.OK)
@@ -301,7 +303,7 @@ namespace CKAN
                 catch (Exception exception)
                 {
                     currentUser.RaiseError("Error in autoupdate: \n\t" + exception.Message + "");
-                    log.Error("Error in autoupdate", exception);
+                    Log.Error("Error in autoupdate", exception);
                 }
             }
 
@@ -354,10 +356,10 @@ namespace CKAN
                     identifier = identifier.Substring(0, identifier.Length - 1);
                 }
 
-                log.Debug("Attempting to select mod from startup parameters");
+                Log.Debug("Attempting to select mod from startup parameters");
                 FocusMod(identifier, true, true);
                 ModList.Refresh();
-                log.Debug("Failed to select mod from startup parameters");
+                Log.Debug("Failed to select mod from startup parameters");
             }
 
             var pluginsPath = Path.Combine(CurrentInstance.CkanDir(), "Plugins");
@@ -374,7 +376,7 @@ namespace CKAN
                         // as possible, once the UI is "settled" from its initial
                         // load.
 
-            log.Info("GUI started");
+            Log.Info("GUI started");
             base.OnLoad(e);
         }
 
@@ -430,7 +432,7 @@ namespace CKAN
             tabController.RenameTab("WaitTabPage", "Updating CKAN");
             SetDescription("Upgrading CKAN to " + AutoUpdate.Instance.LatestVersion);
 
-            log.Info("Start ckan update");
+            Log.Info("Start ckan update");
             BackgroundWorker updateWorker = new BackgroundWorker();
             updateWorker.DoWork += (sender, args) => AutoUpdate.Instance.StartUpdateProcess(true, GUI.user);
             updateWorker.RunWorkerAsync();
