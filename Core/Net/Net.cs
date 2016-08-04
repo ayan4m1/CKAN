@@ -62,7 +62,7 @@ namespace CKAN
                 {
                     Curl.Init();
 
-                    using (FileStream stream = File.OpenWrite(filename))
+                    using (var stream = File.OpenWrite(filename))
                     using (var curl = Curl.CreateEasy(url, stream))
                     {
                         CurlCode result = curl.Perform();
