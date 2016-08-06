@@ -33,6 +33,8 @@ namespace CKAN.CmdLine
         [STAThread]
         public static int Main(string[] args)
         {
+            Application.Initialize();
+
             // Launch debugger if the "--debugger" flag is present in the command line arguments.
             // We want to do this as early as possible so just check the flag manually, rather than doing the
             // more robust argument parsing.

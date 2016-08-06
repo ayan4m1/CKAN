@@ -15,7 +15,7 @@ namespace CKAN
     /// </summary>
     public class AutoUpdate
     {
-        private readonly ILog log = LogManager.GetLogger(typeof(AutoUpdate));
+        private readonly ILog Log = LogManager.GetLogger(typeof(AutoUpdate));
 
         private readonly Uri latestCKANReleaseApiUrl = new Uri("https://api.github.com/repos/KSP-CKAN/CKAN/releases/latest");
 
@@ -178,7 +178,7 @@ namespace CKAN
             }
             catch (WebException webEx)
             {
-                log.ErrorFormat("WebException while accessing {0}: {1}", url, webEx);
+                Log.ErrorFormat("WebException while accessing {0}: {1}", url, webEx);
                 throw;
             }
         }

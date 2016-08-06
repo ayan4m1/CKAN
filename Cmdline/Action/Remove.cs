@@ -1,4 +1,5 @@
-﻿using log4net;
+﻿using Autofac;
+using log4net;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -63,8 +64,9 @@ namespace CKAN.CmdLine
             {
                 try
                 {
-                    var installer = ModuleInstaller.GetInstance(ksp, user);
-                    installer.UninstallList(options.modules);
+                    var installer = Application.Container.Resolve<IModuleInstaller>();
+                    var instance = installer.GetInstance(ksp, user);
+                    instance.UninstallList(options.modules);
                 }
                 catch (ModNotInstalledKraken kraken)
                 {

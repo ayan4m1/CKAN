@@ -1,4 +1,5 @@
-﻿using CKAN.Exporters;
+﻿using Autofac;
+using CKAN.Exporters;
 using CKAN.Properties;
 using CKAN.Types;
 using log4net;
@@ -187,7 +188,7 @@ namespace CKAN
                 var result = new ChooseKSPInstance().ShowDialog();
                 if (result == DialogResult.Cancel || result == DialogResult.Abort)
                 {
-                    Application.Exit();
+                    System.Windows.Forms.Application.Exit();
                     return;
                 }
             }
@@ -231,7 +232,7 @@ namespace CKAN
                 yield_timer.Start();
             }
 
-            Application.Run(this);
+            System.Windows.Forms.Application.Run(this);
         }
 
         private void ModList_CurrentCellDirtyStateChanged(object sender, EventArgs e)
@@ -731,7 +732,8 @@ namespace CKAN
             var user_change_set = mainModList.ComputeUserChangeSet();
             try
             {
-                var module_installer = ModuleInstaller.GetInstance(CurrentInstance, GUI.user);
+                var installer = Application.Container.Resolve<IModuleInstaller>();
+                var module_installer = installer.GetInstance(CurrentInstance, GUI.user);
                 full_change_set =
                     await mainModList.ComputeChangeSetFromModList(registry, user_change_set, module_installer,
                     CurrentInstance.Version());

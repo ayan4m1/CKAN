@@ -8,6 +8,7 @@ using System.Windows.Forms;
 
 namespace CKAN
 {
+    using Autofac;
     using ModChanges = List<ModChange>;
     public partial class Main
     {
@@ -30,9 +31,13 @@ namespace CKAN
             var opts =
                 (KeyValuePair<ModChanges, RelationshipResolverOptions>) e.Argument;
 
+            var container = Application.Container;
+
+            // todo: get this via container
             IRegistryQuerier registry = RegistryManager.Instance(manager.CurrentInstance).registry;
-            ModuleInstaller installer = ModuleInstaller.GetInstance(CurrentInstance, GUI.user);
-            // setup progress callback
+
+            var installer = container.Resolve<IModuleInstaller>();
+            var installerInstance = installer.GetInstance(CurrentInstance, GUI.user);
 
             toInstall = new HashSet<string>();
             var toUninstall = new HashSet<string>();
@@ -104,12 +109,12 @@ namespace CKAN
                 //Set the result to false/failed in case we return
                 e.Result = new KeyValuePair<bool, ModChanges>(false, opts.Key);
                 SetDescription("Uninstalling selected mods");
-                if (!WasSuccessful(() => installer.UninstallList(toUninstall)))
+                if (!WasSuccessful(() => installerInstance.UninstallList(toUninstall)))
                     return;
                 if (installCanceled) return;
 
                 SetDescription("Updating selected mods");
-                if (!WasSuccessful(() => installer.Upgrade(toUpgrade, downloader)))
+                if (!WasSuccessful(() => installerInstance.Upgrade(toUpgrade, downloader)))
                     return;
                 if (installCanceled) return;
 
@@ -300,7 +305,8 @@ namespace CKAN
             if (toInstall.Any())
             {
                 // actual magic happens here, we run the installer with our mod list
-                var module_installer = ModuleInstaller.GetInstance(manager.CurrentInstance, GUI.user);
+                var installer = Application.Container.Resolve<IModuleInstaller>();
+                var module_installer = installer.GetInstance(manager.CurrentInstance, GUI.user);
                 module_installer.onReportModInstalled = OnModInstalled;
                 return WasSuccessful(
                     () => module_installer.InstallList(toInstall.ToList(), options, downloader));

@@ -1,4 +1,5 @@
-﻿using log4net;
+﻿using Autofac;
+using log4net;
 using System.Collections.Generic;
 
 namespace CKAN.CmdLine
@@ -64,6 +65,7 @@ namespace CKAN.CmdLine
 
             try
             {
+                var installer = Application.Container.Resolve<IModuleInstaller>();
                 if (options.upgrade_all)
                 {
                     var installed = new Dictionary<string, Version>(ksp.Registry.Installed());
@@ -104,12 +106,12 @@ namespace CKAN.CmdLine
                         }
                     }
 
-                    ModuleInstaller.GetInstance(ksp, User).Upgrade(to_upgrade, new NetAsyncModulesDownloader(User));
+                    installer.GetInstance(ksp, User).Upgrade(to_upgrade, new NetAsyncModulesDownloader(User));
                 }
                 else
                 {
                     // TODO: These instances all need to go.
-                    ModuleInstaller.GetInstance(ksp, User).Upgrade(options.modules, new NetAsyncModulesDownloader(User));
+                    installer.GetInstance(ksp, User).Upgrade(options.modules, new NetAsyncModulesDownloader(User));
                 }
             }
             catch (ModuleNotFoundKraken kraken)

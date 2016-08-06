@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using log4net;
+using Autofac;
 
 namespace CKAN.CmdLine
 {
@@ -101,8 +102,9 @@ namespace CKAN.CmdLine
             // Install everything requested. :)
             try
             {
-                var installer = ModuleInstaller.GetInstance(ksp, user);
-                installer.InstallList(options.modules, install_ops);
+                var installer = Application.Container.Resolve<IModuleInstaller>();
+                var instance = installer.GetInstance(ksp, user);
+                instance.InstallList(options.modules, install_ops);
             }
             catch (ModuleNotFoundKraken ex)
             {

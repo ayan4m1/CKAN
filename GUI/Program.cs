@@ -20,8 +20,8 @@ namespace CKAN
         public static void Main_(string[] args, bool showConsole = false)
         {
             AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionEventHandler;
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
+            System.Windows.Forms.Application.EnableVisualStyles();
+            System.Windows.Forms.Application.SetCompatibleTextRenderingDefault(false);
 
             if (args.Contains(URLHandlers.UrlRegistrationArgument))
             {

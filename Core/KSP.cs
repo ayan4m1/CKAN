@@ -201,7 +201,7 @@ namespace CKAN
 
         private static KspVersion DetectVersionInternal(string directory)
         {
-            var buildIdVersionProvider = ServiceLocator.Container
+            var buildIdVersionProvider = Application.Container
                 .ResolveKeyed<IGameVersionProvider>(KspVersionSource.BuildId);
 
             KspVersion version;
@@ -211,7 +211,7 @@ namespace CKAN
             }
             else
             {
-                var readmeVersionProvider = ServiceLocator.Container
+                var readmeVersionProvider = Application.Container
                     .ResolveKeyed<IGameVersionProvider>(KspVersionSource.Readme);
 
                 return readmeVersionProvider.TryGetVersion(directory, out version) ? version : null;

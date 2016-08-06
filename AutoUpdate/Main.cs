@@ -1,4 +1,7 @@
-﻿using System;
+﻿using CKAN;
+using log4net;
+using Mono.Unix.Native;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -19,106 +22,82 @@ namespace AutoUpdater
 {
     internal class Program
     {
-        private static void Main(string[] args)
+        private static readonly ILog Log = LogManager.GetLogger(typeof(Program));
+        private static readonly int UpdateRetries = 8;
+
+        public static int Main(string[] args)
         {
+            Application.Initialize();
+
             if (args.Length != 4)
             {
-                return;
+                Console.WriteLine("AutoUpdate.exe <running CKAN PID> <running CKAN path> <updated CKAN path> <launch>");
+                return -1;
             }
 
             var pid = int.Parse(args[0]);
-            var local_path = args[1];
-            var updated_path = args[2];
+            var currentPath = args[1];
+            var updatePath = args[2];
 
-            if (!File.Exists(updated_path))
+            if (!File.Exists(updatePath))
             {
-                return;
+                return -1;
             }
 
             // wait for CKAN to close
             try
             {
                 var process = Process.GetProcessById(pid);
-
                 if (!process.HasExited)
                 {
                     process.WaitForExit();
                 }
             }
-            catch (Exception) { }
-
-            int retries = 8;
-
-            while (File.Exists(local_path))
+            catch (Exception e)
             {
-                try
-                {
-                    // delete the old ckan.exe
-                    File.Delete(local_path);
-                }
-                catch (Exception)
-                {
-                    Thread.Sleep(1000);
-                }
-
-                retries--;
-                if (retries == 0)
-                {
-                    return;
-                }
+                Log.Debug("Continuing despite process check exception", e);
             }
 
-            // replace ckan.exe
-            File.Move(updated_path, local_path);
+            try
+            {
+                var retries = UpdateRetries;
+                while (File.Exists(currentPath) && --retries > 0)
+                {
+                    File.Delete(currentPath);
+                }
 
-            MakeExecutable(local_path);
+                // replace ckan.exe
+                File.Move(updatePath, currentPath);
 
+                // if we have a native chmod() call and the OS supports it
+                // then make sure we set the +x bits
+                if (Platform.IsUnix && Platform.IsMono)
+                {
+                    var executeMask = FilePermissions.S_IXUSR | FilePermissions.S_IXGRP | FilePermissions.S_IXOTH;
+                    var syscall = Syscall.chmod(updatePath, executeMask);
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error("Failed to update binary!", e);
+                return -1;
+            }
+
+            // start the application using platform-compatible syntax
             if (args[3] == "launch")
             {
-                //Start CKAN
-                if (IsOnMono())
+                if (Platform.IsMono)
                 {
-                    Process.Start("mono", String.Format("\"{0}\"", local_path));
+                    Process.Start("mono", String.Format("\"{0}\"", currentPath));
                 }
                 else
                 {
-                    Process.Start(local_path);
+                    Process.Start(currentPath);
                 }
             }
-        }
 
-        private static void MakeExecutable(string path)
-        {
-            if (!IsOnWindows())
-            {
-                // TODO: It would be really lovely (and safer!) to use the native system
-                // call here: http://docs.go-mono.com/index.aspx?link=M:Mono.Unix.Native.Syscall.chmod
-
-                string command = string.Format("+x \"{0}\"", path);
-
-                ProcessStartInfo permsinfo = new ProcessStartInfo("chmod", command);
-                permsinfo.UseShellExecute = false;
-                Process permsprocess = Process.Start(permsinfo);
-                permsprocess.WaitForExit();
-            }
-        }
-
-        /// <summary>
-        /// Are we on Mono?
-        /// </summary>
-        private static bool IsOnMono()
-        {
-            return Type.GetType("Mono.Runtime") != null;
-        }
-
-        /// <summary>
-        /// Are we on Windows?
-        /// </summary>
-        private static bool IsOnWindows()
-        {
-            PlatformID platform = Environment.OSVersion.Platform;
-            return platform != PlatformID.MacOSX &&
-                platform != PlatformID.Unix && platform != PlatformID.Xbox;
+            // exit code indicates success
+            return 0;
         }
     }
 }

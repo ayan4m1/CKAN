@@ -276,7 +276,7 @@ namespace CKAN
         {
             // We don't have this passed in, so we'll ask the service locator
             // directly. Yuck.
-            _comparator = ServiceLocator.Container.Resolve<IGameComparator>();
+            _comparator = Application.Container.Resolve<IGameComparator>();
         }
 
         /// <summary>
@@ -461,7 +461,7 @@ namespace CKAN
         public static CkanModule FromJson(string json)
         {
             log.Debug("Inflating comparator object");
-            IGameComparator comparator = ServiceLocator.Container.Resolve<IGameComparator>();
+            IGameComparator comparator = Application.Container.Resolve<IGameComparator>();
 
             log.Debug("Building CkanModule");
             return new CkanModule(json, comparator);
@@ -631,7 +631,8 @@ namespace CKAN
         }
     }
 
-    public class InvalidModuleAttributesException : Exception
+    [Serializable]
+    public class InvalidModuleAttributesException : Exception, ISerializable
     {
         private readonly CkanModule module;
         private readonly string why;

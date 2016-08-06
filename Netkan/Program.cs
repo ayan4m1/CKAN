@@ -16,7 +16,7 @@ using System.Text;
 
 namespace CKAN.NetKAN
 {
-    public static class Program
+    internal static class Program
     {
         private const int ExitOk = 0;
         private const int ExitBadOpt = 1;
@@ -28,6 +28,8 @@ namespace CKAN.NetKAN
 
         public static int Main(string[] args)
         {
+            Application.Initialize();
+
             try
             {
                 ProcessArgs(args);

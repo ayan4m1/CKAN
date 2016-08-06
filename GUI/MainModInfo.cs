@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Autofac;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -235,7 +236,8 @@ namespace CKAN
             ContentsPreviewTree.Nodes.Clear();
             ContentsPreviewTree.Nodes.Add(module.name);
 
-            IEnumerable<string> contents = ModuleInstaller.GetInstance(manager.CurrentInstance, GUI.user).GetModuleContentsList(module);
+            var installer = Application.Container.Resolve<IModuleInstaller>();
+            IEnumerable<string> contents = installer.GetInstance(manager.CurrentInstance, GUI.user).GetModuleContentsList(module);
             if (contents == null)
             {
                 return;

@@ -142,7 +142,7 @@ namespace CKAN
         internal static void UpdateRegistry(Uri repo, Registry registry, KSP ksp, IUser user, Boolean clear = true)
         {
             // Use this opportunity to also update the build mappings... kind of hacky
-            ServiceLocator.Container.Resolve<IKspBuildMap>().Refresh();
+            Application.Container.Resolve<IKspBuildMap>().Refresh();
 
             log.InfoFormat("Downloading {0}", repo);
 
@@ -289,8 +289,10 @@ namespace CKAN
                     @"The following mods have had their metadata changed since last update - {0}.
 It is advisable that you reinstall them in order to preserve consistency with the repository. Do you wish to reinstall now?", mods)))
                 {
-                    ModuleInstaller installer = ModuleInstaller.GetInstance(ksp, new NullUser());
-                    installer.Upgrade(metadataChanges, new NetAsyncModulesDownloader(new NullUser()));
+                    var app = Application.Container;
+                    var installer = app.Resolve<IModuleInstaller>();
+                    var installerInstance = installer.GetInstance(ksp, new NullUser());
+                    installerInstance.Upgrade(metadataChanges, new NetAsyncModulesDownloader(new NullUser()));
                 }
             }
 
