@@ -52,6 +52,9 @@ namespace CKAN
                 .As<IGameVersionProvider>()
                 .Keyed<IGameVersionProvider>(KspVersionSource.Readme);
 
+            builder.RegisterType<ModuleInstaller>()
+                .As<IModuleInstaller>();
+
             _container = builder.Build();
         }
     }
