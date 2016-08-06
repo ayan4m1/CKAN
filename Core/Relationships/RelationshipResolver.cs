@@ -555,7 +555,7 @@ namespace CKAN
                 get
                 {
                     Debug.Assert(false);
-                    throw new Exception("Should never be called on Installed");
+                    return null;
                 }
             }
 
@@ -572,7 +572,7 @@ namespace CKAN
                 get
                 {
                     Debug.Assert(false);
-                    throw new Exception("Should never be called on UserRequested");
+                    return null;
                 }
             }
 
