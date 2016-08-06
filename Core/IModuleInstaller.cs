@@ -7,6 +7,7 @@ namespace CKAN
 {
     public interface IModuleInstaller
     {
+        ModuleInstaller GetInstance(KSP ksp_instance, IUser user);
         string Download(Uri url, string filename);
         string CachedOrDownload(CkanModule module, string filename);
         string CachedOrDownload(string identifier, Version version, Uri url, string filename);

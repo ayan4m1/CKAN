@@ -103,7 +103,7 @@
     <Compile Include="Platform.cs" />
     <Compile Include="Net\Curl.cs" />
     <Compile Include="Converters\JsonIgnoreBadUrlConverter.cs" />
-    <Compile Include="ApplicationContainer.cs" />
+    <Compile Include="Application.cs" />
     <Compile Include="Types\GameComparator\IGameComparator.cs" />
     <Compile Include="Types\GameComparator\GrasGameComparator.cs" />
     <Compile Include="Types\GameComparator\StrictGameComparator.cs" />

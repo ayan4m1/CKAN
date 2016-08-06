@@ -30,6 +30,9 @@ namespace CKAN
 
         public ModuleInstallerReportModInstalled onReportModInstalled = null;
 
+        // To allow the ModuleInstaller to work on multiple KSP instances, keep a list of each ModuleInstaller and return the correct one upon request.
+        private static SortedList<string, ModuleInstaller> Instances = new SortedList<string, ModuleInstaller>();
+
         private RegistryManager _registryManager;
         private KSP _ksp;
 
@@ -49,6 +52,28 @@ namespace CKAN
             _ksp = ksp;
             _registryManager = RegistryManager.Instance(ksp);
             Log.DebugFormat("Creating ModuleInstaller for {0}", ksp.GameDir());
+        }
+
+        /// <summary>
+        /// Gets the ModuleInstaller instance associated with the passed KSP instance. Creates a new ModuleInstaller instance if none exists.
+        /// </summary>
+        /// <returns>The ModuleInstaller instance.</returns>
+        /// <param name="ksp_instance">Current KSP instance.</param>
+        /// <param name="user">IUser implementation.</param>
+        public ModuleInstaller GetInstance(KSP ksp_instance, IUser user)
+        {
+            ModuleInstaller instance;
+
+            // Check in the list of instances if we have already created a ModuleInstaller instance for this KSP instance.
+            if (!Instances.TryGetValue(ksp_instance.GameDir().ToLower(), out instance))
+            {
+                // Create a new instance and insert it in the static list.
+                instance = new ModuleInstaller(ksp_instance, user);
+
+                Instances.Add(ksp_instance.GameDir().ToLower(), instance);
+            }
+
+            return instance;
         }
 
         /// <summary>
