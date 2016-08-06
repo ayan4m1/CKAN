@@ -10,13 +10,13 @@ namespace Tests.GUI
     {
         private string tempDir;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             tempDir = TestData.NewTempDir();
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void TearDown()
         {
             Directory.Delete(tempDir, true);
