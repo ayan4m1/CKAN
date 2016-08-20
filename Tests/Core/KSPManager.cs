@@ -118,7 +118,7 @@ namespace Tests.Core
         {
             using (var tidy2 = new DisposableKSP())
             {
-                win32_reg.Instances.Add(new Tuple<string, string>("tidy2",tidy2.KSP.GameDir()));
+                win32_reg.Instances.Add(new Tuple<string, string>("tidy2", tidy2.KSP.GameDir));
                 manager.LoadInstancesFromRegistry();
                 manager.ClearAutoStart();
                 Assert.That(manager.GetPreferredInstance(), Is.Null);
@@ -153,7 +153,7 @@ namespace Tests.Core
         {
             return new FakeWin32Registry(new List<Tuple<string, string>>
             {
-                new Tuple<string, string>(name, tidy.KSP.GameDir())
+                new Tuple<string, string>(name, tidy.KSP.GameDir)
             });
         }
     }
@@ -164,7 +164,7 @@ namespace Tests.Core
         {
             Instances = new List<Tuple<string, string>>
             {
-                new Tuple<string, string>("test", instance.GameDir())
+                new Tuple<string, string>("test", instance.GameDir)
             };
             AutoStartInstance = autostart;
         }
@@ -202,7 +202,7 @@ namespace Tests.Core
         public void SetRegistryToInstances(SortedList<string, CKAN.KSP> instances, string autoStartInstance)
         {
             Instances =
-                instances.Select(kvpair => new Tuple<string, string>(kvpair.Key, kvpair.Value.GameDir())).ToList();
+                instances.Select(kvpair => new Tuple<string, string>(kvpair.Key, kvpair.Value.GameDir)).ToList();
             AutoStartInstance = autoStartInstance;
         }
 

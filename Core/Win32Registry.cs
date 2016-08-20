@@ -16,7 +16,7 @@ namespace CKAN
 
     public class Win32Registry : IWin32Registry
     {
-        private static readonly string CKAN_KEY = @"HKEY_CURRENT_USER\Software\CKAN";
+        private static readonly string CkanKey = @"HKEY_CURRENT_USER\Software\CKAN";
 
         public Win32Registry()
         {
@@ -24,13 +24,13 @@ namespace CKAN
         }
         private int InstanceCount
         {
-            get { return GetRegistryValue(@"KSPInstanceCount", 0); }
+            get { return GetRegistryValue("KSPInstanceCount", 0); }
         }
 
         public string AutoStartInstance
         {
-            get { return GetRegistryValue(@"KSPAutoStartInstance", ""); }
-            set { SetAutoStartInstance(value??String.Empty); }
+            get { return GetRegistryValue("KSPAutoStartInstance", ""); }
+            set { SetAutoStartInstance(value ?? string.Empty); }
         }
 
         private Tuple<string, string> GetInstance(int i)
@@ -82,23 +82,23 @@ namespace CKAN
 
         private void SetNumberOfInstances(int count)
         {
-            SetRegistryValue(@"KSPInstanceCount", count);
+            SetRegistryValue("KSPInstanceCount", count);
         }
 
         private void SetInstanceKeysTo(int instanceIndex, string name, KSP ksp)
         {            
-            SetRegistryValue(@"KSPInstanceName_" + instanceIndex, name);
-            SetRegistryValue(@"KSPInstancePath_" + instanceIndex, ksp.GameDir());
+            SetRegistryValue("KSPInstanceName_" + instanceIndex, name);
+            SetRegistryValue("KSPInstancePath_" + instanceIndex, ksp.GameDir());
         }        
 
         private static void SetRegistryValue<T>(string key, T value)
         {
-            Microsoft.Win32.Registry.SetValue(CKAN_KEY, key, value);
+            Microsoft.Win32.Registry.SetValue(CkanKey, key, value);
         }
 
         private static T GetRegistryValue<T>(string key, T defaultValue)
         {
-            return (T)Microsoft.Win32.Registry.GetValue(CKAN_KEY, key, defaultValue);
+            return (T)Microsoft.Win32.Registry.GetValue(CkanKey, key, defaultValue);
         }
     }
 }

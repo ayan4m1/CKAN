@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Autofac;
 using ChinhDo.Transactions;
+using ChinhDo.Transactions.FileManager;
 using CKAN.GameVersionProviders;
 using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.Tar;
@@ -105,7 +106,7 @@ namespace CKAN
             registry_manager.Save();
 
             // Return how many we got!
-            return registry_manager.registry.Available(ksp.Version()).Count;
+            return registry_manager.registry.Available(ksp.Version).Count;
         }
 
         public static int Update(RegistryManager registry_manager, KSP ksp, IUser user, Boolean clear = true, Uri repo = null)
@@ -122,7 +123,7 @@ namespace CKAN
             registry_manager.Save();
 
             // Return how many we got!
-            return registry_manager.registry.Available(ksp.Version()).Count;
+            return registry_manager.registry.Available(ksp.Version).Count;
         }
 
         public static int Update(RegistryManager registry_manager, KSP ksp, IUser user, Boolean clear = true, string repo = null)

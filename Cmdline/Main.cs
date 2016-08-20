@@ -157,7 +157,7 @@ This is a bad idea and there is absolutely no good reason to do it. Please run C
                 }
                 else
                 {
-                    log.InfoFormat("Using KSP install at {0}",ksp.GameDir());
+                    log.InfoFormat("Using KSP install at {0}", ksp.GameDir);
                 }
             }
 
@@ -323,9 +323,9 @@ This is a bad idea and there is absolutely no good reason to do it. Please run C
 
         private static int Available(CKAN.KSP current_instance, IUser user)
         {
-            List<CkanModule> available = RegistryManager.Instance(current_instance).registry.Available(current_instance.Version());
+            List<CkanModule> available = RegistryManager.Instance(current_instance).registry.Available(current_instance.Version);
 
-            user.RaiseMessage("Mods available for KSP {0}", current_instance.Version());
+            user.RaiseMessage("Mods available for KSP {0}", current_instance.Version);
             user.RaiseMessage("");
 
             var width = user.WindowWidth;
@@ -342,15 +342,15 @@ This is a bad idea and there is absolutely no good reason to do it. Please run C
         /// <summary>
         /// Scans the ksp instance. Detects installed mods to mark as auto-detected and checks the consistency
         /// </summary>
-        /// <param name="ksp_instance">The instance to scan</param>
+        /// <param name="kspInstance">The instance to scan</param>
         /// <param name="user"></param>
         /// <param name="next_command">Changes the output message if set.</param>
         /// <returns>Exit.OK if instance is consistent, Exit.ERROR otherwise </returns>
-        private static int Scan(CKAN.KSP ksp_instance, IUser user, string next_command=null)
+        private static int Scan(CKAN.KSP kspInstance, IUser user, string next_command=null)
         {
             try
             {
-                ksp_instance.ScanGameData();
+                kspInstance.ScanGameData();
                 return Exit.OK;
             }
             catch (InconsistentKraken kraken)
@@ -372,9 +372,9 @@ This is a bad idea and there is absolutely no good reason to do it. Please run C
             }
         }
 
-        private static int Clean(CKAN.KSP current_instance)
+        private static int Clean(CKAN.KSP currentInstance)
         {
-            current_instance.CleanCache();
+            currentInstance.Cache.Cleanup();
             return Exit.OK;
         }
     }

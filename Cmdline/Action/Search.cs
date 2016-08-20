@@ -29,10 +29,10 @@ namespace CKAN.CmdLine
             var matching_mods = PerformSearch(ksp, options.search_term);
 
             // Show how many matches we have.
-            user.RaiseMessage("Found " + matching_mods.Count().ToString() + " mods matching \"" + options.search_term + "\".");
+            user.RaiseMessage("Found " + matching_mods.Count.ToString() + " mods matching \"" + options.search_term + "\".");
 
             // Present the results.
-            if (!matching_mods.Any())
+            if (matching_mods.Count == 0)
             {
                 return Exit.OK;
             }
@@ -56,7 +56,7 @@ namespace CKAN.CmdLine
         {
             var registry = RegistryManager.Instance(ksp).registry;
             return registry
-                .Available(ksp.Version())
+                .Available(ksp.Version)
                 .Where((module) =>
             {
                 // Extract the description. This is an optional field and may be null.

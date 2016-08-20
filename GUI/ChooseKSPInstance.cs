@@ -39,9 +39,9 @@ namespace CKAN
             {
                 var item = new ListViewItem { Text = instance.Key, Tag = instance.Key };
 
-                item.SubItems.Add(new ListViewItem.ListViewSubItem { Text = instance.Value.Version().ToString() });
+                item.SubItems.Add(new ListViewItem.ListViewSubItem { Text = instance.Value.Version.ToString() });
 
-                item.SubItems.Add(new ListViewItem.ListViewSubItem { Text = instance.Value.GameDir() });
+                item.SubItems.Add(new ListViewItem.ListViewSubItem { Text = instance.Value.GameDir });
 
                 KSPInstancesListView.Items.Add(item);
             }

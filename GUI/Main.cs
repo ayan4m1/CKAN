@@ -194,7 +194,7 @@ namespace CKAN
 
             configuration = Configuration.LoadOrCreateConfiguration
                 (
-                    Path.Combine(CurrentInstance.GameDir(), "CKAN/GUIConfig.xml"),
+                    Path.Combine(CurrentInstance.GameDir, "CKAN/GUIConfig.xml"),
                     Repo.default_ckan_repo.ToString()
                 );
 
@@ -356,9 +356,9 @@ namespace CKAN
                 UpdateRepo();
             }
 
-            Text = String.Format("CKAN {0} - KSP {1}  --  {2}", Meta.Version(), CurrentInstance.Version(),
-                CurrentInstance.GameDir());
-            KSPVersionLabel.Text = String.Format("Kerbal Space Program {0}", CurrentInstance.Version());
+            Text = String.Format("CKAN {0} - KSP {1}  --  {2}", Meta.Version(), CurrentInstance.Version,
+                CurrentInstance.GameDir);
+            KSPVersionLabel.Text = String.Format("Kerbal Space Program {0}", CurrentInstance.Version);
 
             if (commandLineArgs.Length >= 2)
             {
@@ -383,7 +383,8 @@ namespace CKAN
                 log.Debug("Failed to select mod from startup parameters");
             }
 
-            var pluginsPath = Path.Combine(CurrentInstance.CkanDir(), "Plugins");
+            var ckanDir = KSPPathUtils.GetGameDirectory(CurrentInstance.GameDir, GameDirectory.CkanDir);
+            var pluginsPath = Path.Combine(ckanDir, "Plugins");
             if (!Directory.Exists(pluginsPath))
             {
                 Directory.CreateDirectory(pluginsPath);
@@ -427,14 +428,14 @@ namespace CKAN
         {
             Util.Invoke(this, () =>
             {
-                Text = String.Format("CKAN {0} - KSP {1}    --    {2}", Meta.Version(), CurrentInstance.Version(),
-                CurrentInstance.GameDir());
-                KSPVersionLabel.Text = String.Format("Kerbal Space Program {0}", CurrentInstance.Version());
+                Text = String.Format("CKAN {0} - KSP {1}    --    {2}", Meta.Version(), CurrentInstance.Version,
+                CurrentInstance.GameDir);
+                KSPVersionLabel.Text = String.Format("Kerbal Space Program {0}", CurrentInstance.Version);
             });
 
             configuration = Configuration.LoadOrCreateConfiguration
             (
-                Path.Combine(CurrentInstance.GameDir(), "CKAN/GUIConfig.xml"),
+                Path.Combine(CurrentInstance.GameDir, "CKAN/GUIConfig.xml"),
                 Repo.default_ckan_repo.ToString()
             );
             UpdateModsList();
@@ -755,13 +756,13 @@ namespace CKAN
                 var module_installer = ModuleInstaller.GetInstance(CurrentInstance, GUI.user);
                 full_change_set =
                     await mainModList.ComputeChangeSetFromModList(registry, user_change_set, module_installer,
-                    CurrentInstance.Version());
+                    CurrentInstance.Version);
             }
             catch (InconsistentKraken)
             {
                 //Need to be recomputed due to ComputeChangeSetFromModList possibly changing it with too many provides handling.
                 user_change_set = mainModList.ComputeUserChangeSet();
-                new_conflicts = MainModList.ComputeConflictsFromModList(registry, user_change_set, CurrentInstance.Version());
+                new_conflicts = MainModList.ComputeConflictsFromModList(registry, user_change_set, CurrentInstance.Version);
                 full_change_set = null;
             }
             catch (TooManyModsProvideKraken)
@@ -897,7 +898,7 @@ namespace CKAN
 
             try
             {
-                Directory.SetCurrentDirectory(CurrentInstance.GameDir());
+                Directory.SetCurrentDirectory(CurrentInstance.GameDir);
                 Process.Start(binary, args);
             }
             catch (Exception exception)
@@ -973,7 +974,7 @@ namespace CKAN
 
                 var changeset = new List<ModChange>();
                 changeset.Add(new ModChange(
-                    new GUIMod(module,registry_manager.registry,CurrentInstance.Version()),
+                    new GUIMod(module,registry_manager.registry,CurrentInstance.Version),
                     GUIModChangeType.Install, null));
 
                 menuStrip1.Enabled = false;
@@ -1036,7 +1037,8 @@ namespace CKAN
                     RegistryManager.Instance(CurrentInstance).Save(true, recommends, versions);
 
                     // TODO: The core might eventually save as something other than 'installed-default.ckan'
-                    File.Copy(Path.Combine(CurrentInstance.CkanDir(), "installed-default.ckan"), dlg.FileName, true);
+                    var ckanDir = KSPPathUtils.GetGameDirectory(CurrentInstance.GameDir, GameDirectory.CkanDir);
+                    File.Copy(Path.Combine(ckanDir, "installed-default.ckan"), dlg.FileName, true);
                 }
                 else
                 {
@@ -1063,7 +1065,7 @@ namespace CKAN
 
         private void openKspDirectoryToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Process.Start(Instance.manager.CurrentInstance.GameDir());
+            Process.Start(Instance.manager.CurrentInstance.GameDir);
         }
 
         private void DependsGraphTree_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)

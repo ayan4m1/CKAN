@@ -6,6 +6,7 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using ChinhDo.Transactions;
+using ChinhDo.Transactions.FileManager;
 using CurlSharp;
 using log4net;
 

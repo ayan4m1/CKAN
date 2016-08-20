@@ -793,9 +793,10 @@ namespace Tests.Core.Relationships
         [Test]
         public void AutodetectedCanSatisfyRelationships()
         {
-            using (var ksp = new DisposableKSP ())
+            using (var ksp = new DisposableKSP())
             {
-                registry.RegisterDll(ksp.KSP, Path.Combine(ksp.KSP.GameData(), "ModuleManager.dll"));
+                var dataDir = CKAN.KSPPathUtils.GetGameDirectory(ksp.KSP.GameDir, GameDirectory.GameData);
+                registry.RegisterDll(ksp.KSP, Path.Combine(dataDir, "ModuleManager.dll"));
 
                 var depends = new List<CKAN.RelationshipDescriptor>();
                 depends.Add(new CKAN.RelationshipDescriptor { name = "ModuleManager" });

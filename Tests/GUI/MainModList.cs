@@ -67,12 +67,12 @@ namespace Tests.GUI
                 registry.RegisterModule(module, Enumerable.Empty<string>(), tidy.KSP);
 
                 var main_mod_list = new MainModList(null, null);
-                var mod = new GUIMod(TestData.FireSpitterModule(), registry, manager.CurrentInstance.Version());
-                var mod2 = new GUIMod(TestData.kOS_014_module(), registry, manager.CurrentInstance.Version());
+                var mod = new GUIMod(TestData.FireSpitterModule(), registry, manager.CurrentInstance.Version);
+                var mod2 = new GUIMod(TestData.kOS_014_module(), registry, manager.CurrentInstance.Version);
                 mod.IsInstallChecked = true;
                 mod2.IsInstallChecked = true;
 
-                var compute_change_set_from_mod_list = main_mod_list.ComputeChangeSetFromModList(registry, main_mod_list.ComputeUserChangeSet(), null, tidy.KSP.Version());
+                var compute_change_set_from_mod_list = main_mod_list.ComputeChangeSetFromModList(registry, main_mod_list.ComputeUserChangeSet(), null, tidy.KSP.Version);
                 await UtilStatic.Throws<InconsistentKraken>(async ()=> { await compute_change_set_from_mod_list; });
             }
         }
@@ -88,7 +88,7 @@ namespace Tests.GUI
                 var registry = Registry.Empty();
                 registry.AddAvailable(ckan_mod);
                 var item = new MainModList(delegate { }, null);
-                Assert.That(item.IsVisible(new GUIMod(ckan_mod, registry, manager.CurrentInstance.Version())));
+                Assert.That(item.IsVisible(new GUIMod(ckan_mod, registry, manager.CurrentInstance.Version)));
             }
         }
 
@@ -116,8 +116,8 @@ namespace Tests.GUI
                 var main_mod_list = new MainModList(null, null);
                 var mod_list = main_mod_list.ConstructModList(new List<GUIMod>
                 {
-                    new GUIMod(TestData.FireSpitterModule(), registry, manager.CurrentInstance.Version()),
-                    new GUIMod(TestData.kOS_014_module(), registry, manager.CurrentInstance.Version())
+                    new GUIMod(TestData.FireSpitterModule(), registry, manager.CurrentInstance.Version),
+                    new GUIMod(TestData.kOS_014_module(), registry, manager.CurrentInstance.Version)
                 });
                 Assert.That(mod_list, Has.Count.EqualTo(2));
             }
@@ -132,7 +132,7 @@ namespace Tests.GUI
                 var registry = Registry.Empty();
                 var generator = new RandomModuleGenerator(new Random(0451));
                 var provide_ident = "provide";
-                var ksp_version = tidy.KSP.Version();
+                var ksp_version = tidy.KSP.Version;
                 var mod = generator.GeneratorRandomModule(depends: new List<RelationshipDescriptor>
                 {
                     new RelationshipDescriptor {name = provide_ident}

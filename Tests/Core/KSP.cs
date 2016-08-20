@@ -42,7 +42,7 @@ namespace Tests.Core
             Assert.IsTrue(CKAN.KSP.IsKspDir(ksp_dir));
 
             // And the one from our KSP instance.
-            Assert.IsTrue(CKAN.KSP.IsKspDir(ksp.GameDir()));
+            Assert.IsTrue(CKAN.KSP.IsKspDir(ksp.GameDir));
 
             // All these ones should be bad.
             foreach (string dir in TestData.bad_ksp_dirs())
@@ -54,39 +54,39 @@ namespace Tests.Core
         [Test]
         public void Training()
         {
-            //Use Uri to avoid issues with windows vs linux line seperators.
+            // Use Uri to force line separators to a consistent format
             var canonicalPath = new Uri(Path.Combine(ksp_dir, "saves", "training")).LocalPath;
-            var training = new Uri(ksp.Tutorial()).LocalPath;
-            Assert.AreEqual(canonicalPath, training);
+            var testPath = CKAN.KSPPathUtils.GetGameDirectory(ksp.GameDir, GameDirectory.Tutorial);
+
+            Assert.AreEqual(canonicalPath, new Uri(testPath).LocalPath);
         }
 
         [Test]
         public void ScanDlls()
         {
-            string path = Path.Combine(ksp.GameData(), "Example.dll");
-            var registry = CKAN.RegistryManager.Instance(ksp).registry;
+            var dataDir = CKAN.KSPPathUtils.GetGameDirectory(ksp.GameDir, GameDirectory.GameData);
+            string path = Path.Combine(dataDir, "Example.dll");
 
-            Assert.IsFalse(registry.IsInstalled("Example"), "Example should start uninstalled");
+            Assert.IsFalse(ksp.Registry.IsInstalled("Example"), "Example should start uninstalled");
 
             File.WriteAllText(path, "Not really a DLL, are we?");
 
             ksp.ScanGameData();
 
-            Assert.IsTrue(registry.IsInstalled("Example"), "Example installed");
+            Assert.IsTrue(ksp.Registry.IsInstalled("Example"), "Example installed");
 
-            Version version = registry.InstalledVersion("Example");
+            Version version = ksp.Registry.InstalledVersion("Example");
             Assert.IsInstanceOf<DllVersion>(version, "DLL detected as a DLL, not full mod");
 
             // Now let's do the same with different case.
+            string path2 = Path.Combine(dataDir, "NewMod.DLL");
 
-            string path2 = Path.Combine(ksp.GameData(), "NewMod.DLL");
-
-            Assert.IsFalse(registry.IsInstalled("NewMod"));
+            Assert.IsFalse(ksp.Registry.IsInstalled("NewMod"));
             File.WriteAllText(path2, "This text is irrelevant. You will be assimilated");
 
             ksp.ScanGameData();
 
-            Assert.IsTrue(registry.IsInstalled("NewMod"));
+            Assert.IsTrue(ksp.Registry.IsInstalled("NewMod"));
         }
 
         [Test]

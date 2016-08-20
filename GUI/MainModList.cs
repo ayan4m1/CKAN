@@ -145,7 +145,7 @@ namespace CKAN
         {
             log.Debug("Updating the mod list");
 
-            KspVersion version = CurrentInstance.Version();
+            var version = CurrentInstance.Version;
             IRegistryQuerier registry = RegistryManager.Instance(CurrentInstance).registry;
             var gui_mods = new HashSet<GUIMod>(registry.Available(version)
                 .Select(m => new GUIMod(m, registry, version)));

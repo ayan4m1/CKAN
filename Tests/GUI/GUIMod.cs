@@ -21,7 +21,7 @@ namespace Tests.GUI
                 var registry = Registry.Empty();
                 var ckan_mod = TestData.kOS_014_module();
                 registry.AddAvailable(ckan_mod);
-                var mod = new GUIMod(ckan_mod, registry, manager.CurrentInstance.Version());
+                var mod = new GUIMod(ckan_mod, registry, manager.CurrentInstance.Version);
                 Assert.False(mod.IsUpgradeChecked);
             }
         }
@@ -31,14 +31,14 @@ namespace Tests.GUI
             using (var tidy = new DisposableKSP())
             {
                 var generatror = new RandomModuleGenerator(new Random(0451));
-                var old_version = generatror.GeneratorRandomModule(version: new Version("0.24"), ksp_version: tidy.KSP.Version());
-                var new_version = generatror.GeneratorRandomModule(version: new Version("0.25"), ksp_version: tidy.KSP.Version(),
+                var old_version = generatror.GeneratorRandomModule(version: new Version("0.24"), ksp_version: tidy.KSP.Version);
+                var new_version = generatror.GeneratorRandomModule(version: new Version("0.25"), ksp_version: tidy.KSP.Version,
                     identifier:old_version.identifier);
                 var registry = Registry.Empty();
                 registry.RegisterModule(old_version, Enumerable.Empty<string>(), null);
                 registry.AddAvailable(new_version);
 
-                var mod = new GUIMod(old_version, registry, tidy.KSP.Version());
+                var mod = new GUIMod(old_version, registry, tidy.KSP.Version);
                 Assert.True(mod.HasUpdate);
             }
         }

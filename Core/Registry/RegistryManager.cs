@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using ChinhDo.Transactions;
+using ChinhDo.Transactions.FileManager;
 using log4net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -165,20 +164,12 @@ namespace CKAN
         /// </summary>
         public static RegistryManager Instance(KSP ksp)
         {
-            string directory = ksp.CkanDir();
+            var directory = KSPPathUtils.GetGameDirectory(ksp.GameDir, GameDirectory.CkanDir);
             if (!registryCache.ContainsKey(directory))
             {
                 log.DebugFormat("Preparing to load registry at {0}", directory);
                 registryCache[directory] = new RegistryManager(directory, ksp);
             }
-            ///else /// create a lock file in existing RegistryManager object.
-            ///{
-            ///    log.InfoFormat("Attempting to lock old registry at {0}", directory);
-            ///    if (! registryCache[directory].GetLock())
-            ///    {
-            ///        throw new RegistryInUseKraken(directory);
-            ///    }
-            ///}
 
             return registryCache[directory];
         }

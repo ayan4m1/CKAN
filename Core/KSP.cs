@@ -17,7 +17,7 @@ namespace CKAN
 {
     
     /// <summary>
-    ///     Everything for dealing with KSP itself.
+    /// Represents a single installed instance of KSP.
     /// </summary>
     public class KSP : IDisposable
     {
@@ -25,14 +25,25 @@ namespace CKAN
 
         #region Fields and Properties
 
-        private static readonly ILog log = LogManager.GetLogger(typeof(KSP));
+        private static readonly ILog Log = LogManager.GetLogger(typeof(KSP));
 
-        private readonly string gameDir;
-        private KspVersion version;
+        private readonly string _gameDir;
+        private KspVersion _version;
 
         public NetFileCache Cache { get; private set; }
 
+        public RegistryManager RegistryManager
+        {
+            get { return RegistryManager.Instance(this); }
+        }
+
+        public Registry Registry
+        {
+            get { return RegistryManager.registry; }
+        }
+
         #endregion
+
         #region Construction and Initialisation
 
         /// <summary>
@@ -46,15 +57,16 @@ namespace CKAN
 
             // Make sure our path is absolute and has normalised slashes.
             gameDir = KSPPathUtils.NormalizePath(Path.GetFullPath(gameDir));
-
-            if (! IsKspDir(gameDir))
+            if (!IsKspDir(gameDir))
             {
                 throw new NotKSPDirKraken(gameDir);
             }
-            
-            this.gameDir = gameDir;
+
+            _gameDir = gameDir;
             Init();
-            Cache = new NetFileCache(DownloadCacheDir());
+
+            var cacheDir = KSPPathUtils.GetGameDirectory(_gameDir, GameDirectory.DownloadCacheDir);
+            Cache = new NetFileCache(cacheDir);
         }
 
         /// <summary>
@@ -62,22 +74,24 @@ namespace CKAN
         /// </summary>
         private void Init()
         {
-            log.DebugFormat("Initialising {0}", CkanDir());
+            var ckanDir = KSPPathUtils.GetGameDirectory(_gameDir, GameDirectory.CkanDir);
+            Log.DebugFormat("Initialising {0}", ckanDir);
 
-            if (! Directory.Exists(CkanDir()))
+            if (!Directory.Exists(ckanDir))
             {
                 User.RaiseMessage("Setting up CKAN for the first time...");
-                User.RaiseMessage("Creating {0}", CkanDir());
-                Directory.CreateDirectory(CkanDir());
+                User.RaiseMessage("Creating {0}", ckanDir);
+                Directory.CreateDirectory(ckanDir);
 
                 User.RaiseMessage("Scanning for installed mods...");
                 ScanGameData();
             }
 
-            if (! Directory.Exists(DownloadCacheDir()))
+            var cacheDir = KSPPathUtils.GetGameDirectory(_gameDir, GameDirectory.DownloadCacheDir);
+            if (! Directory.Exists(cacheDir))
             {
-                User.RaiseMessage("Creating {0}", DownloadCacheDir());
-                Directory.CreateDirectory(DownloadCacheDir());
+                User.RaiseMessage("Creating {0}", cacheDir);
+                Directory.CreateDirectory(cacheDir);
             }
 
             // Clear any temporary files we find. If the directory
@@ -85,14 +99,15 @@ namespace CKAN
             // will auto-create it as needed.
             // Create our temporary directories, or clear them if they
             // already exist.
-            if (Directory.Exists(TempDir()))
+            var tempDir = KSPPathUtils.GetGameDirectory(_gameDir, GameDirectory.TempDir);
+            if (Directory.Exists(tempDir))
             {
-                var directory = new DirectoryInfo(TempDir());
+                var directory = new DirectoryInfo(tempDir);
                 foreach (FileInfo file in directory.GetFiles()) file.Delete();
                 foreach (DirectoryInfo subDirectory in directory.GetDirectories()) subDirectory.Delete(true);
             }
 
-            log.DebugFormat("Initialised {0}", CkanDir());
+            Log.DebugFormat("Initialised {0}", ckanDir);
         }
 
         #endregion
@@ -131,13 +146,13 @@ namespace CKAN
             // In Perl, this is just `use FindBin qw($Bin);` Verbose enough, C#?
             string exe_dir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-            log.DebugFormat("Checking if KSP is in my exe dir: {0}", exe_dir);
+            Log.DebugFormat("Checking if KSP is in my exe dir: {0}", exe_dir);
 
             // Checking for a GameData directory probably isn't the best way to
             // detect KSP, but it works. More robust implementations welcome.
             if (IsKspDir(exe_dir))
             {
-                log.InfoFormat("KSP found at {0}", exe_dir);
+                Log.InfoFormat("KSP found at {0}", exe_dir);
                 return exe_dir;
             }
 
@@ -161,7 +176,7 @@ namespace CKAN
                     return kspSteamPath;
                 }
 
-                log.DebugFormat("Have Steam, but KSP is not at \"{0}\".", kspSteamPath);
+                Log.DebugFormat("Have Steam, but KSP is not at \"{0}\".", kspSteamPath);
             }
 
             // Oh noes! We can't find KSP!
@@ -188,12 +203,12 @@ namespace CKAN
 
             if (version != null)
             {
-                log.DebugFormat("Found version {0}", version);
+                Log.DebugFormat("Found version {0}", version);
                 return version;
             }
             else
             {
-                log.Error("Could not find KSP version");
+                Log.Error("Could not find KSP version");
                 throw new NotKSPDirKraken(directory, "Could not find KSP version in readme.txt");
             }
         }
@@ -233,108 +248,23 @@ namespace CKAN
 
         #endregion
 
-        #region Things which would be better as Properties
-
-        public string GameDir()
+        public KspVersion Version
         {
-            return gameDir;
-        }
-
-        public string GameData()
-        {
-            return KSPPathUtils.NormalizePath(
-                Path.Combine(GameDir(), "GameData")
-            );
-        }
-
-        public string CkanDir()
-        {
-            return KSPPathUtils.NormalizePath(
-                Path.Combine(GameDir(), "CKAN")
-            );
-        }
-
-        public string DownloadCacheDir()
-        {
-            return KSPPathUtils.NormalizePath(
-                Path.Combine(CkanDir(), "downloads")
-            );
-        }
-
-        public string Ships()
-        {
-            return KSPPathUtils.NormalizePath(
-                Path.Combine(GameDir(), "Ships")
-            );
-        }
-
-        public string ShipsVab()
-        {
-            return KSPPathUtils.NormalizePath(
-                Path.Combine(Ships(), "VAB")
-            );
-        }
-
-        public string ShipsSph()
-        {
-            return KSPPathUtils.NormalizePath(
-                Path.Combine(Ships(), "SPH")
-            );
-        }
-
-        public string ShipsThumbs()
-        {
-            return KSPPathUtils.NormalizePath(
-                Path.Combine(Ships(), "@thumbs")
-            );
-        }
-
-        public string ShipsThumbsSPH()
-        {
-            return KSPPathUtils.NormalizePath(
-                Path.Combine(ShipsThumbs(), "SPH")
-            );
-        }
-
-        public string ShipsThumbsVAB()
-        {
-            return KSPPathUtils.NormalizePath(
-                Path.Combine(ShipsThumbs(), "VAB")
-            );
-        }
-
-        public string Tutorial()
-        {
-            return KSPPathUtils.NormalizePath(
-                Path.Combine(GameDir(), "saves", "training")
-            );
-        }
-
-        public string Scenarios()
-        {
-            return KSPPathUtils.NormalizePath(
-                Path.Combine(GameDir(), "saves", "scenarios")
-            );
-        }
-
-        public string TempDir()
-        {
-            return KSPPathUtils.NormalizePath(
-                Path.Combine(CkanDir(), "temp")
-            );
-        }
-
-        public KspVersion Version()
-        {
-            if (version != null)
+            get
             {
-                return version;
-            }
+                if (_version != null)
+                {
+                    return _version;
+                }
 
-            return version = DetectVersion(GameDir());
+                return _version = DetectVersion(_gameDir);
+            }
         }
 
-        #endregion
+        public string GameDir
+        {
+            get { return _gameDir; }
+        }
 
         #region CKAN/GameData Directory Maintenance
 
@@ -371,35 +301,29 @@ namespace CKAN
         // TODO: This would likely be better in the Registry class itself.
         public void ScanGameData()
         {
-            var manager = RegistryManager.Instance(this);
             using (TransactionScope tx = CkanTransaction.CreateTransactionScope())
             {
-                manager.registry.ClearDlls();
+                Registry.ClearDlls();
 
-                // TODO: It would be great to optimise this to skip .git directories and the like.
-                // Yes, I keep my GameData in git.
+                // This searches for DLLs in a case-insensitive manner,
+                // filtering out any path that contains a .git/ metadata directory
+                // and then registering the results
+                var dataDir = KSPPathUtils.GetGameDirectory(_gameDir, GameDirectory.GameData);
+                Directory.EnumerateFiles(dataDir, "*", SearchOption.AllDirectories)
+                    .Where(file => 
+                        Regex.IsMatch(file, @"\.dll$", RegexOptions.IgnoreCase)
+                        && !file.Contains("/.git/")
+                    )
+                    .Select(KSPPathUtils.NormalizePath)
+                    .ToList()
+                    .ForEach(dll =>
+                    {
+                        Registry.RegisterDll(this, dll);
+                    });
 
-                // Alas, EnumerateFiles is *case-sensitive* in its pattern, which causes
-                // DLL files to be missed under Linux; we have to pick .dll, .DLL, or scanning
-                // GameData *twice*.
-                //
-                // The least evil is to walk it once, and filter it ourselves.
-                IEnumerable<string> files = Directory.EnumerateFiles(
-                                        GameData(),
-                                        "*",
-                                        SearchOption.AllDirectories
-                                    );
-
-                files = files.Where(file => Regex.IsMatch(file, @"\.dll$", RegexOptions.IgnoreCase));
-
-                foreach (string dll in files.Select(KSPPathUtils.NormalizePath))
-                {
-                    manager.registry.RegisterDll(this, dll);
-                }
-                    
                 tx.Complete();
             }
-            manager.Save();
+            RegistryManager.Save();
         }
 
         #endregion
@@ -409,7 +333,7 @@ namespace CKAN
         /// </summary>
         public string ToRelativeGameDir(string path)
         {
-            return KSPPathUtils.ToRelative(path, GameDir());
+            return KSPPathUtils.ToRelative(path, _gameDir);
         }
 
         /// <summary>
@@ -418,24 +342,23 @@ namespace CKAN
         /// </summary>
         public string ToAbsoluteGameDir(string path)
         {
-            return KSPPathUtils.ToAbsolute(path, GameDir());
+            return KSPPathUtils.ToAbsolute(path, _gameDir);
         }
 
         public override string ToString()
         {
-            return "KSP Install:" + gameDir;
+            return "KSP Install:" + _gameDir;
         }
 
         public override bool Equals(object obj)
         {
             var other = obj as KSP;
-            return other != null ? gameDir.Equals(other.GameDir()) : base.Equals(obj);
+            return other != null ? _gameDir.Equals(other._gameDir) : base.Equals(obj);
         }
 
         public override int GetHashCode()
         {
-            return gameDir.GetHashCode();
+            return _gameDir.GetHashCode();
         }
     }
-
 }

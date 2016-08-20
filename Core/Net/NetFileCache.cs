@@ -2,12 +2,12 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using ChinhDo.Transactions;
 using ICSharpCode.SharpZipLib.Zip;
 using log4net;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
 using System.Security.Permissions;
+using ChinhDo.Transactions.FileManager;
 
 namespace CKAN
 {
@@ -21,41 +21,42 @@ namespace CKAN
     [PermissionSet(SecurityAction.Demand, Name="FullTrust")]
     public class NetFileCache : IDisposable
     {
-        private FileSystemWatcher watcher;
-        private string[] cachedFiles;
-        private string cachePath;
-        private static readonly TxFileManager tx_file = new TxFileManager();
-        private static readonly ILog log = LogManager.GetLogger(typeof (NetFileCache));
+        private static readonly ILog Log = LogManager.GetLogger(typeof(NetFileCache));
+        private static readonly TxFileManager TxFile = new TxFileManager();
 
-        public NetFileCache(string _cachePath)
+        private readonly FileSystemWatcher _watcher;
+        private readonly string _cachePath;
+        private string[] _cachedFiles;
+
+        public NetFileCache(string cachePath)
         {
             // Basic validation, our cache has to exist.
 
-            if (!Directory.Exists(_cachePath))
+            if (!Directory.Exists(cachePath))
             {
-                throw new DirectoryNotFoundKraken(_cachePath, "Cannot find cache directory");
+                throw new DirectoryNotFoundKraken(cachePath, "Cannot find cache directory");
             }
 
-            cachePath = _cachePath;
+            _cachePath = cachePath;
 
             // Establish a watch on our cache. This means we can cache the directory contents,
             // and discard that cache if we spot changes.
-            watcher = new FileSystemWatcher(cachePath, "");
+            _watcher = new FileSystemWatcher(_cachePath, "");
 
             // While we should only care about files appearing and disappearing, I've over-asked
             // for permissions to get things to work on Mono.
 
-            watcher.NotifyFilter =
+            _watcher.NotifyFilter =
                 NotifyFilters.LastWrite | NotifyFilters.LastAccess | NotifyFilters.DirectoryName | NotifyFilters.FileName;
             
             // If we spot any changes, we fire our event handler.
-            watcher.Changed += new FileSystemEventHandler(OnCacheChanged);
-            watcher.Created += new FileSystemEventHandler(OnCacheChanged);
-            watcher.Deleted += new FileSystemEventHandler(OnCacheChanged);
-            watcher.Renamed += new RenamedEventHandler(OnCacheChanged);
+            _watcher.Changed += new FileSystemEventHandler(OnCacheChanged);
+            _watcher.Created += new FileSystemEventHandler(OnCacheChanged);
+            _watcher.Deleted += new FileSystemEventHandler(OnCacheChanged);
+            _watcher.Renamed += new RenamedEventHandler(OnCacheChanged);
 
             // Enable events!
-            watcher.EnableRaisingEvents = true;
+            _watcher.EnableRaisingEvents = true;
         }
 
         /// <summary>
@@ -69,8 +70,8 @@ namespace CKAN
         {
             // All we really need to do is clear our FileSystemWatcher.
             // We disable its event raising capabilities first for good measure.
-            watcher.EnableRaisingEvents = false;
-            watcher.Dispose();
+            _watcher.EnableRaisingEvents = false;
+            _watcher.Dispose();
         }
 
         /// <summary>
@@ -88,12 +89,12 @@ namespace CKAN
         /// </summary>
         private void OnCacheChanged()
         {
-            cachedFiles = null;   
+            _cachedFiles = null;   
         }
 
         public string GetCachePath()
         {
-            return cachePath;
+            return _cachePath;
         }
 
         // returns true if a url is already in the cache
@@ -137,7 +138,7 @@ namespace CKAN
         /// </summary>
         public string GetCachedFilename(Uri url)
         {
-            log.DebugFormat("Checking cache for {0}", url);
+            Log.DebugFormat("Checking cache for {0}", url);
 
             if (url == null)
             {
@@ -152,12 +153,12 @@ namespace CKAN
             // *may* get cleared by OnCacheChanged while we're
             // using it.
 
-            string[] files = cachedFiles;
+            string[] files = _cachedFiles;
 
             if (files == null)
             {
-                log.Debug("Rebuilding cache index");
-                cachedFiles = files = Directory.GetFiles(cachePath);
+                Log.Debug("Rebuilding cache index");
+                _cachedFiles = files = Directory.GetFiles(_cachePath);
             }
 
             // Now that we have a list of files one way or another,
@@ -226,7 +227,7 @@ namespace CKAN
         /// </summary>
         public string Store(Uri url, string path, string description = null, bool move = false)
         {
-            log.DebugFormat("Storing {0}", url);
+            Log.DebugFormat("Storing {0}", url);
 
             // Make sure we clear our cache entry first.
             Remove(url);
@@ -241,17 +242,17 @@ namespace CKAN
             );
 
             string fullName = String.Format("{0}-{1}", hash, Path.GetFileName(description));
-            string targetPath = Path.Combine(cachePath, fullName);
+            string targetPath = Path.Combine(_cachePath, fullName);
 
-            log.DebugFormat("Storing {0} in {1}", path, targetPath);
+            Log.DebugFormat("Storing {0} in {1}", path, targetPath);
 
             if (move)
             {
-                tx_file.Move(path, targetPath);
+                TxFile.Move(path, targetPath);
             }
             else
             {
-                tx_file.Copy(path, targetPath, true);
+                TxFile.Copy(path, targetPath, true);
             }
 
             // We've changed our cache, so signal that immediately.
@@ -271,7 +272,7 @@ namespace CKAN
 
             if (file != null)
             {
-                tx_file.Delete(file);
+                TxFile.Delete(file);
 
                 // We've changed our cache, so signal that immediately.
                 OnCacheChanged();
@@ -280,6 +281,23 @@ namespace CKAN
             }
 
             return false;
+        }
+
+        public void Cleanup()
+        {
+            Log.Debug("Cleaning cache directory");
+            string[] files = Directory.GetFiles(_cachePath, "*", SearchOption.AllDirectories);
+            foreach (string file in files)
+            {
+                if (Directory.Exists(file))
+                {
+                    Log.DebugFormat("Skipping directory: {0}", file);
+                    continue;
+                }
+
+                Log.DebugFormat("Deleting {0}", file);
+                TxFile.Delete(file);
+            }
         }
 
         // returns the 8-byte hash for a given url

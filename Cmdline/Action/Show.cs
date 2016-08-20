@@ -26,8 +26,7 @@ namespace CKAN.CmdLine
             }
 
             // Check installed modules for an exact match.
-            var registry = RegistryManager.Instance(ksp).registry;
-            var installedModuleToShow = registry.InstalledModule(options.Modname);
+            InstalledModule installedModuleToShow = ksp.Registry.InstalledModule(options.Modname);
 
             if (installedModuleToShow != null)
             {
@@ -37,8 +36,8 @@ namespace CKAN.CmdLine
 
             // Module was not installed, look for an exact match in the available modules,
             // either by "name" (the user-friendly display name) or by identifier
-            CkanModule moduleToShow = registry
-                                      .Available(ksp.Version())
+            CkanModule moduleToShow = ksp.Registry                  
+                                      .Available(ksp.Version)
                                       .SingleOrDefault(
                                             mod => mod.name == options.Modname
                                                 || mod.identifier == options.Modname
@@ -48,19 +47,19 @@ namespace CKAN.CmdLine
             {
                 // No exact match found. Try to look for a close match for this KSP version.
                 user.RaiseMessage("{0} not found or installed.", options.Modname);
-                user.RaiseMessage("Looking for close matches in available mods for KSP {0}.", ksp.Version());
+                user.RaiseMessage("Looking for close matches in available mods for KSP {0}.", ksp.Version);
 
                 Search search = new Search(user);
                 var matches = search.PerformSearch(ksp, options.Modname);
 
                 // Display the results of the search.
-                if (!matches.Any())
+                if (matches.Count == 0)
                 {
                     // No matches found.
                     user.RaiseMessage("No close matches found.");
                     return Exit.BADOPT;
                 }
-                else if (matches.Count() == 1)
+                else if (matches.Count == 1)
                 {
                     // If there is only 1 match, display it.
                     user.RaiseMessage("Found 1 close match: {0}", matches[0].name);

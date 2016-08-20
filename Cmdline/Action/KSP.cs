@@ -137,19 +137,19 @@ namespace CKAN.CmdLine
 
             if (preferredInstance != null)
             {
-                preferredGameDir = preferredInstance.GameDir();
+                preferredGameDir = preferredInstance.GameDir;
             }
 
             var output = Manager.Instances
-                .OrderByDescending(i => i.Value.GameDir() == preferredGameDir)
-                .ThenByDescending(i => i.Value.Version())
+                .OrderByDescending(i => i.Value.GameDir == preferredGameDir)
+                .ThenByDescending(i => i.Value.Version)
                 .ThenBy(i => i.Key)
                 .Select(i => new
                 {
                     Name = i.Key,
-                    Version = i.Value.Version().ToString(),
-                    Default = i.Value.GameDir() == preferredGameDir ? "Yes" : "No",
-                    Path = i.Value.GameDir()
+                    Version = i.Value.Version.ToString(),
+                    Default = i.Value.GameDir == preferredGameDir ? "Yes" : "No",
+                    Path = i.Value.GameDir
                 })
                 .ToList();
 
@@ -285,7 +285,7 @@ namespace CKAN.CmdLine
                 {
                     var instance = Manager.Instances.ElementAt(i);
 
-                    keys[i + defaultInstancePresent] = String.Format("\"{0}\" - {1}", instance.Key, instance.Value.GameDir());
+                    keys[i + defaultInstancePresent] = String.Format("\"{0}\" - {1}", instance.Key, instance.Value.GameDir);
                 }
 
                 // Mark the default intance for the user.

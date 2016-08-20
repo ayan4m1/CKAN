@@ -69,9 +69,9 @@ namespace CKAN
         {
             m_cacheSize = 0;
             m_cacheFileCount = 0;
-            var cachePath = Path.Combine(Main.Instance.CurrentInstance.CkanDir(), "downloads");
-
-            var cacheDirectory = new DirectoryInfo(cachePath);
+            var cacheDir = KSPPathUtils.GetGameDirectory(Main.Instance.CurrentInstance.GameDir,
+                GameDirectory.DownloadCacheDir);
+            var cacheDirectory = new DirectoryInfo(cacheDir);
             foreach (var file in cacheDirectory.GetFiles())
             {
                 m_cacheFileCount++;
@@ -98,18 +98,7 @@ namespace CKAN
 
             if (deleteConfirmationDialog.ShowYesNoDialog(confirmationText) == System.Windows.Forms.DialogResult.Yes)
             {
-                var cachePath = Path.Combine(Main.Instance.CurrentInstance.CkanDir(), "downloads");
-                foreach (var file in Directory.GetFiles(cachePath))
-                {
-                    try
-                    {
-                        File.Delete(file);
-                    }
-                    catch (Exception)
-                    {
-                    }
-                }
-
+                Main.Instance.CurrentInstance.Cache.Cleanup();
                 UpdateCacheInfo();
             }
         }

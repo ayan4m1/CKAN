@@ -69,8 +69,7 @@ namespace CKAN.CmdLine
             {
                 if (options.upgrade_all)
                 {
-                    var registry = RegistryManager.Instance(ksp).registry;
-                    var installed = new Dictionary<string, Version>(registry.Installed());
+                    var installed = new Dictionary<string, Version>(ksp.Registry.Installed());
                     var to_upgrade = new List<CkanModule>();
 
                     foreach (KeyValuePair<string, Version> mod in installed)
@@ -86,7 +85,7 @@ namespace CKAN.CmdLine
                             try
                             {
                                 // Check if upgrades are available
-                                var latest = registry.LatestAvailable(mod.Key, ksp.Version());
+                                var latest = ksp.Registry.LatestAvailable(mod.Key, ksp.Version);
 
                                 // This may be an unindexed mod. If so,
                                 // skip rather than crash. See KSP-CKAN/CKAN#841.

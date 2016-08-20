@@ -41,8 +41,8 @@ namespace CKAN.CmdLine
 
             if (!(options.porcelain) && exportFileType == null)
             {
-                user.RaiseMessage("\r\nKSP found at {0}\r\n", ksp.GameDir());
-                user.RaiseMessage("KSP Version: {0}\r\n", ksp.Version());
+                user.RaiseMessage("\r\nKSP found at {0}\r\n", ksp.GameDir);
+                user.RaiseMessage("KSP Version: {0}\r\n", ksp.Version);
 
                 user.RaiseMessage("Installed Modules:\r\n");
             }
@@ -72,7 +72,7 @@ namespace CKAN.CmdLine
                         try
                         {
                             // Check if upgrades are available, and show appropriately.
-                            CkanModule latest = registry.LatestAvailable(mod.Key, ksp.Version());
+                            CkanModule latest = registry.LatestAvailable(mod.Key, ksp.Version);
 
                             log.InfoFormat("Latest {0} is {1}", mod.Key, latest);
 

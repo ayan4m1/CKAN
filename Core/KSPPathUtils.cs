@@ -167,6 +167,39 @@ namespace CKAN
             return null;
         }
 
+        public static string GetGameDirectory(string rootDir, GameDirectory directory)
+        {
+            switch (directory)
+            {
+                case GameDirectory.GameData:
+                    return NormalizePath(Path.Combine(rootDir, "GameData"));
+                case GameDirectory.CkanDir:
+                    return NormalizePath(Path.Combine(rootDir, "CKAN"));
+                case GameDirectory.TempDir:
+                    return NormalizePath(Path.Combine(rootDir, "CKAN", "Temp"));
+                case GameDirectory.DownloadCacheDir:
+                    return NormalizePath(Path.Combine(rootDir, "CKAN", "downloads"));
+                case GameDirectory.Ships:
+                    return NormalizePath(Path.Combine(rootDir, "Ships"));
+                case GameDirectory.ShipsVertical:
+                    return NormalizePath(Path.Combine(rootDir, "Ships", "VAB"));
+                case GameDirectory.ShipsHorizontal:
+                    return NormalizePath(Path.Combine(rootDir, "Ships", "SPH"));
+                case GameDirectory.ShipsThumbs:
+                    return NormalizePath(Path.Combine(rootDir, "Ships", "@thumbs"));
+                case GameDirectory.ShipsThumbsVertical:
+                    return NormalizePath(Path.Combine(rootDir, "Ships", "@thumbs", "VAB"));
+                case GameDirectory.ShipsThumbsHorizontal:
+                    return NormalizePath(Path.Combine(rootDir, "Ships", "@thumbs", "SPH"));
+                case GameDirectory.Tutorial:
+                    return NormalizePath(Path.Combine(rootDir, "saves", "training"));
+                case GameDirectory.Scenarios:
+                    return NormalizePath(Path.Combine(rootDir, "saves", "scenarios"));
+                default:
+                    throw new ArgumentOutOfRangeException("directory", directory, "Tried to fetch an unknown game directory!");
+            }
+        }
+
         /// <summary>
         /// Normalizes the path by replace any \ with / and removing any trailing slash.
         /// </summary>

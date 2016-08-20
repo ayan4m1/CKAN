@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Transactions;
-using ChinhDo.Transactions;
+using ChinhDo.Transactions.FileManager;
 using ICSharpCode.SharpZipLib.Core;
 using ICSharpCode.SharpZipLib.Zip;
 using log4net;
@@ -50,7 +50,7 @@ namespace CKAN
             User = user;
             this.ksp = ksp;
             registry_manager = RegistryManager.Instance(ksp);
-            log.DebugFormat("Creating ModuleInstaller for {0}", ksp.GameDir());
+            log.DebugFormat("Creating ModuleInstaller for {0}", ksp.GameDir);
         }
 
         /// <summary>
@@ -64,12 +64,12 @@ namespace CKAN
             ModuleInstaller instance;
 
             // Check in the list of instances if we have already created a ModuleInstaller instance for this KSP instance.
-            if (!instances.TryGetValue(ksp_instance.GameDir().ToLower(), out instance))
+            if (!instances.TryGetValue(ksp_instance.GameDir.ToLower(), out instance))
             {
                 // Create a new instance and insert it in the static list.
                 instance = new ModuleInstaller(ksp_instance, user);
 
-                instances.Add(ksp_instance.GameDir().ToLower(), instance);
+                instances.Add(ksp_instance.GameDir.ToLower(), instance);
             }
 
             return instance;
@@ -152,7 +152,7 @@ namespace CKAN
             IDownloader downloader = null
         )
         {
-            var resolver = new RelationshipResolver(modules, options, registry_manager.registry, ksp.Version());
+            var resolver = new RelationshipResolver(modules, options, registry_manager.registry, ksp.Version);
             List<CkanModule> modsToInstall = resolver.ModList();
 
             InstallList(modsToInstall, options, downloader);
@@ -174,7 +174,7 @@ namespace CKAN
             IDownloader downloader = null
         )
         {
-            var resolver = new RelationshipResolver(modules, options, registry_manager.registry, ksp.Version());
+            var resolver = new RelationshipResolver(modules, options, registry_manager.registry, ksp.Version);
             List<CkanModule> modsToInstall = resolver.ModList();
             List<CkanModule> downloads = new List<CkanModule> ();
 
@@ -419,11 +419,12 @@ namespace CKAN
                 if (stanza.install_to.Contains("/../") || stanza.install_to.EndsWith("/.."))
                     throw new BadInstallLocationKraken("Invalid installation path: " + stanza.install_to);
 
-                string subDir = stanza.install_to.Substring("GameData".Length);    // remove "GameData"
+                var subDir = stanza.install_to.Substring("GameData".Length);       // remove "GameData"
                 subDir = subDir.StartsWith("/") ? subDir.Substring(1) : subDir;    // remove a "/" at the beginning, if present
 
                 // Add the extracted subdirectory to the path of KSP's GameData
-                installDir = ksp == null ? null : (KSPPathUtils.NormalizePath(ksp.GameData() + "/" + subDir));
+                var dataDir = KSPPathUtils.GetGameDirectory(ksp.GameDir, GameDirectory.GameData);
+                installDir = Path.Combine(dataDir, subDir);
                 makeDirs = true;
             }
             else if (stanza.install_to.StartsWith("Ships"))
@@ -434,22 +435,24 @@ namespace CKAN
                 switch (stanza.install_to)
                 {
                     case "Ships":
-                        installDir = ksp == null ? null : ksp.Ships();
+                        installDir = ksp == null
+                            ? null
+                            : KSPPathUtils.GetGameDirectory(ksp.GameDir, GameDirectory.Ships);
                         break;
                     case "Ships/VAB":
-                        installDir = ksp == null ? null : ksp.ShipsVab();
+                        installDir = ksp == null ? null : KSPPathUtils.GetGameDirectory(ksp.GameDir, GameDirectory.ShipsVertical);
                         break;
                     case "Ships/SPH":
-                        installDir = ksp == null ? null : ksp.ShipsSph();
+                        installDir = ksp == null ? null : KSPPathUtils.GetGameDirectory(ksp.GameDir, GameDirectory.ShipsHorizontal);
                         break;
                     case "Ships/@thumbs":
-                        installDir = ksp == null ? null : ksp.ShipsThumbs();
+                        installDir = ksp == null ? null : KSPPathUtils.GetGameDirectory(ksp.GameDir, GameDirectory.ShipsThumbs);
                         break;
                     case "Ships/@thumbs/VAB":
-                        installDir = ksp == null ? null : ksp.ShipsThumbsVAB();
+                        installDir = ksp == null ? null : KSPPathUtils.GetGameDirectory(ksp.GameDir, GameDirectory.ShipsThumbsVertical);
                         break;
                     case "Ships/@thumbs/SPH":
-                        installDir = ksp == null ? null : ksp.ShipsThumbsSPH();
+                        installDir = ksp == null ? null : KSPPathUtils.GetGameDirectory(ksp.GameDir, GameDirectory.ShipsThumbsHorizontal);
                         break;
                     default:
                         throw new BadInstallLocationKraken("Unknown install_to " + stanza.install_to);
@@ -458,17 +461,17 @@ namespace CKAN
             else switch (stanza.install_to)
             {
                 case "Tutorial":
-                    installDir = ksp == null ? null : ksp.Tutorial();
+                    installDir = ksp == null ? null : KSPPathUtils.GetGameDirectory(ksp.GameDir, GameDirectory.Tutorial);
                     makeDirs = true;
                     break;
 
                 case "Scenarios":
-                    installDir = ksp == null ? null : ksp.Scenarios();
+                    installDir = ksp == null ? null : KSPPathUtils.GetGameDirectory(ksp.GameDir, GameDirectory.Scenarios);
                     makeDirs = true;
                     break;
 
                 case "GameRoot":
-                    installDir = ksp == null ? null : ksp.GameDir();
+                    installDir = ksp == null ? null : ksp.GameDir;
                     makeDirs = false;
                     break;
 
@@ -853,14 +856,15 @@ namespace CKAN
                 {
                     if (!Directory.EnumerateFileSystemEntries(directory).Any())
                     {
-                        // It is bad if any of this directories get's removed
-                        // So we protect them
-                        if (directory == ksp.Tutorial() || directory == ksp.ShipsVab()
-                            || directory == ksp.ShipsSph() || directory == ksp.Ships()
-                            || directory == ksp.Scenarios() || directory == ksp.GameData()
-                            || directory == ksp.GameDir() || directory == ksp.CkanDir()
-                            || directory == ksp.ShipsThumbs() || directory == ksp.ShipsThumbsVAB()
-                            || directory == ksp.ShipsThumbsSPH())
+                        // ensure that any of the special game directories are not
+                        // accidentally removed
+                        var safeDirs = Enum
+                            .GetValues(typeof(GameDirectory))
+                            .Cast<GameDirectory>()
+                            .ToList()
+                            .Select(dir => KSPPathUtils.GetGameDirectory(ksp.GameDir, dir));
+
+                        if (safeDirs.Contains(directory))
                         {
                             continue;
                         }
@@ -959,7 +963,7 @@ namespace CKAN
             options.with_recommends = false;
             options.with_suggests = false;
 
-            var resolver = new RelationshipResolver(identifiers.ToList(), options, registry_manager.registry, ksp.Version());
+            var resolver = new RelationshipResolver(identifiers.ToList(), options, registry_manager.registry, ksp.Version);
             List<CkanModule> upgrades = resolver.ModList();
 
             Upgrade(upgrades, netAsyncDownloader);
