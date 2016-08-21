@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using CKAN;
+using CKAN.Net;
 using NUnit.Framework;
 
 namespace Tests.Core.Net
@@ -13,7 +14,7 @@ namespace Tests.Core.Net
         const string KnownURL = "http://example.com/";
         private static void BadDownload()
         {
-            CKAN.Net.Download("cheese sandwich");
+            NetUtils.Download("cheese sandwich");
         }
 
         [Test]
@@ -30,7 +31,7 @@ namespace Tests.Core.Net
         {
             // Two-argument test, should save to the file we supply
             string savefile = "example.txt";
-            string downloaded = CKAN.Net.Download(KnownURL, savefile);
+            string downloaded = NetUtils.Download(KnownURL, savefile);
             Assert.AreEqual(downloaded, savefile);
             Assert.That(File.Exists(savefile));
             File.Delete(savefile);
@@ -40,7 +41,7 @@ namespace Tests.Core.Net
         [Category("Online")]
         public void SingleArgumentDownloadSavesToTemporaryFile()
         {
-            string downloaded = CKAN.Net.Download(KnownURL);
+            string downloaded = NetUtils.Download(KnownURL);
             Assert.That(File.Exists(downloaded));
             File.Delete(downloaded);
         }
@@ -51,7 +52,7 @@ namespace Tests.Core.Net
         {
             Assert.DoesNotThrow(delegate
             {
-                string file = CKAN.Net.Download("https://spacedock.info/mod/132/Contract%20Reward%20Modifier/download/2.1");
+                string file = NetUtils.Download("https://spacedock.info/mod/132/Contract%20Reward%20Modifier/download/2.1");
                 if (!File.Exists(file))
                 {
                     throw new Exception("File not downloaded");

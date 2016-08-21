@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using CKAN;
+using CKAN.Net;
 using log4net;
 using NUnit.Framework;
 using Tests.Data;
@@ -16,7 +17,7 @@ namespace Tests.Core.Net
 
         private CKAN.Registry registry;
         private DisposableKSP ksp;
-        private CKAN.IDownloader async;
+        private IDownloader async;
         private NetFileCache cache;
 
         private static readonly ILog log = LogManager.GetLogger(typeof (NetAsyncModulesDownloader));
@@ -35,10 +36,10 @@ namespace Tests.Core.Net
             registry.Installed().Clear();
 
             // Make sure we have a registry we can use.
-            CKAN.Repo.UpdateRegistry(TestData.TestKANZip(), registry, ksp.KSP, new NullUser());
+            CKAN.Net.Repo.UpdateRegistry(TestData.TestKANZip(), registry, ksp.KSP, new NullUser());
 
             // Ready our downloader.
-            async = new CKAN.NetAsyncModulesDownloader(new NullUser());
+            async = new CKAN.Net.NetAsyncModulesDownloader(new NullUser());
 
             // General shortcuts
             cache = ksp.KSP.Cache;

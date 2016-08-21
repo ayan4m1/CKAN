@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using CKAN.Net;
 using log4net;
 
 namespace CKAN.CmdLine
@@ -62,7 +63,7 @@ namespace CKAN.CmdLine
                     else
                     {
                         log.InfoFormat("Installing from remote CKAN file \"{0}\"", ckan_uri);
-                        filename = Net.Download(ckan_uri, null, user);
+                        filename = NetUtils.Download(ckan_uri, null, user);
 
                         log.DebugFormat("Temporary file for \"{0}\" is at \"{1}\".", ckan_uri, filename);
                     }

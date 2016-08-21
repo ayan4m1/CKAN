@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using CKAN.Net;
 using CKAN.NetKAN.Model;
 using CKAN.NetKAN.Services;
 using CKAN.NetKAN.Transformers;
@@ -118,7 +119,7 @@ namespace CKAN.NetKAN
 
             if (Options.NetUserAgent != null)
             {
-                Net.UserAgentString = Options.NetUserAgent;
+                NetUtils.UserAgentString = Options.NetUserAgent;
             }
         }
 

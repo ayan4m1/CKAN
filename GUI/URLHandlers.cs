@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using CKAN.Net;
 using IniParser;
 using IniParser.Exceptions;
 using IniParser.Model;

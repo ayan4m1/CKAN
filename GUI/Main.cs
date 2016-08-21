@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using CKAN.Exporters;
+using CKAN.Net;
 using CKAN.Properties;
 using CKAN.Types;
 using log4net;
@@ -195,7 +196,7 @@ namespace CKAN
             configuration = Configuration.LoadOrCreateConfiguration
                 (
                     Path.Combine(CurrentInstance.GameDir, "CKAN/GUIConfig.xml"),
-                    Repo.default_ckan_repo.ToString()
+                    Net.Repo.DefaultCkanRepo.ToString()
                 );
 
             // Check if there is any other instances already running.
@@ -436,7 +437,7 @@ namespace CKAN
             configuration = Configuration.LoadOrCreateConfiguration
             (
                 Path.Combine(CurrentInstance.GameDir, "CKAN/GUIConfig.xml"),
-                Repo.default_ckan_repo.ToString()
+                Repo.DefaultCkanRepo.ToString()
             );
             UpdateModsList();
             ChangeSet = null;

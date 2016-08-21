@@ -8,7 +8,7 @@ using System.Threading;
 using CurlSharp;
 using log4net;
 
-namespace CKAN
+namespace CKAN.Net
 {
     /// <summary>
     /// Download lots of files at once!

@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Net;
+using CKAN.Net;
 using log4net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -76,7 +77,7 @@ namespace CKAN.NetKAN.Sources.Github
         private string Call(string path)
         {
             var web = new WebClient();
-            web.Headers.Add("User-Agent", Net.UserAgentString);
+            web.Headers.Add("User-Agent", NetUtils.UserAgentString);
 
             if (_oauthToken != null)
             {

@@ -5,6 +5,7 @@ using System.Reflection;
 using CKAN.Versioning;
 using log4net;
 using Newtonsoft.Json;
+using CKAN.Net;
 
 namespace CKAN.GameVersionProviders
 {
@@ -99,7 +100,7 @@ namespace CKAN.GameVersionProviders
         {
             try
             {
-                var json = Net.DownloadText(BuildMapUri);
+                var json = NetUtils.DownloadText(BuildMapUri);
 
                 if (TrySetBuildMap(json))
                 {

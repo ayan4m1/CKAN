@@ -8,7 +8,7 @@ using System.Threading;
 using CurlSharp;
 using log4net;
 
-namespace CKAN
+namespace CKAN.Net
 {
     /// <summary>
     /// Download lots of files at once!
@@ -39,7 +39,7 @@ namespace CKAN
                 size = expectedSize;
                 lastProgressUpdateTime = DateTime.Now;
 
-                agent.Headers.Add("user-agent", Net.UserAgentString);
+                agent.Headers.Add("user-agent", NetUtils.UserAgentString);
             }
         }
 

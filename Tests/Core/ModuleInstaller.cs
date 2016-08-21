@@ -622,10 +622,9 @@ namespace Tests.Core
             {
                 results = CKAN.ModuleInstaller.FindInstallableFiles(mod.install.First(), zip, ksp.KSP);
 
+                var scenarioDir = CKAN.KSPPathUtils.GetGameDirectory(ksp.KSP.GameDir, GameDirectory.Scenarios);
                 Assert.AreEqual(
-                    CKAN.KSPPathUtils.NormalizePath(
-                        Path.Combine(ksp.KSP.GameDir, "saves/scenarios/AwesomeRace.sfs")
-                    ),
+                    CKAN.KSPPathUtils.NormalizePath(Path.Combine(scenarioDir, "AwesomeRace.sfs")),
                     results.First().destination
                 );
             }

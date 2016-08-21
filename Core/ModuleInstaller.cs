@@ -8,6 +8,7 @@ using ChinhDo.Transactions.FileManager;
 using ICSharpCode.SharpZipLib.Core;
 using ICSharpCode.SharpZipLib.Zip;
 using log4net;
+using CKAN.Net;
 
 namespace CKAN
 {
@@ -91,7 +92,7 @@ namespace CKAN
         {
             log.Info("Downloading " + filename);
 
-            string tmp_file = Net.Download(url);
+            string tmp_file = NetUtils.Download(url);
 
             return cache.Store(url, tmp_file, filename, true);
         }
@@ -399,9 +400,9 @@ namespace CKAN
         /// <exception cref="BadInstallLocationKraken">Thrown when the installation path is not valid according to the spec.</exception>
         internal static List<InstallableFile> FindInstallableFiles(ModuleInstallDescriptor stanza, ZipFile zipfile, KSP ksp)
         {
-            string installDir;
+            string installDir = null;
             bool makeDirs;
-            var files = new List<InstallableFile> ();
+            var files = new List<InstallableFile>();
 
             // Normalize the path before doing everything else
             // TODO: This really should happen in the ModuleInstallDescriptor itself.
@@ -409,9 +410,7 @@ namespace CKAN
 
             // Convert our stanza to a standard `file` type. This is a no-op if it's
             // already the basic type.
-
             stanza = stanza.ConvertFindToFile(zipfile);
-
             if (stanza.install_to == "GameData" || stanza.install_to.StartsWith("GameData/"))
             {
                 // The installation path can be either "GameData" or a sub-directory of "GameData"
@@ -423,8 +422,12 @@ namespace CKAN
                 subDir = subDir.StartsWith("/") ? subDir.Substring(1) : subDir;    // remove a "/" at the beginning, if present
 
                 // Add the extracted subdirectory to the path of KSP's GameData
-                var dataDir = KSPPathUtils.GetGameDirectory(ksp.GameDir, GameDirectory.GameData);
-                installDir = Path.Combine(dataDir, subDir);
+                if (ksp != null)
+                {
+                    var dataDir = KSPPathUtils.GetGameDirectory(ksp.GameDir, GameDirectory.GameData);
+                    installDir = KSPPathUtils.NormalizePath(dataDir + Path.PathSeparator + subDir);
+                }
+                
                 makeDirs = true;
             }
             else if (stanza.install_to.StartsWith("Ships"))

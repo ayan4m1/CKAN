@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Net;
 using System.Windows.Forms;
+using CKAN.Net;
 using Newtonsoft.Json;
 
 namespace CKAN

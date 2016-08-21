@@ -1,4 +1,5 @@
 ﻿using System;
+using CKAN.Net;
 using CKAN.NetKAN.Model;
 using log4net;
 
@@ -24,7 +25,7 @@ namespace CKAN.NetKAN.Transformers
 
                 if (Uri.IsWellFormedUriString(metadata.Kref.Id, UriKind.Absolute))
                 {
-                    var resolvedUri = Net.ResolveRedirect(new Uri(metadata.Kref.Id));
+                    var resolvedUri = NetUtils.ResolveRedirect(new Uri(metadata.Kref.Id));
 
                     Log.InfoFormat("URL {0} resolved to {1}", metadata.Kref.Id, resolvedUri);
 

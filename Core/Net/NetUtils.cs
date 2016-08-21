@@ -5,22 +5,20 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
-using ChinhDo.Transactions;
 using ChinhDo.Transactions.FileManager;
 using CurlSharp;
 using log4net;
 
-namespace CKAN
+namespace CKAN.Net
 {
     /// <summary>
     ///     Doing something with the network? Do it here.
     /// </summary>
-
-    public class Net
+    public class NetUtils
     {
         public static string UserAgentString = "Mozilla/4.0 (compatible; CKAN)";
 
-        private static readonly ILog Log = LogManager.GetLogger(typeof (Net));
+        private static readonly ILog Log = LogManager.GetLogger(typeof(NetUtils));
         private static readonly TxFileManager FileTransaction = new TxFileManager();
 
         /// <summary>
@@ -66,7 +64,7 @@ namespace CKAN
                     using (FileStream stream = File.OpenWrite(filename))
                     using (var curl = Curl.CreateEasy(url, stream))
                     {
-                        CurlCode result = curl.Perform();
+                        var result = curl.Perform();
                         if (result != CurlCode.Ok)
                         {
                             throw new Kraken("curl download of " + url + " failed with CurlCode " + result);
@@ -182,19 +180,22 @@ namespace CKAN
                 {
                     content += Encoding.UTF8.GetString(buf);
                     return size * nmemb;
-                });
+                }) as CurlEasy;
 
                 using (client)
                 {
-                    var result = client.Perform();
+                    if (client == null)
+                    {
+                        return content;
+                    }
 
+                    var result = client.Perform();
                     if (result != CurlCode.Ok)
                     {
                         throw new Exception("Curl download failed with error " + result);
                     }
 
-                    Log.DebugFormat("Download from {0}:\r\n\r\n{1}", url, content);
-
+                    Log.DebugFormat("Downloaded from {0}:\r\n\r\n{1}", url, content);
                     return content;
                 }
             }

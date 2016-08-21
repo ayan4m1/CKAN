@@ -135,8 +135,8 @@ namespace CKAN.CmdLine
             RegistryManager registry_manager = RegistryManager.Instance(ksp);
 
             var updated = repository == null
-                ? CKAN.Repo.UpdateAllRepositories(registry_manager, ksp, user)
-                : CKAN.Repo.Update(registry_manager, ksp, user, true, repository);
+                ? Net.Repo.UpdateAllRepositories(registry_manager, ksp, user)
+                : Net.Repo.Update(registry_manager, ksp, user, true, repository);
 
             user.RaiseMessage("Updated information on {0} available modules", updated);
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CKAN.Net;
 using CKAN.NetKAN.Extensions;
 using CKAN.NetKAN.Model;
 using CKAN.NetKAN.Services;
@@ -66,7 +67,7 @@ namespace CKAN.NetKAN.Transformers
 
                         try
                         {
-                            var remoteJson = Net.DownloadText(avc.Url);
+                            var remoteJson = NetUtils.DownloadText(avc.Url);
                             var remoteAvc = JsonConvert.DeserializeObject<AvcVersion>(remoteJson);
 
                             if (avc.version.CompareTo(remoteAvc.version) == 0)

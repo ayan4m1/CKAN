@@ -11,6 +11,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using CKAN.Net;
 using log4net;
 using log4net.Config;
 using log4net.Core;
@@ -111,7 +112,7 @@ This is a bad idea and there is absolutely no good reason to do it. Please run C
             // Assign user-agent string if user has given us one
             if (options.NetUserAgent != null)
             {
-                Net.UserAgentString = options.NetUserAgent;
+                NetUtils.UserAgentString = options.NetUserAgent;
             }
 
             // User provided KSP instance

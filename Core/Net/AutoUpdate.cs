@@ -7,9 +7,8 @@ using Newtonsoft.Json;
 using CKAN.Types;
 using System.Linq;
 
-namespace CKAN
+namespace CKAN.Net
 {
-
     /// <summary>
     /// CKAN client auto-updating routines. This works in conjunction with the
     /// auto-update helper to allow users to upgrade.
@@ -125,9 +124,9 @@ namespace CKAN
             // download updater app and new ckan.exe
             string updaterFilename = System.IO.Path.GetTempPath() + Guid.NewGuid().ToString() + ".exe";
             string ckanFilename = System.IO.Path.GetTempPath() + Guid.NewGuid().ToString() + ".exe";
-            Net.DownloadWithProgress(new[]{
-                new Net.DownloadTarget(fetchedUpdaterUrl.Item1, updaterFilename, fetchedUpdaterUrl.Item2),
-                new Net.DownloadTarget(fetchedCkanUrl.Item1, ckanFilename, fetchedCkanUrl.Item2),
+            NetUtils.DownloadWithProgress(new[]{
+                new NetUtils.DownloadTarget(fetchedUpdaterUrl.Item1, updaterFilename, fetchedUpdaterUrl.Item2),
+                new NetUtils.DownloadTarget(fetchedCkanUrl.Item1, ckanFilename, fetchedCkanUrl.Item2),
             }, user);
 
             // run updater
@@ -171,7 +170,7 @@ namespace CKAN
         internal dynamic MakeRequest(Uri url)
         {
             var web = new WebClient();
-            web.Headers.Add("user-agent", Net.UserAgentString);
+            web.Headers.Add("user-agent", NetUtils.UserAgentString);
 
             try
             {

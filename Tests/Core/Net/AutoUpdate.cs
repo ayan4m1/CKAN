@@ -30,7 +30,7 @@ namespace Tests.Core.AutoUpdate
         [Category("FlakyNetwork")]
         public void FetchLatestReleaseInfo()
         {
-            var updater = CKAN.AutoUpdate.Instance;
+            var updater = CKAN.Net.AutoUpdate.Instance;
 
             // Is is a *really* basic test to just make sure we get release info
             // if we ask for it.
@@ -48,14 +48,14 @@ namespace Tests.Core.AutoUpdate
         {
             Assert.AreEqual(
                 expected,
-                CKAN.AutoUpdate.Instance.ExtractReleaseNotes(body),
+                CKAN.Net.AutoUpdate.Instance.ExtractReleaseNotes(body),
                 comment
             );
         }
 
         private void Fetch(Uri url)
         {
-            CKAN.AutoUpdate.Instance.RetrieveUrl(CKAN.AutoUpdate.Instance.MakeRequest(url));
+            CKAN.Net.AutoUpdate.Instance.RetrieveUrl(CKAN.Net.AutoUpdate.Instance.MakeRequest(url));
         }
     }
 }

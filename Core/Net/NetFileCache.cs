@@ -9,9 +9,8 @@ using System.Diagnostics;
 using System.Security.Permissions;
 using ChinhDo.Transactions.FileManager;
 
-namespace CKAN
+namespace CKAN.Net
 {
-
     /// <summary>
     /// A local cache dedicated to storing and retrieving files based upon their
     /// URL.
@@ -19,7 +18,7 @@ namespace CKAN
 
     // We require fancy permissions to use the FileSystemWatcher
     [PermissionSet(SecurityAction.Demand, Name="FullTrust")]
-    public class NetFileCache : IDisposable
+    public class NetFileCache : ICache, IDisposable
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(NetFileCache));
         private static readonly TxFileManager TxFile = new TxFileManager();
@@ -41,7 +40,7 @@ namespace CKAN
 
             // Establish a watch on our cache. This means we can cache the directory contents,
             // and discard that cache if we spot changes.
-            _watcher = new FileSystemWatcher(_cachePath, "");
+            _watcher = new FileSystemWatcher(_cachePath, string.Empty);
 
             // While we should only care about files appearing and disappearing, I've over-asked
             // for permissions to get things to work on Mono.
@@ -60,12 +59,12 @@ namespace CKAN
         }
 
         /// <summary>
-        /// Releases all resource used by the <see cref="CKAN.NetFileCache"/> object.
+        /// Releases all resource used by the <see cref="NetFileCache"/> object.
         /// </summary>
-        /// <remarks>Call <see cref="Dispose"/> when you are finished using the <see cref="CKAN.NetFileCache"/>. The
-        /// <see cref="Dispose"/> method leaves the <see cref="CKAN.NetFileCache"/> in an unusable state. After calling
-        /// <see cref="Dispose"/>, you must release all references to the <see cref="CKAN.NetFileCache"/> so the garbage
-        /// collector can reclaim the memory that the <see cref="CKAN.NetFileCache"/> was occupying.</remarks>
+        /// <remarks>Call <see cref="Dispose"/> when you are finished using the <see cref="NetFileCache"/>. The
+        /// <see cref="Dispose"/> method leaves the <see cref="NetFileCache"/> in an unusable state. After calling
+        /// <see cref="Dispose"/>, you must release all references to the <see cref="NetFileCache"/> so the garbage
+        /// collector can reclaim the memory that the <see cref="NetFileCache"/> was occupying.</remarks>
         public void Dispose()
         {
             // All we really need to do is clear our FileSystemWatcher.

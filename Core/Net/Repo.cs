@@ -13,27 +13,27 @@ using ICSharpCode.SharpZipLib.Tar;
 using ICSharpCode.SharpZipLib.Zip;
 using log4net;
 
-namespace CKAN
+namespace CKAN.Net
 {
     /// <summary>
     ///     Class for downloading the CKAN meta-info itself.
     /// </summary>
     public static class Repo
     {
-        private static readonly ILog log = LogManager.GetLogger(typeof (Repo));
-        private static TxFileManager file_transaction = new TxFileManager();
+        private static readonly ILog Log = LogManager.GetLogger(typeof (Repo));
+        private static readonly TxFileManager TxFile = new TxFileManager();
 
         // Forward to keep existing code compiling, will be removed soon.
-        public static readonly Uri default_ckan_repo = CKAN.Repository.default_ckan_repo_uri;
+        public static readonly Uri DefaultCkanRepo = CKAN.Repository.default_ckan_repo_uri;
 
         internal static void ProcessRegistryMetadataFromJSON(string metadata, Registry registry, string filename)
         {
-            log.DebugFormat("Converting metadata from JSON.");
+            Log.DebugFormat("Converting metadata from JSON.");
 
             try
             {
                 CkanModule module = CkanModule.FromJson(metadata);
-                log.InfoFormat("Found {0} version {1}", module.identifier, module.version);
+                Log.InfoFormat("Found {0} version {1}", module.identifier, module.version);
                 registry.AddAvailable(module);
             }
             catch (Exception exception)
@@ -53,7 +53,7 @@ namespace CKAN
                         // clients, so they're not really warnings, they're just
                         // informational.
 
-                        log.InfoFormat("Skipping {0} : {1}", filename, exception.Message);
+                        Log.InfoFormat("Skipping {0} : {1}", filename, exception.Message);
 
                         // I'd *love a way to "return" from the catch block.
                         handled = true;
@@ -70,13 +70,13 @@ namespace CKAN
                     if (exception == null)
                     {
                         // Had exception, walked exception tree, reached leaf, got stuck.
-                        log.ErrorFormat("Error processing {0} (exception tree leaf)", filename); 
+                        Log.ErrorFormat("Error processing {0} (exception tree leaf)", filename); 
                     }
                     else
                     {
                         // In case whatever's calling us is lazy in error reporting, we'll
                         // report that we've got an issue here.
-                        log.ErrorFormat("Error processing {0} : {1}", filename, exception.Message);
+                        Log.ErrorFormat("Error processing {0} : {1}", filename, exception.Message);
                     }
 
                     throw;
@@ -97,9 +97,9 @@ namespace CKAN
             SortedDictionary<string, Repository> sortedRepositories = registry_manager.registry.Repositories;
             foreach (KeyValuePair<string, Repository> repository in sortedRepositories)
             {
-                log.InfoFormat("About to update {0}", repository.Value.name);
+                Log.InfoFormat("About to update {0}", repository.Value.name);
                 UpdateRegistry(repository.Value.uri, registry_manager.registry, ksp, user, false);
-                log.InfoFormat("Updated {0}", repository.Value.name);
+                Log.InfoFormat("Updated {0}", repository.Value.name);
             }
 
             // Save our changes.
@@ -114,7 +114,7 @@ namespace CKAN
             // Use our default repo, unless we've been told otherwise.
             if (repo == null)
             {
-                repo = default_ckan_repo;
+                repo = DefaultCkanRepo;
             }
 
             UpdateRegistry(repo, registry_manager.registry, ksp, user, clear);
@@ -145,12 +145,12 @@ namespace CKAN
             // Use this opportunity to also update the build mappings... kind of hacky
             ServiceLocator.Container.Resolve<IKspBuildMap>().Refresh();
 
-            log.InfoFormat("Downloading {0}", repo);
+            Log.InfoFormat("Downloading {0}", repo);
 
             string repo_file = String.Empty;
             try
             {
-                repo_file = Net.Download(repo);
+                repo_file = NetUtils.Download(repo);
             }
             catch (System.Net.WebException)
             {
@@ -191,7 +191,7 @@ namespace CKAN
                     var installedVersion = registry.InstalledVersion(identifier);
                     if (!(registry.available_modules.ContainsKey(identifier)))
                     {
-                        log.InfoFormat("UpdateRegistry, module {0}, version {1} not in repository ({2})", identifier, installedVersion, repo);
+                        Log.InfoFormat("UpdateRegistry, module {0}, version {1} not in repository ({2})", identifier, installedVersion, repo);
                         continue;
                     }
 
@@ -288,14 +288,14 @@ namespace CKAN
                     @"The following mods have had their metadata changed since last update - {0}.
 It is advisable that you reinstall them in order to preserve consistency with the repository. Do you wish to reinstall now?", mods)))
                 {
-                    ModuleInstaller installer = ModuleInstaller.GetInstance(ksp, new NullUser());
-                    installer.Upgrade(metadataChanges, new NetAsyncModulesDownloader(new NullUser()));
+                    var installer = ModuleInstaller.GetInstance(ksp, new NullUser());
+                    installer.Upgrade(metadataChanges, new NetAsyncModulesDownloader(installer.User));
                 }
             }
 
             // Remove our downloaded meta-data now we've processed it.
-            // Seems weird to do this as part of a transaction, but Net.Download uses them, so let's be consistent.
-            file_transaction.Delete(repo_file);
+            // Seems weird to do this as part of a transaction, but NetUtils.Download uses them, so let's be consistent.
+            TxFile.Delete(repo_file);
         }
 
         /// <summary>
@@ -305,7 +305,7 @@ It is advisable that you reinstall them in order to preserve consistency with th
         /// </summary>
         internal static void UpdateRegistryFromTarGz(string path, Registry registry)
         {
-            log.DebugFormat("Starting registry update from tar.gz file: \"{0}\".", path);
+            Log.DebugFormat("Starting registry update from tar.gz file: \"{0}\".", path);
 
             // Open the gzip'ed file.
             using (Stream inputStream = File.OpenRead(path))
@@ -334,11 +334,11 @@ It is advisable that you reinstall them in order to preserve consistency with th
                             // Skip things we don't want.
                             if (!Regex.IsMatch(filename, filter))
                             {
-                                log.DebugFormat("Skipping archive entry {0}", filename);
+                                Log.DebugFormat("Skipping archive entry {0}", filename);
                                 continue;
                             }
 
-                            log.DebugFormat("Reading CKAN data from {0}", filename);
+                            Log.DebugFormat("Reading CKAN data from {0}", filename);
 
                             // Read each file into a buffer.
                             int buffer_size;
@@ -349,7 +349,7 @@ It is advisable that you reinstall them in order to preserve consistency with th
                             }
                             catch (OverflowException)
                             {
-                                log.ErrorFormat("Error processing {0}: Metadata size too large.", entry.Name);
+                                Log.ErrorFormat("Error processing {0}: Metadata size too large.", entry.Name);
                                 continue;
                             }
 
@@ -374,7 +374,7 @@ It is advisable that you reinstall them in order to preserve consistency with th
         /// </summary>
         internal static void UpdateRegistryFromZip(string path, Registry registry)
         {
-            log.DebugFormat("Starting registry update from zip file: \"{0}\".", path);
+            Log.DebugFormat("Starting registry update from zip file: \"{0}\".", path);
 
             using (var zipfile = new ZipFile(path))
             {
@@ -388,11 +388,11 @@ It is advisable that you reinstall them in order to preserve consistency with th
                     // Skip things we don't want.
                     if (! Regex.IsMatch(filename, filter))
                     {
-                        log.DebugFormat("Skipping archive entry {0}", filename);
+                        Log.DebugFormat("Skipping archive entry {0}", filename);
                         continue;
                     }
 
-                    log.DebugFormat("Reading CKAN data from {0}", filename);
+                    Log.DebugFormat("Reading CKAN data from {0}", filename);
 
                     // Read each file into a string.
                     string metadata_json;

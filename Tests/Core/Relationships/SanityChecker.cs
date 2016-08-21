@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using CKAN;
+using CKAN.Net;
 using NUnit.Framework;
 using Tests.Data;
 

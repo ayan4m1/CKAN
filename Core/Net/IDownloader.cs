@@ -1,9 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace CKAN
+namespace CKAN.Net
 {
-    //Todo. Have not specified the user of IUser to report progress as part of the interface
-    // Need to decide if we wish to include a nicer method of reporting such a callbacks or events.
+    /// <summary>
+    /// This interface represents the expected functionality
+    /// of a downloader implementation.
+    /// </summary>
     public interface IDownloader
     {
         /// <summary>
@@ -12,10 +15,5 @@ namespace CKAN
         /// Blocks until the downloads are complete, cancelled, or errored.
         /// </summary>
         void DownloadModules(NetFileCache cache, IEnumerable<CkanModule> modules);
-
-        /// <summary>
-        /// Cancel any running downloads.
-        /// </summary>
-        void CancelDownload();
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using CKAN;
+using CKAN.Net;
 using NUnit.Framework;
 using Tests.Data;
 

@@ -30,7 +30,7 @@ namespace Tests.Core.Net
         [Test]
         public void UpdateRegistryTarGz()
         {
-            CKAN.Repo.UpdateRegistry(TestData.TestKANTarGz(), registry, ksp.KSP, new NullUser());
+            CKAN.Net.Repo.UpdateRegistry(TestData.TestKANTarGz(), registry, ksp.KSP, new NullUser());
 
             // Test we've got an expected module.
             CkanModule far = registry.LatestAvailable("FerramAerospaceResearch", KspVersion.Parse("0.25.0"));
@@ -41,7 +41,7 @@ namespace Tests.Core.Net
         [Test]
         public void UpdateRegistryZip()
         {
-            CKAN.Repo.UpdateRegistry(TestData.TestKANZip(), registry, ksp.KSP, new NullUser());
+            CKAN.Net.Repo.UpdateRegistry(TestData.TestKANZip(), registry, ksp.KSP, new NullUser());
 
             // Test we've got an expected module.
             CkanModule far = registry.LatestAvailable("FerramAerospaceResearch", KspVersion.Parse("0.25.0"));
@@ -54,7 +54,7 @@ namespace Tests.Core.Net
         {
             Assert.DoesNotThrow(delegate
             {
-                CKAN.Repo.UpdateRegistry(TestData.BadKANTarGz(), registry, ksp.KSP, new NullUser());
+                CKAN.Net.Repo.UpdateRegistry(TestData.BadKANTarGz(), registry, ksp.KSP, new NullUser());
             });
         }
 
@@ -63,7 +63,7 @@ namespace Tests.Core.Net
         {
             Assert.DoesNotThrow(delegate
                 {
-                    CKAN.Repo.UpdateRegistry(TestData.BadKANZip(), registry, ksp.KSP, new NullUser());
+                    CKAN.Net.Repo.UpdateRegistry(TestData.BadKANZip(), registry, ksp.KSP, new NullUser());
                 });
         }
     }

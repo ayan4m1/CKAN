@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Transactions;
 using Autofac;
 using CKAN.GameVersionProviders;
+using CKAN.Net;
 using CKAN.Versioning;
 using log4net;
 

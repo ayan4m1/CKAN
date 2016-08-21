@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
+using CKAN.Net;
 using log4net;
 using log4net.Repository.Hierarchy;
 

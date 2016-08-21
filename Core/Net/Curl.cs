@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using CurlSharp;
 using log4net;
-
+using CKAN.Net;
 
 namespace CKAN
 {
@@ -64,7 +64,7 @@ namespace CKAN
             easy.WriteFunction = wf;
             easy.Encoding = "deflate, gzip";
             easy.FollowLocation = true; // Follow redirects
-            easy.UserAgent = Net.UserAgentString;
+            easy.UserAgent = NetUtils.UserAgentString;
             easy.SslVerifyPeer = true;
 
             // ksp.sarbian.com uses a SSL cert that libcurl can't

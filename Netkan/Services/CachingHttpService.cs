@@ -1,4 +1,5 @@
 ﻿using System;
+using CKAN.Net;
 
 namespace CKAN.NetKAN.Services
 {
@@ -21,7 +22,7 @@ namespace CKAN.NetKAN.Services
             }
             else
             {
-                var downloadedFile = Net.Download(url);
+                var downloadedFile = NetUtils.Download(url);
 
                 string extension;
 
@@ -58,7 +59,7 @@ namespace CKAN.NetKAN.Services
 
         public string DownloadText(Uri url)
         {
-            return Net.DownloadText(url);
+            return NetUtils.DownloadText(url);
         }
     }
 }
