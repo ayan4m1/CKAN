@@ -1,4 +1,4 @@
-﻿using CKAN;
+﻿using CKAN.Types;
 using NUnit.Framework;
 
 namespace Tests.Core.Types
@@ -26,8 +26,8 @@ namespace Tests.Core.Types
         [Test][TestCaseSource("GoodStatuses")]
         public void ReleaseGood(string status)
         {
-            var release = new CKAN.ReleaseStatus(status);
-            Assert.IsInstanceOf<CKAN.ReleaseStatus>(release);
+            var release = new CKAN.Types.ReleaseStatus(status);
+            Assert.IsInstanceOf<CKAN.Types.ReleaseStatus>(release);
             Assert.AreEqual(status, release.ToString());
         }
 
@@ -36,7 +36,7 @@ namespace Tests.Core.Types
         {
             Assert.Throws<BadMetadataKraken>(delegate
             {
-                new CKAN.ReleaseStatus(status);
+                new CKAN.Types.ReleaseStatus(status);
             });
         }
 
@@ -44,7 +44,7 @@ namespace Tests.Core.Types
         public void Null()
         {
             // According to the spec, no release status means "stable".
-            var release = new CKAN.ReleaseStatus(null);
+            var release = new CKAN.Types.ReleaseStatus(null);
             Assert.AreEqual("stable", release.ToString());
         }
     }

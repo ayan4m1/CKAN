@@ -3,21 +3,16 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using CKAN;
+using CKAN.Types;
 using CKAN.Versioning;
-using Version = CKAN.Version;
 
 namespace Tests.Data
 {
-    static public class TestData
+    internal static class TestData
     {
         public static string DataDir()
         {
-            // TODO: Have this actually walk our directory structure and find
-            // t/data. This means we can relocate our test executable and
-            // things will still work.
-            string current = Directory.GetCurrentDirectory();
-
-            return Path.Combine(current, "../../Data");
+            return Path.Combine(Environment.CurrentDirectory, "..", "..", "Data");
         }
 
         public static string DataDir(string file)
@@ -530,16 +525,16 @@ namespace Tests.Data
             List<RelationshipDescriptor> sugests = null,
             List<String> provides = null,
             string identifier = null,
-            Version version = null)
+            GameVersion version = null)
         {
             var mod = new CkanModule
             {
                 name = Generator.Next().ToString(CultureInfo.InvariantCulture),
                 @abstract = Generator.Next().ToString(CultureInfo.InvariantCulture),
                 identifier = identifier??Generator.Next().ToString(CultureInfo.InvariantCulture),
-                spec_version = new Version(1.ToString(CultureInfo.InvariantCulture)),
+                spec_version = new GameVersion(1.ToString(CultureInfo.InvariantCulture)),
                 ksp_version = ksp_version ?? KspVersion.Parse("0." + Generator.Next()),
-                version = version ?? new Version(Generator.Next().ToString(CultureInfo.InvariantCulture))
+                version = version ?? new GameVersion(Generator.Next().ToString(CultureInfo.InvariantCulture))
             };
             mod.ksp_version_max = mod.ksp_version_min = null;
             mod.conflicts = conflicts;

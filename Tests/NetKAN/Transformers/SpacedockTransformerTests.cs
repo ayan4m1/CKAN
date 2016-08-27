@@ -1,8 +1,8 @@
 ﻿using System;
-using CKAN.NetKAN;
 using CKAN.NetKAN.Model;
 using CKAN.NetKAN.Sources.Spacedock;
 using CKAN.NetKAN.Transformers;
+using CKAN.Types;
 using Moq;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
@@ -51,7 +51,7 @@ namespace Tests.NetKAN.Transformers
 
             sdmod.versions[0] = new SDVersion
             {
-                friendly_version = new CKAN.Version("0.25"),
+                friendly_version = new GameVersion("0.25"),
                 download_path = new Uri("http://example.com/")
             };
 

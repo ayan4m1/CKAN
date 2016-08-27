@@ -1,5 +1,5 @@
 ﻿using System.Text.RegularExpressions;
-using CKAN;
+using CKAN.Types;
 using NUnit.Framework;
 
 namespace Tests.Core
@@ -25,7 +25,7 @@ namespace Tests.Core
         [Test]
         public void ReleaseNumber()
         {
-            Version version = CKAN.Meta.ReleaseNumber();
+            GameVersion version = CKAN.Meta.ReleaseNumber();
 
             if (version == null)
             {

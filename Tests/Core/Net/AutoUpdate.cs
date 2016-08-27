@@ -1,9 +1,8 @@
 ﻿using System;
-using CKAN;
+using CKAN.Types;
 using NUnit.Framework;
-using System.Net;
 
-namespace Tests.Core.AutoUpdate
+namespace Tests.Core.Net
 {
     [TestFixture]
     public class AutoUpdate
@@ -17,7 +16,7 @@ namespace Tests.Core.AutoUpdate
         // We expect a kraken when looking at a URL with no releases.
         public void FetchCkanUrl()
         {
-            Assert.Throws<CKAN.Kraken>(delegate
+            Assert.Throws<Kraken>(delegate
                 {
                     Fetch(test_ckan_release);
                 }

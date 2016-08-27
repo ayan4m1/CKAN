@@ -72,7 +72,6 @@ namespace Tests
             }
             catch (T)
             {
-                return;
             }
         }
     }

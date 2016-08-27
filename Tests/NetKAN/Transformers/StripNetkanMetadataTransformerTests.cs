@@ -102,7 +102,7 @@ namespace Tests.NetKAN.Transformers
                     }",
                     @"{
                         ""spec_version"": 1
-                    }",
+                    }"
                 };
 
                 yield return new object[]
@@ -113,7 +113,7 @@ namespace Tests.NetKAN.Transformers
                     }",
                     @"{
                         ""spec_version"": 1
-                    }",
+                    }"
                 };
             }
         }

@@ -1,5 +1,5 @@
-﻿using CKAN;
-using CKAN.NetKAN.Services;
+﻿using CKAN.NetKAN.Services;
+using CKAN.Types;
 using CKAN.Versioning;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
@@ -84,7 +84,7 @@ namespace Tests.NetKAN.Services
             Assert.That(result, Is.Not.Null,
                 "ModuleService should get an internal AVC file."
             );
-            Assert.That(result.version, Is.EqualTo(new Version("1.1.0.0")),
+            Assert.That(result.version, Is.EqualTo(new GameVersion("1.1.0.0")),
                 "ModuleService should get correct version from the internal AVC file."
             );
             Assert.That(result.ksp_version, Is.EqualTo(KspVersion.Parse("0.24.2")),

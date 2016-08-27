@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CKAN;
 using CKAN.Net;
+using CKAN.Types;
 using NUnit.Framework;
 using Tests.Data;
 
@@ -33,13 +34,13 @@ namespace Tests.Core.Relationships
         [Test]
         public void Empty()
         {
-            Assert.IsTrue(CKAN.SanityChecker.IsConsistent(new List<CkanModule>()));
+            Assert.IsTrue(CKAN.Relationships.SanityChecker.IsConsistent(new List<CkanModule>()));
         }
 
         [Test]
         public void Void()
         {
-            Assert.IsTrue(CKAN.SanityChecker.IsConsistent(null));
+            Assert.IsTrue(CKAN.Relationships.SanityChecker.IsConsistent(null));
         }
 
         [Test]
@@ -48,7 +49,7 @@ namespace Tests.Core.Relationships
             // Test with a module that depends and conflicts with nothing.
             var mods = new List<CkanModule> {registry.LatestAvailable("DogeCoinFlag",null)};
 
-            Assert.IsTrue(CKAN.SanityChecker.IsConsistent(mods), "DogeCoinFlag");
+            Assert.IsTrue(CKAN.Relationships.SanityChecker.IsConsistent(mods), "DogeCoinFlag");
         }
 
         [Test]
@@ -56,13 +57,13 @@ namespace Tests.Core.Relationships
         {
             var mods = new List<CkanModule> {registry.LatestAvailable("CustomBiomes", null)};
 
-            Assert.IsFalse(CKAN.SanityChecker.IsConsistent(mods), "CustomBiomes without data");
+            Assert.IsFalse(CKAN.Relationships.SanityChecker.IsConsistent(mods), "CustomBiomes without data");
 
             mods.Add(registry.LatestAvailable("CustomBiomesKerbal",null));
-            Assert.IsTrue(CKAN.SanityChecker.IsConsistent(mods), "CustomBiomes with stock data");
+            Assert.IsTrue(CKAN.Relationships.SanityChecker.IsConsistent(mods), "CustomBiomes with stock data");
 
             mods.Add(registry.LatestAvailable("CustomBiomesRSS",null));
-            Assert.IsFalse(CKAN.SanityChecker.IsConsistent(mods), "CustomBiomes with conflicting data");
+            Assert.IsFalse(CKAN.Relationships.SanityChecker.IsConsistent(mods), "CustomBiomes with conflicting data");
         }
 
         [Test]
@@ -71,15 +72,15 @@ namespace Tests.Core.Relationships
             var mods = new List<CkanModule>();
             var dlls = new List<string> {"CustomBiomes"};
 
-            Assert.IsTrue(CKAN.SanityChecker.IsConsistent(mods, dlls), "CustomBiomes dll by itself");
+            Assert.IsTrue(CKAN.Relationships.SanityChecker.IsConsistent(mods, dlls), "CustomBiomes dll by itself");
 
             // This would actually be a terrible thing for users to have, but it tests the
             // relationship we want.
             mods.Add(registry.LatestAvailable("CustomBiomesKerbal",null));
-            Assert.IsTrue(CKAN.SanityChecker.IsConsistent(mods, dlls), "CustomBiomes DLL, with config added");
+            Assert.IsTrue(CKAN.Relationships.SanityChecker.IsConsistent(mods, dlls), "CustomBiomes DLL, with config added");
 
             mods.Add(registry.LatestAvailable("CustomBiomesRSS",null));
-            Assert.IsFalse(CKAN.SanityChecker.IsConsistent(mods, dlls), "CustomBiomes with conflicting data");
+            Assert.IsFalse(CKAN.Relationships.SanityChecker.IsConsistent(mods, dlls), "CustomBiomes with conflicting data");
         }
 
         [Test]
@@ -88,8 +89,8 @@ namespace Tests.Core.Relationships
             var mods = new List<CkanModule> { registry.LatestAvailable("SRL",null) };
             var dlls = new List<string> { "QuickRevert" };
 
-            Assert.IsTrue(CKAN.SanityChecker.IsConsistent(mods), "SRL can be installed by itself");
-            Assert.IsFalse(CKAN.SanityChecker.IsConsistent(mods, dlls), "SRL conflicts with QuickRevert DLL");
+            Assert.IsTrue(CKAN.Relationships.SanityChecker.IsConsistent(mods), "SRL can be installed by itself");
+            Assert.IsFalse(CKAN.Relationships.SanityChecker.IsConsistent(mods, dlls), "SRL conflicts with QuickRevert DLL");
         }
 
         [Test]
@@ -102,7 +103,7 @@ namespace Tests.Core.Relationships
                 registry.LatestAvailable("DogeCoinFlag",null)
             };
 
-            var provides = CKAN.SanityChecker.ModulesToProvides(mods);
+            var provides = CKAN.Relationships.SanityChecker.ModulesToProvides(mods);
             Assert.Contains("CustomBiomes", provides.Keys);
             Assert.Contains("CustomBiomesData", provides.Keys);
             Assert.Contains("CustomBiomesKerbal", provides.Keys);
@@ -114,22 +115,22 @@ namespace Tests.Core.Relationships
         public void FindUnmetDependencies()
         {
             var mods = new List<CkanModule>();
-            var dlls = Enumerable.Empty<string>();
-            Assert.IsEmpty(CKAN.SanityChecker.FindUnmetDependencies(mods, dlls), "Empty list");
+            var dlls = new List<string>();
+            Assert.IsEmpty(CKAN.Relationships.SanityChecker.FindUnmetDependencies(mods, dlls), "Empty list");
 
             mods.Add(registry.LatestAvailable("DogeCoinFlag",null));
-            Assert.IsEmpty(CKAN.SanityChecker.FindUnmetDependencies(mods, dlls), "DogeCoinFlag");
+            Assert.IsEmpty(CKAN.Relationships.SanityChecker.FindUnmetDependencies(mods, dlls), "DogeCoinFlag");
 
             mods.Add(registry.LatestAvailable("CustomBiomes",null));
-            Assert.Contains("CustomBiomesData", CKAN.SanityChecker.FindUnmetDependencies(mods, dlls).Keys, "Missing CustomBiomesData");
+            Assert.Contains("CustomBiomesData", CKAN.Relationships.SanityChecker.FindUnmetDependencies(mods, dlls).Keys, "Missing CustomBiomesData");
 
             mods.Add(registry.LatestAvailable("CustomBiomesKerbal",null));
-            Assert.IsEmpty(CKAN.SanityChecker.FindUnmetDependencies(mods, dlls), "CBD+CBK");
+            Assert.IsEmpty(CKAN.Relationships.SanityChecker.FindUnmetDependencies(mods, dlls), "CBD+CBK");
 
             mods.RemoveAll(x => x.identifier == "CustomBiomes");
             Assert.AreEqual(2, mods.Count, "Checking removed CustomBiomes");
 
-            Assert.Contains("CustomBiomes", CKAN.SanityChecker.FindUnmetDependencies(mods, dlls).Keys, "Missing CustomBiomes");
+            Assert.Contains("CustomBiomes", CKAN.Relationships.SanityChecker.FindUnmetDependencies(mods, dlls).Keys, "Missing CustomBiomes");
         }
 
         [Test]

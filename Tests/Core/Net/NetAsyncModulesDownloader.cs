@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using CKAN;
 using CKAN.Net;
+using CKAN.Types;
 using log4net;
 using NUnit.Framework;
 using Tests.Data;

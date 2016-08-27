@@ -1,4 +1,5 @@
 ﻿using CKAN;
+using CKAN.Types;
 using NUnit.Framework;
 using Tests.Data;
 
@@ -14,7 +15,7 @@ namespace Tests.Core.Registry
     {
         private static string test_registry = TestData.TestRegistry();
         private DisposableKSP temp_ksp;
-        private CKAN.IRegistryQuerier registry;
+        private IRegistryQuerier registry;
 
         [SetUp]
         public void Setup()

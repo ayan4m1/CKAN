@@ -1,5 +1,5 @@
 using System.Transactions;
-using CKAN;
+using CKAN.Types;
 using CKAN.Versioning;
 using NUnit.Framework;
 using Tests.Data;
@@ -27,9 +27,10 @@ namespace Tests.Core.Registry
         [Test]
         public void Empty()
         {
-            CKAN.Registry registry = CKAN.Registry.Empty();
-            Assert.IsInstanceOf<CKAN.Registry>(registry);
-
+            // This may not be a very useful test... the method signature
+            // specifies the return type.
+            var emptyRegistry = CKAN.Registry.Empty();
+            Assert.IsInstanceOf<CKAN.Registry>(emptyRegistry);
         }
 
         [Test]

@@ -1,4 +1,5 @@
 using CKAN;
+using CKAN.Types;
 using CKAN.Versioning;
 using NUnit.Framework;
 using Tests.Data;

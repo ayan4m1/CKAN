@@ -27,11 +27,11 @@ namespace Tests.Data
 
             // If we've been given a registry file, then copy it into position before
             // creating our KSP object.
-
             if (registryFile != null)
             {
                 var registryDir = Path.Combine(_disposableDir, "CKAN");
                 var registryPath = Path.Combine(registryDir, "registry.json");
+
                 Directory.CreateDirectory(registryDir);
                 File.Copy(registryFile, registryPath, true);
             }
@@ -47,12 +47,12 @@ namespace Tests.Data
                 registry.Dispose();
             }
 
-            //Now that the loickfile is closed, we can remove the directory
+            //Now that the lockfile is closed, we can remove the directory
             Directory.Delete(_disposableDir, true);
 
             //proceed to dispose our wrapped KSP object
             KSP.Dispose();
-            KSP = null;
+            KSP = null; // In case .Dispose() was called manually.
         }
     }
 }

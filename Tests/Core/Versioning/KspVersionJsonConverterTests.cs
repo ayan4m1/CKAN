@@ -14,7 +14,7 @@ namespace Tests.Core.Versioning
             new object[] { new KspVersion(1), "1" },
             new object[] { new KspVersion(1, 2), "1.2" },
             new object[] { new KspVersion(1, 2, 3), "1.2.3" },
-            new object[] { new KspVersion(1, 2, 3, 4), "1.2.3.4" },
+            new object[] { new KspVersion(1, 2, 3, 4), "1.2.3.4" }
         };
 
         private static readonly object[] ReadJsonCases =
@@ -25,7 +25,7 @@ namespace Tests.Core.Versioning
             new object[] { @"{ ""KspVersion"": ""1.2""} ", new KspVersion(1, 2) },
             new object[] { @"{ ""KspVersion"": ""1.2.3""} ", new KspVersion(1, 2, 3) },
             new object[] { @"{ ""KspVersion"": ""1.2.3.4""} ", new KspVersion(1, 2, 3, 4) },
-            new object[] { @"{ ""KspVersion"": ""1.1.""} ", new KspVersion(1,1) }, // #1780
+            new object[] { @"{ ""KspVersion"": ""1.1.""} ", new KspVersion(1,1) } // #1780
         };
 
         private static readonly object[] ReadJsonFailureCases =

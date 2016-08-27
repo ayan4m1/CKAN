@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 using CKAN;
+using CKAN.Types;
 using NUnit.Framework;
 using Tests.Data;
-using Version = CKAN.Version;
 
 namespace Tests.Core
 {
@@ -75,7 +75,7 @@ namespace Tests.Core
 
             Assert.IsTrue(ksp.Registry.IsInstalled("Example"), "Example installed");
 
-            Version version = ksp.Registry.InstalledVersion("Example");
+            GameVersion version = ksp.Registry.InstalledVersion("Example");
             Assert.IsInstanceOf<DllVersion>(version, "DLL detected as a DLL, not full mod");
 
             // Now let's do the same with different case.

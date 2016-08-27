@@ -1,7 +1,7 @@
-﻿using CKAN;
-using CKAN.NetKAN.Model;
+﻿using CKAN.NetKAN.Model;
 using CKAN.NetKAN.Services;
 using CKAN.NetKAN.Validators;
+using CKAN.Types;
 using Moq;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;

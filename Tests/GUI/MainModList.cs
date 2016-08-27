@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CKAN;
+using CKAN.Types;
 using NUnit.Framework;
 using Tests.Core;
 using Tests.Data;

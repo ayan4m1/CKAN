@@ -1,9 +1,8 @@
 using System.Linq;
-using CKAN;
+using CKAN.Types;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using Tests.Data;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace Tests.Core.Types
 {
@@ -49,8 +48,8 @@ namespace Tests.Core.Types
             Assert.AreEqual("https://github.com/KSP-KOS/KOS/issues", module.resources.bugtracker.ToString());
             Assert.AreEqual("https://github.com/KSP-KOS/KOS", module.resources.repository.ToString());
             
-            Assert.AreEqual("C5A224AC4397770C0B19B4A6417F6C5052191608", module.download_hash.sha1.ToString());
-            Assert.AreEqual("E0FB79C81D8FCDA8DB6E38B104106C3B7D078FDC06ACA2BC7834973B43D789CB", module.download_hash.sha256.ToString());
+            Assert.AreEqual("C5A224AC4397770C0B19B4A6417F6C5052191608", module.download_hash.sha1);
+            Assert.AreEqual("E0FB79C81D8FCDA8DB6E38B104106C3B7D078FDC06ACA2BC7834973B43D789CB", module.download_hash.sha256);
         }
 
         /// <summary>
@@ -87,9 +86,9 @@ namespace Tests.Core.Types
             // The *old* CKAN spec had a version number of "1".
             // It should be accepted by any client with an old version number,
             // as well as any with a new version number.
-            var old_spec = new CKAN.Version("1");
-            var old_dev = new CKAN.Version("v0.23");
-            var new_dev = new CKAN.Version("v1.2.3");
+            var old_spec = new GameVersion("1");
+            var old_dev = new GameVersion("v0.23");
+            var new_dev = new GameVersion("v1.2.3");
 
             Assert.IsTrue(old_dev.IsGreaterThan(old_spec));
             Assert.IsTrue(new_dev.IsGreaterThan(old_spec));
@@ -97,8 +96,8 @@ namespace Tests.Core.Types
             // The new spec requires a minimum number (v1.2, v1.4)
             // Make sure our assumptions here hold, too.
 
-            var readable_spec = new CKAN.Version("v1.2");
-            var unreadable_spec = new CKAN.Version("v1.4");
+            var readable_spec = new GameVersion("v1.2");
+            var unreadable_spec = new GameVersion("v1.4");
 
             Assert.IsTrue(new_dev.IsGreaterThan(readable_spec));
             Assert.IsFalse(new_dev.IsGreaterThan(unreadable_spec));
@@ -113,12 +112,12 @@ namespace Tests.Core.Types
             }
 
             // We should always support old versions, and the classic '1' version.
-            Assert.IsTrue(CkanModule.IsSpecSupported(new CKAN.Version("1")));
-            Assert.IsTrue(CkanModule.IsSpecSupported(new CKAN.Version("v0.02")));
+            Assert.IsTrue(CkanModule.IsSpecSupported(new GameVersion("1")));
+            Assert.IsTrue(CkanModule.IsSpecSupported(new GameVersion("v0.02")));
 
             // We shouldn't support this far-in-the-future version.
             // NB: V2K bug!!!
-            Assert.IsFalse(CkanModule.IsSpecSupported(new CKAN.Version("v2000.99.99")));
+            Assert.IsFalse(CkanModule.IsSpecSupported(new GameVersion("v2000.99.99")));
         }
 
         [Test]
@@ -127,8 +126,8 @@ namespace Tests.Core.Types
             // We should support both two and three number dotted specs, on both
             // tagged and dev releases.
 
-            Assert.IsTrue(CkanModule.IsSpecSupported(new CKAN.Version("v1.1")));
-            Assert.IsTrue(CkanModule.IsSpecSupported(new CKAN.Version("v1.0.2")));
+            Assert.IsTrue(CkanModule.IsSpecSupported(new GameVersion("v1.1")));
+            Assert.IsTrue(CkanModule.IsSpecSupported(new GameVersion("v1.0.2")));
         }
 
         [Test]

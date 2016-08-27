@@ -1,11 +1,11 @@
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Transactions;
 using CKAN;
+using CKAN.Relationships;
+using CKAN.Types;
 using ICSharpCode.SharpZipLib.Zip;
 using NUnit.Framework;
 using Tests.Data;
@@ -15,25 +15,24 @@ namespace Tests.Core
     [TestFixture]
     public class ModuleInstaller
     {
-        private string flag_path;
-        private string dogezip;
-        private CkanModule dogemod;
+        private string _flagPath;
+        private string _dogeZip;
+        private CkanModule _dogeMod;
 
-        private string mm_zip;
-        private CkanModule mm_mod;
+        private string _mmZip;
+        private CkanModule _mmMod;
 
         [SetUp]
         public void Setup()
         {
             // By setting these for every test, we can make sure our tests can change
             // them any way they like without harming other tests.
+            _flagPath = "DogeCoinFlag-1.01/GameData/DogeCoinFlag/Flags/dogecoin.png";
+            _dogeZip = TestData.DogeCoinFlagZip();
+            _dogeMod = TestData.DogeCoinFlag_101_module();
 
-            flag_path = "DogeCoinFlag-1.01/GameData/DogeCoinFlag/Flags/dogecoin.png";
-            dogezip = TestData.DogeCoinFlagZip();
-            dogemod = TestData.DogeCoinFlag_101_module();
-
-            mm_zip = TestData.ModuleManagerZip();
-            mm_mod = TestData.ModuleManagerModule();
+            _mmZip = TestData.ModuleManagerZip();
+            _mmMod = TestData.ModuleManagerModule();
         }
 
         [Test]
@@ -91,7 +90,7 @@ namespace Tests.Core
         [Test][TestCaseSource("doge_mods")]
         public void FindInstallableFiles(CkanModule mod)
         {
-            List<InstallableFile> contents = CKAN.ModuleInstaller.FindInstallableFiles(mod, dogezip, null);
+            List<InstallableFile> contents = CKAN.ModuleInstaller.FindInstallableFiles(mod, _dogeZip, null);
             List<string> filenames = new List<string>();
 
             Assert.IsNotNull(contents);
@@ -122,7 +121,7 @@ namespace Tests.Core
         {
             using (var tidy = new DisposableKSP())
             {
-                List<InstallableFile> contents = CKAN.ModuleInstaller.FindInstallableFiles(mod, dogezip, tidy.KSP);
+                List<InstallableFile> contents = CKAN.ModuleInstaller.FindInstallableFiles(mod, _dogeZip, tidy.KSP);
 
                 // See if we can find an expected estination path in the right place.
                 string file = contents
@@ -150,11 +149,11 @@ namespace Tests.Core
         [TestCaseSource("SuchPaths")]
         public void FindInstallbleFilesWithBonusPath(string path)
         {
-            dogemod.install[0].install_to = path;
+            _dogeMod.install[0].install_to = path;
             using (var tidy = new DisposableKSP())
             {
                 IEnumerable<InstallableFile> contents =
-                    CKAN.ModuleInstaller.FindInstallableFiles(dogemod, dogezip, tidy.KSP);
+                    CKAN.ModuleInstaller.FindInstallableFiles(_dogeMod, _dogeZip, tidy.KSP);
 
                 string file = contents
                     .Select(x => x.Destination).FirstOrDefault(
@@ -169,7 +168,7 @@ namespace Tests.Core
         {
             using (var tidy = new DisposableKSP())
             {
-                List<InstallableFile> contents = CKAN.ModuleInstaller.FindInstallableFiles(mm_mod, mm_zip, tidy.KSP);
+                List<InstallableFile> contents = CKAN.ModuleInstaller.FindInstallableFiles(_mmMod, _mmZip, tidy.KSP);
 
                 string file = contents
                     .Select(x => x.Destination).FirstOrDefault(
@@ -183,11 +182,9 @@ namespace Tests.Core
         // Make sure all our filters work.
         public void FindInstallableFilesWithFilter(CkanModule mod)
         {
-            string extra_doge = TestData.DogeCoinFlagZipWithExtras();
-
-            List<InstallableFile> contents = CKAN.ModuleInstaller.FindInstallableFiles(mod, extra_doge, null);
-
-            var files = contents.Select(x => x.Source.Name);
+            var extraDoge = TestData.DogeCoinFlagZipWithExtras();
+            var contents = CKAN.ModuleInstaller.FindInstallableFiles(mod, extraDoge, null);
+            var files = contents.Select(x => x.Source.Name).ToList();
 
             Assert.IsTrue(files.Contains("DogeCoinFlag-1.01/GameData/DogeCoinFlag/Flags/dogecoin.png"), "dogecoin.png");
             Assert.IsFalse(files.Contains("DogeCoinFlag-1.01/GameData/DogeCoinFlag/README.md"), "Filtered README 1");
@@ -200,23 +197,23 @@ namespace Tests.Core
         {
             // This tests GH #93
 
-            string dogezip = TestData.DogeCoinFlagZip();
-            CkanModule bugged_mod = TestData.DogeCoinFlag_101_bugged_module();
+            var dogezip = TestData.DogeCoinFlagZip();
+            var buggedMod = TestData.DogeCoinFlag_101_bugged_module();
 
             Assert.Throws<BadMetadataKraken>(delegate
             {
-                CKAN.ModuleInstaller.FindInstallableFiles(bugged_mod, dogezip, null);
+                CKAN.ModuleInstaller.FindInstallableFiles(buggedMod, dogezip, null);
             });
 
             try
             {
-                CKAN.ModuleInstaller.FindInstallableFiles(bugged_mod, dogezip, null);
+                CKAN.ModuleInstaller.FindInstallableFiles(buggedMod, dogezip, null);
             }
             catch (BadMetadataKraken ex)
             {
                 // Make sure our module information is attached.
                 Assert.IsNotNull(ex.module);
-                Assert.AreEqual(bugged_mod.identifier, ex.module.identifier);
+                Assert.AreEqual(buggedMod.identifier, ex.module.identifier);
             }
         }
 
@@ -236,11 +233,11 @@ namespace Tests.Core
         public void FindInstallableFilesWithBadTarget(string location)
         {
             // This install location? It shouldn't be valid.
-            dogemod.install[0].install_to = location;
+            _dogeMod.install[0].install_to = location;
 
             Assert.Throws<BadInstallLocationKraken>(delegate
             {
-                CKAN.ModuleInstaller.FindInstallableFiles(dogemod, dogezip, null);
+                CKAN.ModuleInstaller.FindInstallableFiles(_dogeMod, _dogeZip, null);
             });
         }
 
@@ -289,8 +286,8 @@ namespace Tests.Core
         {
             using (ZipFile zipfile = new ZipFile(TestData.DogeCoinFlagZip()))
             {
-                ZipEntry entry = zipfile.GetEntry(flag_path);
-                string tmpfile = Path.GetTempFileName();
+                var entry = zipfile.GetEntry(_flagPath);
+                var tmpfile = Path.GetTempFileName();
 
                 Assert.Throws<FileExistsKraken>(delegate
                 {
@@ -308,16 +305,16 @@ namespace Tests.Core
         //Test how we handle corrupt data
         public void CorruptZip_242()
         {
-            string corrupt_dogezip = TestData.DogeCoinFlagZipCorrupt();
+            var corruptDogeZip = TestData.DogeCoinFlagZipCorrupt();
 
-            using (var zipfile = new ZipFile(corrupt_dogezip))
+            using (var zipfile = new ZipFile(corruptDogeZip))
             {
                 // GenerateDefault Install
                 ModuleInstallDescriptor.DefaultInstallStanza("DogeCoinFlag", zipfile);
 
                 // FindInstallableFiles
                 CkanModule dogemod = TestData.DogeCoinFlag_101_module();
-                CKAN.ModuleInstaller.FindInstallableFiles(dogemod, corrupt_dogezip, null);
+                CKAN.ModuleInstaller.FindInstallableFiles(dogemod, corruptDogeZip, null);
             }
         }
 
@@ -356,7 +353,7 @@ namespace Tests.Core
             string dogezip = TestData.DogeCoinFlagZip();
             ZipFile zipfile = new ZipFile(dogezip);
 
-            ZipEntry entry = zipfile.GetEntry(flag_path);
+            ZipEntry entry = zipfile.GetEntry(_flagPath);
             string tmpfile = Path.GetTempFileName();
 
             // We have to delete our temporary file, as CZE refuses to overwrite; huzzah!
@@ -393,14 +390,14 @@ namespace Tests.Core
             {
                 // Make sure the mod is not installed.
                 var dataDir = CKAN.KSPPathUtils.GetGameDirectory(ksp.KSP.GameDir, GameDirectory.GameData);
-                string modFilePath = Path.Combine(dataDir, modFileName);
+                var modFilePath = Path.Combine(dataDir, modFileName);
 
                 Assert.IsFalse(File.Exists(modFilePath));
 
                 // Copy the zip file to the cache directory.
                 Assert.IsFalse(ksp.KSP.Cache.IsCachedZip(TestData.DogeCoinFlag_101_module().download));
 
-                string cachePath = ksp.KSP.Cache.Store(TestData.DogeCoinFlag_101_module().download, TestData.DogeCoinFlagZip());
+                var cachePath = ksp.KSP.Cache.Store(TestData.DogeCoinFlag_101_module().download, TestData.DogeCoinFlagZip());
 
                 Assert.IsTrue(ksp.KSP.Cache.IsCachedZip(TestData.DogeCoinFlag_101_module().download));
                 Assert.IsTrue(File.Exists(cachePath));
@@ -580,7 +577,6 @@ namespace Tests.Core
                 results = CKAN.ModuleInstaller.FindInstallableFiles(mod.install.First(), zip, ksp.KSP);
             }
 
-
             // Assert
             Assert.That(
                 results.Count(i => i.Destination.EndsWith(string.Format("/{0}/AwesomeShip.craft", directory))) == 1,
@@ -615,11 +611,10 @@ namespace Tests.Core
                     ]
                 }")
             ;
-            
-            List<InstallableFile> results;
+
             using (var ksp = new DisposableKSP())
             {
-                results = CKAN.ModuleInstaller.FindInstallableFiles(mod.install.First(), zip, ksp.KSP);
+                var results = CKAN.ModuleInstaller.FindInstallableFiles(mod.install.First(), zip, ksp.KSP);
 
                 var scenarioDir = CKAN.KSPPathUtils.GetGameDirectory(ksp.KSP.GameDir, GameDirectory.Scenarios);
                 Assert.AreEqual(

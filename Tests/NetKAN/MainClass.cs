@@ -1,7 +1,6 @@
-﻿using CKAN;
-using CKAN.NetKAN;
-using CKAN.NetKAN.Model;
+﻿using CKAN.NetKAN.Model;
 using CKAN.NetKAN.Transformers;
+using CKAN.Types;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using Tests.Data;

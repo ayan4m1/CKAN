@@ -1,10 +1,9 @@
 using System.Collections.Generic;
-using CKAN;
+using CKAN.Types;
+using ICSharpCode.SharpZipLib.Zip;
+using Newtonsoft.Json;
 using NUnit.Framework;
 using Tests.Data;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using ICSharpCode.SharpZipLib.Zip;
 
 namespace Tests.Core.Types
 {
@@ -47,7 +46,7 @@ namespace Tests.Core.Types
                 ""find_regexp"" : """ + regexp + @"""
             }"; 
 
-            var mid = JsonConvert.DeserializeObject<CKAN.ModuleInstallDescriptor>(json);
+            var mid = JsonConvert.DeserializeObject<ModuleInstallDescriptor>(json);
             var zip = new ZipFile(TestData.DogeCoinFlagZipWithExtras());
 
             mid = mid.ConvertFindToFile(zip);
