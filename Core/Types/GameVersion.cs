@@ -1,9 +1,10 @@
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using CKAN.Converters;
+using Newtonsoft.Json;
 
-namespace CKAN
+namespace CKAN.Types
 {
     /// <summary>
     /// Version comparison utilities.
@@ -11,7 +12,7 @@ namespace CKAN
 
     [Serializable]
     [JsonConverter(typeof(JsonSimpleStringConverter))]
-    public class Version : IComparable<Version> {
+    public class GameVersion : IComparable<GameVersion> {
         private readonly int epoch;
         private readonly string version;
         private readonly string originalString;
@@ -36,7 +37,7 @@ namespace CKAN
         /// <summary>
         /// Creates a new version object from the `ToString()` representation of anything!
         /// </summary>
-        public Version (string version) {
+        public GameVersion (string version) {
             originalString = version;
 
             Match match = Regex.Match (
@@ -62,18 +63,18 @@ namespace CKAN
         }
 
         // When cast from a string.
-        public static explicit operator Version(string v) {
-            return new Version (v);
+        public static explicit operator GameVersion(string v) {
+            return new GameVersion (v);
         }
 
 
-        private Dictionary<Tuple<Version,Version>, int> cache = new Dictionary<Tuple<Version, Version>, int>();
+        private Dictionary<Tuple<GameVersion,GameVersion>, int> cache = new Dictionary<Tuple<GameVersion, GameVersion>, int>();
         /// <summary>
         /// Returns a negative value if this is less than that
         /// Returns a positive value if this is greater than that
         /// Returns 0 if equal.
         /// </summary>
-        public int CompareTo(Version that) {
+        public int CompareTo(GameVersion that) {
 
             if (that.epoch == epoch && that.version.Equals(version)) {
                 return 0;
@@ -87,7 +88,7 @@ namespace CKAN
             // Epochs are the same. Do the dance described in
             // https://github.com/KSP-CKAN/CKAN/blob/master/Spec.md#version-ordering
             int ret;
-            var tuple = new Tuple<Version, Version>(this, that);
+            var tuple = new Tuple<GameVersion, GameVersion>(this, that);
             if (cache.TryGetValue(tuple, out ret))
             {
                 return ret;
@@ -142,19 +143,19 @@ namespace CKAN
 
         }
 
-        public bool IsEqualTo(Version that) {
+        public bool IsEqualTo(GameVersion that) {
             return CompareTo (that) == 0;
         }
 
-        public bool IsLessThan(Version that) {
+        public bool IsLessThan(GameVersion that) {
             return CompareTo (that) < 0;
         }
 
-        public bool IsGreaterThan(Version that) {
+        public bool IsGreaterThan(GameVersion that) {
             return CompareTo (that) > 0;
         }
 
-        public static Version Max(Version a, Version b)
+        public static GameVersion Max(GameVersion a, GameVersion b)
         {
             if (a == null)
                 throw new ArgumentNullException("a");
@@ -165,7 +166,7 @@ namespace CKAN
             return a.IsGreaterThan(b) ? a : b;
         }
 
-        public static Version Min(Version a, Version b)
+        public static GameVersion Min(GameVersion a, GameVersion b)
         {
             if (a == null)
                 throw new ArgumentNullException("a");
@@ -300,34 +301,34 @@ namespace CKAN
 
         public override bool Equals(object obj)
         {
-            var other = obj as Version;
+            var other = obj as GameVersion;
             return other != null ? IsEqualTo(other) : base.Equals(obj);
         }
         public override int GetHashCode()
         {
             return version.GetHashCode();
         }
-        int IComparable<Version>.CompareTo(Version other)
+        int IComparable<GameVersion>.CompareTo(GameVersion other)
         {
             return CompareTo(other);
         }
 
-        public static bool operator <(Version v1, Version v2)
+        public static bool operator <(GameVersion v1, GameVersion v2)
         {
             return v1.CompareTo(v2) < 0;
         }
 
-        public static bool operator <=(Version v1, Version v2)
+        public static bool operator <=(GameVersion v1, GameVersion v2)
         {
             return v1.CompareTo(v2) <= 0;
         }
 
-        public static bool operator >(Version v1, Version v2)
+        public static bool operator >(GameVersion v1, GameVersion v2)
         {
             return v1.CompareTo(v2) > 0;
         }
 
-        public static bool operator >=(Version v1, Version v2)
+        public static bool operator >=(GameVersion v1, GameVersion v2)
         {
             return v1.CompareTo(v2) >= 0;
         }
@@ -338,7 +339,7 @@ namespace CKAN
     /// This class represents a DllVersion. They don't have real
     /// version numbers or anything
     /// </summary>
-    public class DllVersion : Version {
+    public class DllVersion : GameVersion {
         public DllVersion() :base("0")
         {
         }
@@ -353,7 +354,7 @@ namespace CKAN
     /// This class represents a virtual version that was provided by
     /// another module.
     /// </summary>
-    public class ProvidesVersion : Version {
+    public class ProvidesVersion : GameVersion {
         internal readonly string provided_by;
 
         public ProvidesVersion(string provided_by) :base("0")
