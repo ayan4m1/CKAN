@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using CKAN;
 
 namespace Tests.Data
@@ -41,18 +42,26 @@ namespace Tests.Data
 
         public void Dispose()
         {
-            var registry = RegistryManager.Instance(KSP);
-            if (registry != null)
-            {
-                registry.Dispose();
-            }
-
-            //Now that the lockfile is closed, we can remove the directory
-            Directory.Delete(_disposableDir, true);
-
-            //proceed to dispose our wrapped KSP object
+            FinalizeDirectory();
             KSP.Dispose();
             KSP = null; // In case .Dispose() was called manually.
+        }
+
+        private void FinalizeDirectory()
+        {
+            // todo: fix two stupid magic numbers
+            for (var x = 0; x < 6; x++)
+            {
+                try
+                {
+                    Thread.Sleep(10);
+                    Directory.Delete(_disposableDir, true);
+                }
+                catch (IOException)
+                {
+                    // todo: logger
+                }
+            }
         }
     }
 }
