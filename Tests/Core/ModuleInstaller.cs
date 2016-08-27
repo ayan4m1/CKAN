@@ -615,10 +615,10 @@ namespace Tests.Core
             using (var ksp = new DisposableKSP())
             {
                 var results = CKAN.ModuleInstaller.FindInstallableFiles(mod.install.First(), zip, ksp.KSP);
-
                 var scenarioDir = CKAN.KSPPathUtils.GetGameDirectory(ksp.KSP.GameDir, GameDirectory.Scenarios);
+
                 Assert.AreEqual(
-                    CKAN.KSPPathUtils.NormalizePath(Path.Combine(scenarioDir, "AwesomeRace.sfs")),
+                    Path.Combine(scenarioDir, "AwesomeRace.sfs"),
                     results.First().Destination
                 );
             }
