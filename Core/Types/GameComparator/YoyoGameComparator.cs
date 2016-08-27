@@ -1,6 +1,6 @@
 ﻿using CKAN.Versioning;
 
-namespace CKAN
+namespace CKAN.Types.GameComparator
 {
     /// <summary>
     /// You're On Your Own (YOYO) game compatibility comparison.

@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using CKAN.Types;
 
 namespace CKAN
 {
@@ -41,7 +42,7 @@ namespace CKAN
         /// <summary>
         /// Returns just our release number (eg: 1.0.3), or null for a dev build.
         /// </summary>
-        public static Version ReleaseNumber()
+        public static GameVersion ReleaseNumber()
         {
             string build_version = BuildVersion();
 
@@ -52,7 +53,7 @@ namespace CKAN
 
             string short_version = Regex.Match(build_version, @"^(.*)-\d+-.*$").Result("$1");
 
-            return new Version(short_version);
+            return new GameVersion(short_version);
         }
 
         /// <summary>

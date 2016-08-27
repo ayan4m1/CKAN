@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
+using CKAN.Types;
 using Newtonsoft.Json;
 
 namespace CKAN

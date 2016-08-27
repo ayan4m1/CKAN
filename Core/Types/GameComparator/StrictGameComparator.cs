@@ -1,6 +1,6 @@
 ﻿using CKAN.Versioning;
 
-namespace CKAN
+namespace CKAN.Types.GameComparator
 {
     /// <summary>
     /// Test to see if a module is compatible with the user's installed game,

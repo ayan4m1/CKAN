@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace CKAN
+namespace CKAN.Types
 {
     /// <summary>
     /// Our application exceptions are called Krakens.

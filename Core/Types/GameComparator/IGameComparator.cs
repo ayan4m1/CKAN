@@ -1,6 +1,6 @@
 ﻿using CKAN.Versioning;
 
-namespace CKAN
+namespace CKAN.Types.GameComparator
 {
     /// <summary>
     /// Used to compare if a mod is compatible with a game.

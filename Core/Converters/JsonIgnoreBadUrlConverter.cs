@@ -1,9 +1,8 @@
 ﻿using System;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using log4net;
+using Newtonsoft.Json;
 
-namespace CKAN
+namespace CKAN.Converters
 {
     /// <summary>
     /// Reads a URL string, and returns a Uri object. Returns null if the string

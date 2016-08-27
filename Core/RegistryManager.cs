@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using ChinhDo.Transactions.FileManager;
+using CKAN.Types;
 using log4net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -193,8 +195,8 @@ namespace CKAN
             // after deserialisation.
             var settings = new JsonSerializerSettings
             {
-                Context = new System.Runtime.Serialization.StreamingContext(
-                    System.Runtime.Serialization.StreamingContextStates.Other,
+                Context = new StreamingContext(
+                    StreamingContextStates.Other,
                     ksp
                     )
             };

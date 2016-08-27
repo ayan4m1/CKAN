@@ -1,13 +1,14 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
+using System.Security.Permissions;
 using System.Text;
+using System.Text.RegularExpressions;
+using ChinhDo.Transactions.FileManager;
+using CKAN.Types;
 using ICSharpCode.SharpZipLib.Zip;
 using log4net;
-using System.Text.RegularExpressions;
-using System.Diagnostics;
-using System.Security.Permissions;
-using ChinhDo.Transactions.FileManager;
 
 namespace CKAN.Net
 {
@@ -30,7 +31,6 @@ namespace CKAN.Net
         public NetFileCache(string cachePath)
         {
             // Basic validation, our cache has to exist.
-
             if (!Directory.Exists(cachePath))
             {
                 throw new DirectoryNotFoundKraken(cachePath, "Cannot find cache directory");
@@ -40,19 +40,26 @@ namespace CKAN.Net
 
             // Establish a watch on our cache. This means we can cache the directory contents,
             // and discard that cache if we spot changes.
-            _watcher = new FileSystemWatcher(_cachePath, string.Empty);
-
             // While we should only care about files appearing and disappearing, I've over-asked
             // for permissions to get things to work on Mono.
+            _watcher = new FileSystemWatcher(_cachePath, string.Empty)
+            {
+                NotifyFilter =
+                    NotifyFilters.LastWrite | NotifyFilters.LastAccess | NotifyFilters.DirectoryName |
+                    NotifyFilters.FileName
+            };
 
-            _watcher.NotifyFilter =
-                NotifyFilters.LastWrite | NotifyFilters.LastAccess | NotifyFilters.DirectoryName | NotifyFilters.FileName;
-            
             // If we spot any changes, we fire our event handler.
-            _watcher.Changed += new FileSystemEventHandler(OnCacheChanged);
-            _watcher.Created += new FileSystemEventHandler(OnCacheChanged);
-            _watcher.Deleted += new FileSystemEventHandler(OnCacheChanged);
-            _watcher.Renamed += new RenamedEventHandler(OnCacheChanged);
+            _watcher.Changed += OnCacheChanged;
+            _watcher.Created += OnCacheChanged;
+            _watcher.Deleted += OnCacheChanged;
+            _watcher.Renamed += OnCacheChanged;
+
+            // Sanity test once more to assert that the directory exists
+            if (!Directory.Exists(_cachePath))
+            {
+                throw new DirectoryNotFoundKraken(_cachePath, "Cannot find cache directory");
+            }
 
             // Enable events!
             _watcher.EnableRaisingEvents = true;

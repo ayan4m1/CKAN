@@ -4,24 +4,25 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
+using Autofac;
+using CKAN.Converters;
+using CKAN.Types.GameComparator;
+using CKAN.Versioning;
 using log4net;
 using Newtonsoft.Json;
-using System.Transactions;
-using Autofac;
-using CKAN.Versioning;
 
-namespace CKAN
+namespace CKAN.Types
 {
     public class RelationshipDescriptor
     {
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public Version max_version;
+        public GameVersion max_version;
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public Version min_version;
+        public GameVersion min_version;
         //Why is the identifier called name?
         public /* required */ string name;
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public Version version;
+        public GameVersion version;
 
         /// <summary>
         /// Returns if the other version satisfies this RelationshipDescriptor.
@@ -31,7 +32,7 @@ namespace CKAN
         /// </summary>
         /// <param name="other_version"></param>
         /// <returns>True if other_version is within the bounds</returns>
-        public bool version_within_bounds(Version other_version)
+        public bool version_within_bounds(GameVersion other_version)
         {
             // DLL versions (aka autodetected mods) satisfy *all* relationships
             if (other_version is DllVersion)
@@ -206,7 +207,7 @@ namespace CKAN
         public List<RelationshipDescriptor> suggests;
 
         [JsonProperty("version", Required = Required.Always)]
-        public Version version;
+        public GameVersion version;
 
         [JsonProperty("supports")]
         public List<RelationshipDescriptor> supports;
@@ -219,7 +220,7 @@ namespace CKAN
 
         [JsonIgnore]
         [JsonProperty("specVersion", Required = Required.Default)]
-        private Version specVersion;
+        private GameVersion specVersion;
         // We integrated the Module and CkanModule into one class
         // Since spec_version was only required for CkanModule before
         // this change, we now need to make sure the user is converted
@@ -227,18 +228,18 @@ namespace CKAN
         // We should return this to a simple Required.Always field some time in the future
         // ~ Postremus, 03.09.2015
         [JsonProperty("spec_version")]
-        public Version spec_version
+        public GameVersion spec_version
         {
             get
             {
                 if (specVersion == null)
-                    specVersion = new Version("1");
+                    specVersion = new GameVersion("1");
                 return specVersion;
             }
             set
             {
                 if (value == null)
-                    specVersion = new Version("1");
+                    specVersion = new GameVersion("1");
                 else
                     specVersion = value;
             }
@@ -436,8 +437,7 @@ namespace CKAN
             if (module == null)
                     throw new ModuleNotFoundKraken(mod, null,
                         string.Format("Cannot install {0}, module not available", mod));
-            else
-                return module;
+            return module;
         }
 
         /// <summary> Generates a CKAN.Meta object given a filename</summary>
@@ -476,7 +476,7 @@ namespace CKAN
         {
             // We never conflict with ourselves, since we can't be installed at
             // the same time as another version of ourselves.
-            if (module.identifier == this.identifier) return false;
+            if (module.identifier == identifier) return false;
 
             return UniConflicts(this, module) || UniConflicts(module, this);
         }
@@ -531,11 +531,11 @@ namespace CKAN
             {
                 return ksp_version_max.ToString();
             }
-            else if (ksp_version != null)
+            if (ksp_version != null)
             {
                 return ksp_version.ToString();
             }
-            else if (ksp_version_min != null )
+            if (ksp_version_min != null )
             {
                 return ksp_version_min + "+";
             }
@@ -553,7 +553,7 @@ namespace CKAN
 
         public bool IsMetapackage
         {
-            get { return (!string.IsNullOrEmpty(this.kind) && this.kind == "metapackage"); }
+            get { return (!string.IsNullOrEmpty(kind) && kind == "metapackage"); }
         }
 
         protected bool Equals(CkanModule other)
@@ -565,7 +565,7 @@ namespace CKAN
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
+            if (obj.GetType() != GetType()) return false;
             return Equals((CkanModule)obj);
         }
 
@@ -591,10 +591,10 @@ namespace CKAN
         /// <summary>
         /// Returns true if we support at least spec_version of the CKAN spec.
         /// </summary>
-        internal static bool IsSpecSupported(Version spec_vesion)
+        internal static bool IsSpecSupported(GameVersion spec_vesion)
         {
             // This could be a read-only state variable; do we have those in C#?
-            Version release = Meta.ReleaseNumber();
+            GameVersion release = Meta.ReleaseNumber();
 
             return release == null || release.IsGreaterThan(spec_vesion);
         }
@@ -616,7 +616,7 @@ namespace CKAN
             return StandardName(identifier, version);
         }
 
-        public static string StandardName(string identifier, Version version)
+        public static string StandardName(string identifier, GameVersion version)
         {
             // Versions can contain ALL SORTS OF WACKY THINGS! Colons, friggin newlines,
             // slashes, and heaven knows what use mod authors try to smoosh into them.

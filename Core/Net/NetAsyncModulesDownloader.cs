@@ -2,10 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Text.RegularExpressions;
-using System.Threading;
-using CurlSharp;
+using CKAN.Types;
 using log4net;
 
 namespace CKAN.Net

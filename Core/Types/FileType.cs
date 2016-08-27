@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace CKAN
+﻿namespace CKAN.Types
 {
     public enum FileType
     {

@@ -1,6 +1,6 @@
 ﻿using CKAN.Versioning;
 
-namespace CKAN
+namespace CKAN.Types.GameComparator
 {
     /// <summary>
     /// Test to see if the user's game is "Generally Recognised As Safe" (GRAS) with a given mod,

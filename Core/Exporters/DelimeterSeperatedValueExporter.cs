@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using CKAN.Types;
 
 namespace CKAN.Exporters
 {
@@ -131,10 +132,7 @@ namespace CKAN.Exporters
             {
                 return "\"" + value + "\"";
             }
-            else
-            {
-                return value;
-            }
+            return value;
         }
 
         public enum Delimter

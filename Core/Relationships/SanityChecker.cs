@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
+using CKAN.Types;
 using log4net;
 
-namespace CKAN
+namespace CKAN.Relationships
 {
     /// <summary>
     /// Sanity checks on what mods we have installed, or may install.

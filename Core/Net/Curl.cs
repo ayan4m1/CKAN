@@ -4,9 +4,8 @@ using System.Linq;
 using System.Reflection;
 using CurlSharp;
 using log4net;
-using CKAN.Net;
 
-namespace CKAN
+namespace CKAN.Net
 {
     /// <summary>
     /// Utility layer on top of curlsharp for common operations.
@@ -131,7 +130,7 @@ namespace CKAN
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ckanSubDirectoryName),
 
                 // %PROGRAMDATA%/CKAN
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), ckanSubDirectoryName),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), ckanSubDirectoryName)
             }
             .Select(i => Path.Combine(i, caBundleFileName))
             .FirstOrDefault(File.Exists);

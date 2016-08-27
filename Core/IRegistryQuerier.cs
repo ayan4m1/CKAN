@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using CKAN.Types;
 using CKAN.Versioning;
 
 namespace CKAN
@@ -59,7 +60,7 @@ namespace CKAN
         /// Attempts to find a module with the given identifier and version.
         /// </summary>
         /// <returns>The module if it exists, null otherwise.</returns>
-        CkanModule GetModuleByVersion(string identifier, Version version);
+        CkanModule GetModuleByVersion(string identifier, GameVersion version);
 
         /// <summary>
         ///     Returns a simple array of all incompatible modules for
@@ -73,7 +74,7 @@ namespace CKAN
         /// This includes DLLs, which will have a version type of `DllVersion`.
         /// This includes Provides if set, which will have a version of `ProvidesVersion`.
         /// </summary>
-        Dictionary<string, Version> Installed(bool include_provides = true);
+        Dictionary<string, GameVersion> Installed(bool include_provides = true);
 
         /// <summary>
         /// Returns the InstalledModule, or null if it is not installed.
@@ -88,7 +89,7 @@ namespace CKAN
         /// </summary>
         /// <param name="with_provides">If set to false will not check for provided versions.</param>
         /// <returns>The version of the mod or null if not found</returns>
-        Version InstalledVersion(string identifier, bool with_provides = true);
+        GameVersion InstalledVersion(string identifier, bool with_provides = true);
     }
 
     /// <summary>
@@ -97,11 +98,11 @@ namespace CKAN
     public static class IRegistryQuerierHelpers
 {
         /// <summary>
-        /// Helper to call <see cref="IRegistryQuerier.GetModuleByVersion(string, Version)"/>
+        /// Helper to call <see cref="IRegistryQuerier.GetModuleByVersion(string, GameVersion)"/>
         /// </summary>
         public static CkanModule GetModuleByVersion(this IRegistryQuerier querier, string ident, string version)
         {
-            return querier.GetModuleByVersion(ident, new Version(version));
+            return querier.GetModuleByVersion(ident, new GameVersion(version));
         }
 
         /// <summary>

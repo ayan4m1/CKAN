@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+using CKAN.Types;
 
 namespace CKAN.Net
 {

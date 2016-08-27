@@ -200,12 +200,12 @@ namespace CKAN.Versioning
         }
 
         /// <summary>
-        /// Converts the value of the current <see cref="KspVersion"/> to its equivalent <see cref="String"/>
+        /// Converts the value of the current <see cref="KspVersion"/> to its equivalent <see cref="string"/>
         /// representation.
         /// </summary>
         /// <returns>
         /// <para>
-        /// The <see cref="String"/> representation of the values of the major, minor, patch, and build components of
+        /// The <see cref="string"/> representation of the values of the major, minor, patch, and build components of
         /// the current <see cref="KspVersion"/> object as depicted in the following format. Each component is
         /// separated by a period character ('.'). Square brackets ('[' and ']') indicate a component that will not
         /// appear in the return value if the component is not defined:
@@ -292,8 +292,7 @@ namespace CKAN.Versioning
             KspVersion result;
             if (TryParse(input, out result))
                 return result;
-            else
-                throw new FormatException();
+            throw new FormatException();
         }
 
         /// <summary>
@@ -358,10 +357,7 @@ namespace CKAN.Versioning
 
                 return true;
             }
-            else
-            {
-                return false;
-            }
+            return false;
         }
     }
 
@@ -491,8 +487,7 @@ namespace CKAN.Versioning
 
             if (objKspVersion != null)
                 return CompareTo(objKspVersion);
-            else
-                throw new ArgumentException("Object must be of type KspVersion.");
+            throw new ArgumentException("Object must be of type KspVersion.");
         }
 
         /// <summary>
@@ -549,15 +544,9 @@ namespace CKAN.Versioning
 
                     return patchCompare == 0 ? _build.CompareTo(other._build) : patchCompare;
                 }
-                else
-                {
-                    return minorCompare;
-                }
+                return minorCompare;
             }
-            else
-            {
-                return majorCompare;
-            }
+            return majorCompare;
         }
 
         /// <summary>
@@ -582,7 +571,7 @@ namespace CKAN.Versioning
 
         /// <summary>
         /// Determines whether the first specified <see cref="KspVersion"/> object is greater than the second
-        /// specified <see cref="Version"/> object.
+        /// specified <see cref="Types.GameVersion"/> object.
         /// </summary>
         /// <param name="left">The first <see cref="KspVersion"/> object.</param>
         /// <param name="right">The second <see cref="KspVersion"/> object.</param>
@@ -705,8 +694,7 @@ namespace CKAN.Versioning
 
                     if (KspVersion.TryParse(value, out result))
                         return result;
-                    else
-                        throw new JsonException(string.Format("Could not parse KSP version: {0}", value));
+                    throw new JsonException(string.Format("Could not parse KSP version: {0}", value));
             }
         }
 

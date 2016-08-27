@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace CKAN
+﻿namespace CKAN
 {
     public enum GameDirectory
     {

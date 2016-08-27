@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Net;
 using System.Reflection;
+using CKAN.Types;
 using log4net;
 using Newtonsoft.Json;
-using CKAN.Types;
-using System.Linq;
 
 namespace CKAN.Net
 {
@@ -26,7 +27,7 @@ namespace CKAN.Net
         private Tuple<Uri, long> fetchedUpdaterUrl;
         private Tuple<Uri, long> fetchedCkanUrl;
 
-        public Version LatestVersion { get; private set; }
+        public GameVersion LatestVersion { get; private set; }
         public string ReleaseNotes { get; private set; }
 
         private static AutoUpdate instance;
@@ -77,7 +78,7 @@ namespace CKAN.Net
             }
             catch (Kraken)
             {
-                LatestVersion = new Version(Meta.Version());
+                LatestVersion = new GameVersion(Meta.Version());
                 return;
             }
 
@@ -96,7 +97,7 @@ namespace CKAN.Net
         public string ExtractReleaseNotes(string releaseBody)
         {
             string divider = "\r\n---\r\n";
-            string[] notesArray = releaseBody.Split(new string[] { divider }, StringSplitOptions.None);
+            string[] notesArray = releaseBody.Split(new[] { divider }, StringSplitOptions.None);
 
             if (notesArray.Length > 1)
             {
@@ -122,11 +123,11 @@ namespace CKAN.Net
             var pid = Process.GetCurrentProcess().Id;
 
             // download updater app and new ckan.exe
-            string updaterFilename = System.IO.Path.GetTempPath() + Guid.NewGuid().ToString() + ".exe";
-            string ckanFilename = System.IO.Path.GetTempPath() + Guid.NewGuid().ToString() + ".exe";
+            string updaterFilename = Path.GetTempPath() + Guid.NewGuid() + ".exe";
+            string ckanFilename = Path.GetTempPath() + Guid.NewGuid() + ".exe";
             NetUtils.DownloadWithProgress(new[]{
                 new NetUtils.DownloadTarget(fetchedUpdaterUrl.Item1, updaterFilename, fetchedUpdaterUrl.Item2),
-                new NetUtils.DownloadTarget(fetchedCkanUrl.Item1, ckanFilename, fetchedCkanUrl.Item2),
+                new NetUtils.DownloadTarget(fetchedCkanUrl.Item1, ckanFilename, fetchedCkanUrl.Item2)
             }, user);
 
             // run updater

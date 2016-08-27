@@ -5,6 +5,8 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using System.Transactions;
+using CKAN.Relationships;
+using CKAN.Types;
 using CKAN.Versioning;
 using log4net;
 using Newtonsoft.Json;
@@ -44,10 +46,10 @@ namespace CKAN
         /// </summary>
         [JsonIgnore] public SortedDictionary<string, Repository> Repositories
         {
-            get { return this.repositories; }
+            get { return repositories; }
 
             // TODO writable only so it can be initialized, better ideas welcome
-            set { this.repositories = value; }
+            set { repositories = value; }
         }
 
         /// <summary>
@@ -382,7 +384,7 @@ namespace CKAN
         /// Remove the given module from the registry of available modules.
         /// Does *nothing* if the module was not present to begin with.
         /// </summary>
-        public void RemoveAvailable(string identifier, Version version)
+        public void RemoveAvailable(string identifier, GameVersion version)
         {
             AvailableModule availableModule;
             if (available_modules.TryGetValue(identifier, out availableModule))
@@ -579,7 +581,7 @@ namespace CKAN
         /// or null if it does not exist.
         /// <see cref = "IRegistryQuerier.GetModuleByVersion" />
         /// </summary>
-        public CkanModule GetModuleByVersion(string ident, Version version)
+        public CkanModule GetModuleByVersion(string ident, GameVersion version)
         {
             log.DebugFormat("Trying to find {0} version {1}", ident, version);
 
@@ -749,9 +751,9 @@ namespace CKAN
         /// <summary>
         /// <see cref = "IRegistryQuerier.Installed" />
         /// </summary>
-        public Dictionary<string, Version> Installed(bool withProvides = true)
+        public Dictionary<string, GameVersion> Installed(bool withProvides = true)
         {
-            var installed = new Dictionary<string, Version>();
+            var installed = new Dictionary<string, GameVersion>();
 
             // Index our DLLs, as much as we dislike them.
             foreach (var dllinfo in installed_dlls)
@@ -824,7 +826,7 @@ namespace CKAN
         /// <summary>
         /// <see cref = "IRegistryQuerier.InstalledVersion" />
         /// </summary>
-        public Version InstalledVersion(string modIdentifier, bool with_provides=true)
+        public GameVersion InstalledVersion(string modIdentifier, bool with_provides=true)
         {
             InstalledModule installedModule;
 

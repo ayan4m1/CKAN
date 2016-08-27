@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using CKAN.Converters;
 using Newtonsoft.Json;
 
-namespace CKAN
+namespace CKAN.Types
 {
     /// <summary>
     /// A release status, complying to the CKAN spec.

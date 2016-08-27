@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using CKAN.Net;
 using CKAN.Versioning;
 using log4net;
 using Newtonsoft.Json;
-using CKAN.Net;
 
 namespace CKAN.GameVersionProviders
 {
@@ -107,10 +107,7 @@ namespace CKAN.GameVersionProviders
                     _registry.SetKSPBuilds(json);
                     return true;
                 }
-                else
-                {
-                    return false;
-                }
+                return false;
             }
             catch (Exception e)
             {
@@ -149,10 +146,7 @@ namespace CKAN.GameVersionProviders
                         return true;
                     }
                 }
-                else
-                {
-                    return false;
-                }
+                return false;
             }
             catch(Exception e)
             {

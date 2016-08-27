@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
+using CKAN.Converters;
 using ICSharpCode.SharpZipLib.Zip;
 using Newtonsoft.Json;
-using System.IO;
 
-namespace CKAN
+namespace CKAN.Types
 {
     [JsonObject(MemberSerialization.OptIn)]
     public class ModuleInstallDescriptor : ICloneable
@@ -158,12 +159,12 @@ namespace CKAN
         public ModuleInstallDescriptor ConvertFindToFile(ZipFile zipfile)
         {
             // If we're already a file type stanza, then we have nothing to do.
-            if (this.file != null)
+            if (file != null)
             {
                 return this;
             }
 
-            var stanza = (ModuleInstallDescriptor) this.Clone();
+            var stanza = (ModuleInstallDescriptor) Clone();
 
             // Candidate top-level directories.
             var candidate_set = new HashSet<string>();
@@ -173,13 +174,13 @@ namespace CKAN
             // don't include entries for directories, but still include entries
             // for the files they contain.
             string filter;
-            if (this.find != null)
+            if (find != null)
             {
-                filter = @"(?:^|/)" + Regex.Escape(this.find) + @"$";
+                filter = @"(?:^|/)" + Regex.Escape(find) + @"$";
             }
             else
             {
-                filter = this.find_regexp;
+                filter = find_regexp;
             }
 
             // Let's find that directory
@@ -206,8 +207,8 @@ namespace CKAN
             if (candidates.Count == 0)
             {
                 throw new FileNotFoundKraken(
-                    this.find ?? this.find_regexp,
-                    String.Format("Could not find {0} entry in zipfile to install", this.find ?? this.find_regexp)
+                    find ?? find_regexp,
+                    String.Format("Could not find {0} entry in zipfile to install", find ?? find_regexp)
                 );
             }
 

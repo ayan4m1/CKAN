@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -9,6 +8,7 @@ using System.Transactions;
 using Autofac;
 using CKAN.GameVersionProviders;
 using CKAN.Net;
+using CKAN.Types;
 using CKAN.Versioning;
 using log4net;
 
@@ -207,11 +207,8 @@ namespace CKAN
                 Log.DebugFormat("Found version {0}", version);
                 return version;
             }
-            else
-            {
-                Log.Error("Could not find KSP version");
-                throw new NotKSPDirKraken(directory, "Could not find KSP version in readme.txt");
-            }
+            Log.Error("Could not find KSP version");
+            throw new NotKSPDirKraken(directory, "Could not find KSP version in readme.txt");
         }
 
         private static KspVersion DetectVersionInternal(string directory)
@@ -224,13 +221,10 @@ namespace CKAN
             {
                 return version;
             }
-            else
-            {
-                var readmeVersionProvider = ServiceLocator.Container
-                    .ResolveKeyed<IGameVersionProvider>(KspVersionSource.Readme);
+            var readmeVersionProvider = ServiceLocator.Container
+                .ResolveKeyed<IGameVersionProvider>(KspVersionSource.Readme);
 
-                return readmeVersionProvider.TryGetVersion(directory, out version) ? version : null;
-            }
+            return readmeVersionProvider.TryGetVersion(directory, out version) ? version : null;
         }
         
         /// <summary>

@@ -2,7 +2,7 @@ using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace CKAN
+namespace CKAN.Converters
 {
     /// <summary>
     /// Converter to allow old resources fields to be read in newer clients.

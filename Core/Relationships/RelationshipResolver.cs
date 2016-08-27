@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using CKAN.Types;
 using CKAN.Versioning;
 using log4net;
 
-namespace CKAN
+namespace CKAN.Relationships
 {
 
     // TODO: It would be lovely to get rid of the `without` fields,
@@ -21,12 +22,12 @@ namespace CKAN
         /// <summary>
         /// If true, add suggests, but not suggested suggests. :)
         /// </summary>
-        public bool with_suggests = false;
+        public bool with_suggests;
 
         /// <summary>
         /// If true, add suggested modules, and *their* suggested modules, too!
         /// </summary>
-        public bool with_all_suggests = false;
+        public bool with_all_suggests;
 
         /// <summary>
         /// If true, surpresses the TooManyProvides kraken when resolving

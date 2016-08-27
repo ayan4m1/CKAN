@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using CKAN.GameVersionProviders;
+using CKAN.Types.GameComparator;
 
 namespace CKAN
 {

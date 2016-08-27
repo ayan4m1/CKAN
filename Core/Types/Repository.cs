@@ -1,7 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
 
-namespace CKAN
+namespace CKAN.Types
 {
     public class Repository
     {
@@ -11,7 +11,7 @@ namespace CKAN
 
         public string name;
         public Uri uri;
-        public int priority = 0;
+        public int priority;
         public Boolean ckan_mirror = false;
 
         public Repository()

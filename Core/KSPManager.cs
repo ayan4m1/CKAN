@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using CKAN;
+using CKAN.Types;
 using log4net;
 
 namespace CKAN
@@ -158,7 +158,7 @@ namespace CKAN
         /// </summary>
         /// <returns> A unused valid instance name.</returns>
         /// <param name="name">The name to use as a base.</param>
-        /// <exception cref="CKAN.Kraken">Could not find a valid name.</exception>
+        /// <exception cref="Kraken">Could not find a valid name.</exception>
         public string GetNextValidInstanceName(string name)
         {
             // Check if the current name is valid.

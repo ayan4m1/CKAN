@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
+using CKAN.Converters;
 using Newtonsoft.Json;
 
-namespace CKAN
+namespace CKAN.Types
 {
     /// <summary>
     /// A Spec compliment license string.

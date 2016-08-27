@@ -6,6 +6,7 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using ChinhDo.Transactions.FileManager;
+using CKAN.Types;
 using CurlSharp;
 using log4net;
 
@@ -69,10 +70,7 @@ namespace CKAN.Net
                         {
                             throw new Kraken("curl download of " + url + " failed with CurlCode " + result);
                         }
-                        else
-                        {
-                            Log.Debug("curlsharp download successful");
-                        }
+                        Log.Debug("curlsharp download successful");
                     }
 
                     Curl.CleanUp();
@@ -180,7 +178,7 @@ namespace CKAN.Net
                 {
                     content += Encoding.UTF8.GetString(buf);
                     return size * nmemb;
-                }) as CurlEasy;
+                });
 
                 using (client)
                 {
@@ -221,23 +219,20 @@ namespace CKAN.Net
                 {
                     return currentUri;
                 }
+                Log.DebugFormat("{0} redirected to {1}", currentUri, location);
+
+                if (Uri.IsWellFormedUriString(location, UriKind.Absolute))
+                {
+                    currentUri = new Uri(location);
+                }
+                else if (Uri.IsWellFormedUriString(location, UriKind.Relative))
+                {
+                    currentUri = new Uri(currentUri, location);
+                    Log.DebugFormat("Relative URL {0} is absolute URL {1}", location, currentUri);
+                }
                 else
                 {
-                    Log.DebugFormat("{0} redirected to {1}", currentUri, location);
-
-                    if (Uri.IsWellFormedUriString(location, UriKind.Absolute))
-                    {
-                        currentUri = new Uri(location);
-                    }
-                    else if (Uri.IsWellFormedUriString(location, UriKind.Relative))
-                    {
-                        currentUri = new Uri(currentUri, location);
-                        Log.DebugFormat("Relative URL {0} is absolute URL {1}", location, currentUri);
-                    }
-                    else
-                    {
-                        throw new Kraken("Invalid URL in Location header: " + location);
-                    }
+                    throw new Kraken("Invalid URL in Location header: " + location);
                 }
             }
 

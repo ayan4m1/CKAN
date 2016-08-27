@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Transactions;
 using ChinhDo.Transactions.FileManager;
+using CKAN.Net;
+using CKAN.Relationships;
+using CKAN.Types;
 using ICSharpCode.SharpZipLib.Core;
 using ICSharpCode.SharpZipLib.Zip;
 using log4net;
-using CKAN.Net;
 
 namespace CKAN
 {
@@ -110,7 +111,7 @@ namespace CKAN
         ///     If no filename is provided, the module's standard name will be used.
         ///     Chcecks the CKAN cache first.
         /// </summary>
-        public string CachedOrDownload(string identifier, Version version, Uri url, string filename = null)
+        public string CachedOrDownload(string identifier, GameVersion version, Uri url, string filename = null)
         {
             return CachedOrDownload(identifier, version, url, Cache, filename);
         }
@@ -121,7 +122,7 @@ namespace CKAN
         ///     If no filename is provided, the module's standard name will be used.
         ///     Chcecks provided cache first.
         /// </summary>
-        public static string CachedOrDownload(string identifier, Version version, Uri url, NetFileCache cache,
+        public static string CachedOrDownload(string identifier, GameVersion version, Uri url, NetFileCache cache,
             string filename = null)
         {
             if (filename == null)
@@ -283,7 +284,7 @@ namespace CKAN
         {
             CheckMetapackageInstallationKraken(module);
 
-            Version version = _registryManager.registry.InstalledVersion(module.identifier);
+            GameVersion version = _registryManager.registry.InstalledVersion(module.identifier);
 
             // TODO: This really should be handled by higher-up code.
             if (version != null)
@@ -931,7 +932,7 @@ namespace CKAN
         public void Upgrade(IEnumerable<string> identifiers, IDownloader netAsyncDownloader)
         {
             // We do not wish to pull in any suggested or recommended mods.
-            var options = new RelationshipResolverOptions()
+            var options = new RelationshipResolverOptions
             {
                 with_recommends = false,
                 with_suggests = false

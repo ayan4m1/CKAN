@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using Autofac;
-using ChinhDo.Transactions;
 using ChinhDo.Transactions.FileManager;
 using CKAN.GameVersionProviders;
+using CKAN.Types;
 using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.Tar;
 using ICSharpCode.SharpZipLib.Zip;
@@ -152,7 +153,7 @@ namespace CKAN.Net
             {
                 repoFile = NetUtils.Download(repo);
             }
-            catch (System.Net.WebException)
+            catch (WebException)
             {
                 user.RaiseMessage("Connection to {0} could not be established.", repo);
                 return;
@@ -282,7 +283,7 @@ namespace CKAN.Net
                 for (int i = 0; i < metadataChanges.Count; i++)
                 {
                     mods += metadataChanges[i].identifier + " "
-                        + metadataChanges[i].version.ToString() + ((i < metadataChanges.Count-1) ? ", " : "");
+                        + metadataChanges[i].version + ((i < metadataChanges.Count-1) ? ", " : "");
                 }
 
                 if(user.RaiseYesNoDialog(String.Format(
