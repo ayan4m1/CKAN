@@ -54,12 +54,13 @@ namespace Tests.Data
             {
                 try
                 {
-                    Thread.Sleep(10);
                     Directory.Delete(_disposableDir, true);
+                    break;
                 }
                 catch (IOException)
                 {
                     // todo: logger
+                    Thread.Sleep(100);
                 }
             }
         }
