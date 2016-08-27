@@ -16,61 +16,60 @@ namespace CKAN
 
     public struct InstallableFile
     {
-        public ZipEntry source;
-        public string destination;
-        public bool makedir;
+        public ZipEntry Source;
+        public string Destination;
+        public bool MakeDir;
     }
 
     public class ModuleInstaller
     {
-        public IUser User { get; set; }
-
         // To allow the ModuleInstaller to work on multiple KSP instances, keep a list of each ModuleInstaller and return the correct one upon request.
-        private static SortedList<string, ModuleInstaller> instances = new SortedList<string, ModuleInstaller>();
+        private static readonly SortedList<string, ModuleInstaller> Instances =
+            new SortedList<string, ModuleInstaller>();
 
-        private static readonly ILog log = LogManager.GetLogger(typeof(ModuleInstaller));
-        private static readonly TxFileManager file_transaction = new TxFileManager ();
+        private static readonly ILog Log = LogManager.GetLogger(typeof(ModuleInstaller));
+        private static readonly TxFileManager FileTransaction = new TxFileManager();
 
-        private RegistryManager registry_manager;
-        private KSP ksp;
+        public event ModuleInstallerReportModInstalled OnReportModInstalled;
 
-        public ModuleInstallerReportModInstalled onReportModInstalled = null;
-
-        // Our own cache is that of the KSP instance we're using.
-        public NetFileCache Cache
-        {
-            get
-            {
-                return ksp.Cache;
-            }
-        }
+        private readonly RegistryManager _registryManager;
+        private readonly KSP _ksp;
 
         // Constructor
         private ModuleInstaller(KSP ksp, IUser user)
         {
             User = user;
-            this.ksp = ksp;
-            registry_manager = RegistryManager.Instance(ksp);
-            log.DebugFormat("Creating ModuleInstaller for {0}", ksp.GameDir);
+            _ksp = ksp;
+            _registryManager = RegistryManager.Instance(ksp);
+            Log.DebugFormat("Creating ModuleInstaller for {0}", ksp.GameDir);
+        }
+
+        public IUser User { get; set; }
+
+        // Our own cache is that of the KSP instance we're using.
+        public NetFileCache Cache
+        {
+            get { return _ksp.Cache; }
         }
 
         /// <summary>
-        /// Gets the ModuleInstaller instance associated with the passed KSP instance. Creates a new ModuleInstaller instance if none exists.
+        ///     Gets the ModuleInstaller instance associated with the passed KSP instance. Creates a new ModuleInstaller instance
+        ///     if none exists.
         /// </summary>
         /// <returns>The ModuleInstaller instance.</returns>
-        /// <param name="ksp_instance">Current KSP instance.</param>
+        /// <param name="kspInstance">Current KSP instance.</param>
         /// <param name="user">IUser implementation.</param>
-        public static ModuleInstaller GetInstance(KSP ksp_instance, IUser user)
+        public static ModuleInstaller GetInstance(KSP kspInstance, IUser user)
         {
             ModuleInstaller instance;
 
             // Check in the list of instances if we have already created a ModuleInstaller instance for this KSP instance.
-            if (!instances.TryGetValue(ksp_instance.GameDir.ToLower(), out instance))
+            if (!Instances.TryGetValue(kspInstance.GameDir.ToLower(), out instance))
             {
                 // Create a new instance and insert it in the static list.
-                instance = new ModuleInstaller(ksp_instance, user);
+                instance = new ModuleInstaller(kspInstance, user);
 
-                instances.Add(ksp_instance.GameDir.ToLower(), instance);
+                Instances.Add(kspInstance.GameDir.ToLower(), instance);
             }
 
             return instance;
@@ -86,23 +85,19 @@ namespace CKAN
         }
 
         /// <summary>
-        /// Downloads the given mod to the cache. Returns the filename it was saved to.
+        ///     Downloads the given mod to the cache. Returns the filename it was saved to.
         /// </summary>
         public static string Download(Uri url, string filename, NetFileCache cache)
         {
-            log.Info("Downloading " + filename);
-
-            string tmp_file = NetUtils.Download(url);
-
-            return cache.Store(url, tmp_file, filename, true);
+            Log.Info("Downloading " + filename);
+            return cache.Store(url, NetUtils.Download(url), filename, true);
         }
 
         /// <summary>
-        /// Returns the path to a cached copy of a module if it exists, or downloads
-        /// and returns the downloaded copy otherwise.
-        ///
-        /// If no filename is provided, the module's standard name will be used.
-        /// Chcecks the CKAN cache first.
+        ///     Returns the path to a cached copy of a module if it exists, or downloads
+        ///     and returns the downloaded copy otherwise.
+        ///     If no filename is provided, the module's standard name will be used.
+        ///     Chcecks the CKAN cache first.
         /// </summary>
         public string CachedOrDownload(CkanModule module, string filename = null)
         {
@@ -110,11 +105,10 @@ namespace CKAN
         }
 
         /// <summary>
-        /// Returns the path to a cached copy of a module if it exists, or downloads
-        /// and returns the downloaded copy otherwise.
-        ///
-        /// If no filename is provided, the module's standard name will be used.
-        /// Chcecks the CKAN cache first.
+        ///     Returns the path to a cached copy of a module if it exists, or downloads
+        ///     and returns the downloaded copy otherwise.
+        ///     If no filename is provided, the module's standard name will be used.
+        ///     Chcecks the CKAN cache first.
         /// </summary>
         public string CachedOrDownload(string identifier, Version version, Uri url, string filename = null)
         {
@@ -122,39 +116,38 @@ namespace CKAN
         }
 
         /// <summary>
-        /// Returns the path to a cached copy of a module if it exists, or downloads
-        /// and returns the downloaded copy otherwise.
-        ///
-        /// If no filename is provided, the module's standard name will be used.
-        /// Chcecks provided cache first.
+        ///     Returns the path to a cached copy of a module if it exists, or downloads
+        ///     and returns the downloaded copy otherwise.
+        ///     If no filename is provided, the module's standard name will be used.
+        ///     Chcecks provided cache first.
         /// </summary>
-        public static string CachedOrDownload(string identifier, Version version, Uri url, NetFileCache cache, string filename = null)
+        public static string CachedOrDownload(string identifier, Version version, Uri url, NetFileCache cache,
+            string filename = null)
         {
             if (filename == null)
             {
                 filename = CkanModule.StandardName(identifier, version);
             }
 
-            string full_path = cache.GetCachedZip(url);
-            if (full_path == null)
+            var fullPath = cache.GetCachedZip(url);
+            if (fullPath == null)
             {
                 return Download(url, filename, cache);
             }
 
-            log.DebugFormat("Using {0} (cached)", filename);
-            return full_path;
+            Log.DebugFormat("Using {0} (cached)", filename);
+            return fullPath;
         }
-
 
 
         public void InstallList(
             List<string> modules,
             RelationshipResolverOptions options,
             IDownloader downloader = null
-        )
+            )
         {
-            var resolver = new RelationshipResolver(modules, options, registry_manager.registry, ksp.Version);
-            List<CkanModule> modsToInstall = resolver.ModList();
+            var resolver = new RelationshipResolver(modules, options, _registryManager.registry, _ksp.Version);
+            var modsToInstall = resolver.ModList();
 
             InstallList(modsToInstall, options, downloader);
         }
@@ -162,10 +155,9 @@ namespace CKAN
         /// <summary>
         ///     Installs all modules given a list of identifiers as a transaction. Resolves dependencies.
         ///     This *will* save the registry at the end of operation.
-        ///
-        /// Propagates a BadMetadataKraken if our install metadata is bad.
-        /// Propagates a FileExistsKraken if we were going to overwrite a file.
-        /// Propagates a CancelledActionKraken if the user cancelled the install.
+        ///     Propagates a BadMetadataKraken if our install metadata is bad.
+        ///     Propagates a FileExistsKraken if we were going to overwrite a file.
+        ///     Propagates a CancelledActionKraken if the user cancelled the install.
         /// </summary>
         //
         // TODO: Break this up into smaller pieces! It's huge!
@@ -173,20 +165,20 @@ namespace CKAN
             ICollection<CkanModule> modules,
             RelationshipResolverOptions options,
             IDownloader downloader = null
-        )
+            )
         {
-            var resolver = new RelationshipResolver(modules, options, registry_manager.registry, ksp.Version);
-            List<CkanModule> modsToInstall = resolver.ModList();
-            List<CkanModule> downloads = new List<CkanModule> ();
+            var resolver = new RelationshipResolver(modules, options, _registryManager.registry, _ksp.Version);
+            var modsToInstall = resolver.ModList();
+            var downloads = new List<CkanModule>();
 
             // TODO: All this user-stuff should be happening in another method!
             // We should just be installing mods as a transaction.
 
-            User.RaiseMessage("About to install...\r\n");
+            User.RaiseMessage("About to install..." + Environment.NewLine);
 
-            foreach (CkanModule module in modsToInstall)
+            foreach (var module in modsToInstall)
             {
-                if (!ksp.Cache.IsCachedZip(module.download))
+                if (!_ksp.Cache.IsCachedZip(module.download))
                 {
                     User.RaiseMessage(" * {0} {1}", module.name, module.version);
                     downloads.Add(module);
@@ -197,14 +189,14 @@ namespace CKAN
                 }
             }
 
-            bool ok = User.RaiseYesNoDialog("\r\nContinue?");
+            var ok = User.RaiseYesNoDialog(Environment.NewLine + "Continue?");
 
             if (!ok)
             {
                 throw new CancelledActionKraken("User declined install list");
             }
 
-            User.RaiseMessage(String.Empty); // Just to look tidy.
+            User.RaiseMessage(string.Empty); // Just to look tidy.
 
             if (downloads.Count > 0)
             {
@@ -213,30 +205,29 @@ namespace CKAN
                     downloader = new NetAsyncModulesDownloader(User);
                 }
 
-                downloader.DownloadModules(ksp.Cache, downloads);
+                downloader.DownloadModules(_ksp.Cache, downloads);
             }
 
             // We're about to install all our mods; so begin our transaction.
-            using (TransactionScope transaction = CkanTransaction.CreateTransactionScope())
+            using (var transaction = CkanTransaction.CreateTransactionScope())
             {
-                for (int i = 0; i < modsToInstall.Count; i++)
+                for (var i = 0; i < modsToInstall.Count; i++)
                 {
-                    int percent_complete = (i * 100) / modsToInstall.Count;
+                    var percentComplete = i*100/modsToInstall.Count;
 
-                    User.RaiseProgress(String.Format("Installing mod \"{0}\"", modsToInstall[i]),
-                                         percent_complete);
+                    User.RaiseProgress(string.Format("Installing mod \"{0}\"", modsToInstall[i]),
+                        percentComplete);
 
                     Install(modsToInstall[i]);
                 }
 
                 User.RaiseProgress("Updating registry", 70);
 
-                registry_manager.Save(!options.without_enforce_consistency);
+                _registryManager.Save(!options.without_enforce_consistency);
 
                 User.RaiseProgress("Commiting filesystem changes", 80);
 
                 transaction.Complete();
-
             }
 
             // We can scan GameData as a separate transaction. Installing the mods
@@ -247,7 +238,7 @@ namespace CKAN
 
             if (!options.without_enforce_consistency)
             {
-                ksp.ScanGameData();
+                _ksp.ScanGameData();
             }
 
             User.RaiseProgress("Done!\r\n", 100);
@@ -262,15 +253,15 @@ namespace CKAN
         // TODO: Return files relative to GameRoot
         public IEnumerable<string> GetModuleContentsList(CkanModule module)
         {
-            string filename = ksp.Cache.GetCachedZip(module.download);
+            string filename = _ksp.Cache.GetCachedZip(module.download);
 
             if (filename == null)
             {
                 return null;
             }
 
-            return FindInstallableFiles(module, filename, ksp)
-                .Select(x => x.destination);
+            return FindInstallableFiles(module, filename, _ksp)
+                .Select(x => x.Destination);
         }
 
         /// <summary>
@@ -292,7 +283,7 @@ namespace CKAN
         {
             CheckMetapackageInstallationKraken(module);
 
-            Version version = registry_manager.registry.InstalledVersion(module.identifier);
+            Version version = _registryManager.registry.InstalledVersion(module.identifier);
 
             // TODO: This really should be handled by higher-up code.
             if (version != null)
@@ -314,7 +305,7 @@ namespace CKAN
             }
 
             // We'll need our registry to record which files we've installed.
-            Registry registry = registry_manager.registry;
+            Registry registry = _registryManager.registry;
 
             using (var transaction = CkanTransaction.CreateTransactionScope())
             {
@@ -322,7 +313,7 @@ namespace CKAN
                 IEnumerable<string> files = InstallModule(module, filename);
 
                 // Register our module and its files.
-                registry.RegisterModule(module, files, ksp);
+                registry.RegisterModule(module, files, _ksp);
 
                 // Finish our transaction, but *don't* save the registry; we may be in an
                 // intermediate, inconsistent state.
@@ -332,9 +323,9 @@ namespace CKAN
             }
 
             // Fire our callback that we've installed a module, if we have one.
-            if (onReportModInstalled != null)
+            if (OnReportModInstalled != null)
             {
-                onReportModInstalled(module);
+                OnReportModInstalled(module);
             }
 
         }
@@ -357,32 +348,32 @@ namespace CKAN
         /// Propagates a BadMetadataKraken if our install metadata is bad.
         /// Propagates a FileExistsKraken if we were going to overwrite a file.
         /// </summary>
-        private IEnumerable<string> InstallModule(CkanModule module, string zip_filename)
+        private IEnumerable<string> InstallModule(CkanModule module, string zipFilename)
         {
             CheckMetapackageInstallationKraken(module);
 
-            using (ZipFile zipfile = new ZipFile(zip_filename))
+            using (ZipFile zipfile = new ZipFile(zipFilename))
             {
-                IEnumerable<InstallableFile> files = FindInstallableFiles(module, zipfile, ksp);
+                IEnumerable<InstallableFile> files = FindInstallableFiles(module, zipfile, _ksp);
 
                 try
                 {
                     foreach (InstallableFile file in files)
                     {
-                        log.InfoFormat("Copying {0}", file.source.Name);
-                        CopyZipEntry(zipfile, file.source, file.destination, file.makedir);
+                        Log.InfoFormat("Copying {0}", file.Source.Name);
+                        CopyZipEntry(zipfile, file.Source, file.Destination, file.MakeDir);
                     }
                 }
                 catch (FileExistsKraken kraken)
                 {
                     // Decorate the kraken with our module and re-throw
-                    kraken.filename = ksp.ToRelativeGameDir(kraken.filename);
+                    kraken.filename = _ksp.ToRelativeGameDir(kraken.filename);
                     kraken.installingModule = module;
-                    kraken.owningModule = registry_manager.registry.FileOwner(kraken.filename);
+                    kraken.owningModule = _registryManager.registry.FileOwner(kraken.filename);
                     throw;
                 }
 
-                return files.Select(x => x.destination);
+                return files.Select(x => x.Destination);
             }
         }
 
@@ -400,9 +391,9 @@ namespace CKAN
         /// <exception cref="BadInstallLocationKraken">Thrown when the installation path is not valid according to the spec.</exception>
         internal static List<InstallableFile> FindInstallableFiles(ModuleInstallDescriptor stanza, ZipFile zipfile, KSP ksp)
         {
-            string installDir = null;
+            string installDir;
             bool makeDirs;
-            var files = new List<InstallableFile>();
+            var files = new List<InstallableFile> ();
 
             // Normalize the path before doing everything else
             // TODO: This really should happen in the ModuleInstallDescriptor itself.
@@ -410,7 +401,9 @@ namespace CKAN
 
             // Convert our stanza to a standard `file` type. This is a no-op if it's
             // already the basic type.
+
             stanza = stanza.ConvertFindToFile(zipfile);
+
             if (stanza.install_to == "GameData" || stanza.install_to.StartsWith("GameData/"))
             {
                 // The installation path can be either "GameData" or a sub-directory of "GameData"
@@ -418,16 +411,11 @@ namespace CKAN
                 if (stanza.install_to.Contains("/../") || stanza.install_to.EndsWith("/.."))
                     throw new BadInstallLocationKraken("Invalid installation path: " + stanza.install_to);
 
-                var subDir = stanza.install_to.Substring("GameData".Length);       // remove "GameData"
+                string subDir = stanza.install_to.Substring("GameData".Length);    // remove "GameData"
                 subDir = subDir.StartsWith("/") ? subDir.Substring(1) : subDir;    // remove a "/" at the beginning, if present
 
                 // Add the extracted subdirectory to the path of KSP's GameData
-                if (ksp != null)
-                {
-                    var dataDir = KSPPathUtils.GetGameDirectory(ksp.GameDir, GameDirectory.GameData);
-                    installDir = KSPPathUtils.NormalizePath(dataDir + Path.PathSeparator + subDir);
-                }
-                
+                installDir = ksp == null ? null : (KSPPathUtils.NormalizePath(KSPPathUtils.GetGameDirectory(ksp.GameDir, GameDirectory.GameData) + "/" + subDir));
                 makeDirs = true;
             }
             else if (stanza.install_to.StartsWith("Ships"))
@@ -488,46 +476,47 @@ namespace CKAN
             foreach (ZipEntry entry in zipfile)
             {
                 // Skips things not prescribed by our install stanza.
-                if (! stanza.IsWanted(entry.Name)) {
+                if (!stanza.IsWanted(entry.Name))
+                {
                     continue;
                 }
 
                 // Prepare our file info.
-                InstallableFile file_info = new InstallableFile
+                var fileInfo = new InstallableFile
                 {
-                    source = entry,
-                    makedir = makeDirs,
-                    destination = null
+                    Source = entry,
+                    MakeDir = makeDirs,
+                    Destination = null
                 };
 
                 // If we have a place to install it, fill that in...
                 if (installDir != null)
                 {
                     // Get the full name of the file.
-                    string outputName = entry.Name;
+                    var outputName = entry.Name;
 
                     // Update our file info with the install location
-                    file_info.destination = TransformOutputName(stanza.file, outputName, installDir, stanza.@as);
+                    fileInfo.Destination = TransformOutputName(stanza.file, outputName, installDir, stanza.@as);
                 }
 
-                files.Add(file_info);
+                files.Add(fileInfo);
             }
 
             // If we have no files, then something is wrong! (KSP-CKAN/CKAN#93)
             if (files.Count == 0)
             {
                 // We have null as the first argument here, because we don't know which module we're installing
-                throw new BadMetadataKraken(null, String.Format("No files found in {0} to install!", stanza.file));
+                throw new BadMetadataKraken(null, string.Format("No files found in {0} to install!", stanza.file));
             }
 
             return files;
         }
 
         /// <summary>
-        /// Transforms the name of the output. This will strip the leading directories from the stanza file from
-        /// output name and then combine it with the installDir.
-        /// EX: "kOS-1.1/GameData/kOS", "kOS-1.1/GameData/kOS/Plugins/kOS.dll", "GameData" will be transformed
-        /// to "GameData/kOS/Plugins/kOS.dll"
+        ///     Transforms the name of the output. This will strip the leading directories from the stanza file from
+        ///     output name and then combine it with the installDir.
+        ///     EX: "kOS-1.1/GameData/kOS", "kOS-1.1/GameData/kOS/Plugins/kOS.dll", "GameData" will be transformed
+        ///     to "GameData/kOS/Plugins/kOS.dll"
         /// </summary>
         /// <returns>The output name.</returns>
         /// <param name="file">The file directive of the stanza.</param>
@@ -535,14 +524,14 @@ namespace CKAN
         /// <param name="installDir">The installation dir where the file should end up with.</param>
         internal static string TransformOutputName(string file, string outputName, string installDir, string @as)
         {
-            string leadingPathToRemove = KSPPathUtils.GetLeadingPathElements(file);
+            var leadingPathToRemove = KSPPathUtils.GetLeadingPathElements(file);
 
             // Special-casing, if stanza.file is just "GameData" or "Ships", strip it.
             // TODO: Do we need to do anything special for tutorials or GameRoot?
             if (
-                leadingPathToRemove == string.Empty &&
+                leadingPathToRemove == string.Empty && 
                 (file == "GameData" || file == "Ships")
-            )
+                )
             {
                 leadingPathToRemove = file;
 
@@ -558,14 +547,14 @@ namespace CKAN
             // needs doing...
             if (leadingPathToRemove != string.Empty)
             {
-                string leadingRegEx = "^" + Regex.Escape(leadingPathToRemove) + "/";
+                var leadingRegEx = "^" + Regex.Escape(leadingPathToRemove) + "/";
                 if (!Regex.IsMatch(outputName, leadingRegEx))
                 {
                     throw new BadMetadataKraken(null,
-                        String.Format("Output file name ({0}) not matching leading path of stanza.file ({1})",
+                        string.Format("Output file name ({0}) not matching leading path of stanza.file ({1})",
                             outputName, leadingRegEx
-                        )
-                    );
+                            )
+                        );
                 }
                 // Strip off leading path name
                 outputName = Regex.Replace(outputName, leadingRegEx, "");
@@ -591,35 +580,33 @@ namespace CKAN
             // Return our snipped, normalised, and ready to go output filename!
             return KSPPathUtils.NormalizePath(
                 Path.Combine(installDir, outputName)
-            );
+                );
         }
 
         /// <summary>
-        /// Given a module and an open zipfile, return all the files that would be installed
-        /// for this module.
-        ///
-        /// If a KSP instance is provided, it will be used to generate output paths, otherwise these will be null.
-        ///
-        /// Throws a BadMetadataKraken if the stanza resulted in no files being returned.
+        ///     Given a module and an open zipfile, return all the files that would be installed
+        ///     for this module.
+        ///     If a KSP instance is provided, it will be used to generate output paths, otherwise these will be null.
+        ///     Throws a BadMetadataKraken if the stanza resulted in no files being returned.
         /// </summary>
         public static List<InstallableFile> FindInstallableFiles(CkanModule module, ZipFile zipfile, KSP ksp)
         {
-            var files = new List<InstallableFile> ();
+            var files = new List<InstallableFile>();
 
             try
             {
                 // Use the provided stanzas, or use the default install stanza if they're absent.
                 if (module.install != null && module.install.Length != 0)
                 {
-                    foreach (ModuleInstallDescriptor stanza in module.install)
+                    foreach (var stanza in module.install)
                     {
                         files.AddRange(FindInstallableFiles(stanza, zipfile, ksp));
                     }
                 }
                 else
                 {
-                    ModuleInstallDescriptor default_stanza = ModuleInstallDescriptor.DefaultInstallStanza(module.identifier, zipfile);
-                    files.AddRange(FindInstallableFiles(default_stanza, zipfile, ksp));
+                    var defaultStanza = ModuleInstallDescriptor.DefaultInstallStanza(module.identifier, zipfile);
+                    files.AddRange(FindInstallableFiles(defaultStanza, zipfile, ksp));
                 }
             }
             catch (BadMetadataKraken kraken)
@@ -634,28 +621,25 @@ namespace CKAN
         }
 
         /// <summary>
-        /// Given a module and a path to a zipfile, returns all the files that would be installed
-        /// from that zip for this module.
-        ///
-        /// This *will* throw an exception if the file does not exist.
-        ///
-        /// Throws a BadMetadataKraken if the stanza resulted in no files being returned.
-        ///
-        /// If a KSP instance is provided, it will be used to generate output paths, otherwise these will be null.
+        ///     Given a module and a path to a zipfile, returns all the files that would be installed
+        ///     from that zip for this module.
+        ///     This *will* throw an exception if the file does not exist.
+        ///     Throws a BadMetadataKraken if the stanza resulted in no files being returned.
+        ///     If a KSP instance is provided, it will be used to generate output paths, otherwise these will be null.
         /// </summary>
         // TODO: Document which exception!
-        public static List<InstallableFile> FindInstallableFiles(CkanModule module, string zip_filename, KSP ksp)
+        public static List<InstallableFile> FindInstallableFiles(CkanModule module, string zipFilename, KSP ksp)
         {
             // `using` makes sure our zipfile gets closed when we exit this block.
-            using (ZipFile zipfile = new ZipFile(zip_filename))
+            using (var zipfile = new ZipFile(zipFilename))
             {
-                log.DebugFormat("Searching {0} using {1} as module", zip_filename, module);
+                Log.DebugFormat("Searching {0} using {1} as module", zipFilename, module);
                 return FindInstallableFiles(module, zipfile, ksp);
             }
         }
 
         /// <summary>
-        /// Copy the entry from the opened zipfile to the path specified.
+        ///     Copy the entry from the opened zipfile to the path specified.
         /// </summary>
         internal static void CopyZipEntry(ZipFile zipfile, ZipEntry entry, string fullPath, bool makeDirs)
         {
@@ -664,45 +648,46 @@ namespace CKAN
                 // Skip if we're not making directories for this install.
                 if (!makeDirs)
                 {
-                    log.DebugFormat ("Skipping {0}, we don't make directories for this path", fullPath);
+                    Log.DebugFormat("Skipping {0}, we don't make directories for this path", fullPath);
                     return;
                 }
 
-                log.DebugFormat("Making directory {0}", fullPath);
-                file_transaction.CreateDirectory(fullPath);
+                Log.DebugFormat("Making directory {0}", fullPath);
+                FileTransaction.CreateDirectory(fullPath);
             }
             else
             {
-                log.DebugFormat("Writing file {0}", fullPath);
+                Log.DebugFormat("Writing file {0}", fullPath);
 
                 // Sometimes there are zipfiles that don't contain entries for the
                 // directories their files are in. No, I understand either, but
                 // the result is we have to make sure our directories exist, just in case.
                 if (makeDirs)
                 {
-                    string directory = Path.GetDirectoryName(fullPath);
-                    file_transaction.CreateDirectory(directory);
+                    var directory = Path.GetDirectoryName(fullPath);
+                    FileTransaction.CreateDirectory(directory);
                 }
 
                 // We don't allow for the overwriting of files. See #208.
-                if (File.Exists (fullPath))
+                if (File.Exists(fullPath))
                 {
-                    throw new FileExistsKraken(fullPath, string.Format("Trying to write {0} but it already exists.", fullPath));
+                    throw new FileExistsKraken(fullPath,
+                        string.Format("Trying to write {0} but it already exists.", fullPath));
                 }
 
                 // Snapshot whatever was there before. If there's nothing, this will just
                 // remove our file on rollback. We still need this even thought we won't
                 // overwite files, as it ensures deletiion on rollback.
-                file_transaction.Snapshot(fullPath);
+                FileTransaction.Snapshot(fullPath);
 
                 try
                 {
                     // It's a file! Prepare the streams
-                    using (Stream zipStream = zipfile.GetInputStream(entry))
-                    using (FileStream writer = File.Create(fullPath))
+                    using (var zipStream = zipfile.GetInputStream(entry))
+                    using (var writer = File.Create(fullPath))
                     {
                         // 4k is the block size on practically every disk and OS.
-                        byte[] buffer = new byte[4096];
+                        var buffer = new byte[4096];
                         StreamUtils.Copy(zipStream, writer, buffer);
                     }
                 }
@@ -714,21 +699,21 @@ namespace CKAN
         }
 
         /// <summary>
-        /// Uninstalls all the mods provided, including things which depend upon them.
-        /// This *DOES* save the registry.
-        /// Preferred over Uninstall.
+        ///     Uninstalls all the mods provided, including things which depend upon them.
+        ///     This *DOES* save the registry.
+        ///     Preferred over Uninstall.
         /// </summary>
         public void UninstallList(IEnumerable<string> mods)
         {
             // Pre-check, have they even asked for things which are installed?
 
-            foreach (string mod in mods.Where(mod => registry_manager.registry.InstalledModule(mod) == null))
+            foreach (string mod in mods.Where(mod => _registryManager.registry.InstalledModule(mod) == null))
             {
                 throw new ModNotInstalledKraken(mod);
             }
 
             // Find all the things which need uninstalling.
-            IEnumerable<string> goners = registry_manager.registry.FindReverseDependencies(mods);
+            IEnumerable<string> goners = _registryManager.registry.FindReverseDependencies(mods);
 
             // If there us nothing to uninstall, skip out.
             if (!goners.Any())
@@ -736,15 +721,15 @@ namespace CKAN
                 return;
             }
 
-            User.RaiseMessage("About to remove:\r\n");
+            User.RaiseMessage("About to remove:" + Environment.NewLine);
 
-            foreach (string mod in goners)
+            foreach (var mod in goners)
             {
-                InstalledModule module = registry_manager.registry.InstalledModule(mod);
+                var module = _registryManager.registry.InstalledModule(mod);
                 User.RaiseMessage(" * {0} {1}", module.Module.name, module.Module.version);
             }
 
-            bool ok = User.RaiseYesNoDialog("\r\nContinue?");
+            bool ok = User.RaiseYesNoDialog(Environment.NewLine + "Continue?");
 
             if (!ok)
             {
@@ -754,18 +739,18 @@ namespace CKAN
 
             using (var transaction = CkanTransaction.CreateTransactionScope())
             {
-                foreach (string mod in goners)
+                foreach (var mod in goners)
                 {
                     User.RaiseMessage("Removing {0}...", mod);
                     Uninstall(mod);
                 }
 
-                registry_manager.Save();
+                _registryManager.Save();
 
                 transaction.Complete();
             }
 
-            User.RaiseMessage("Done!\r\n");
+            User.RaiseMessage("Done!" + Environment.NewLine);
         }
 
         public void UninstallList(string mod)
@@ -775,87 +760,60 @@ namespace CKAN
         }
 
         /// <summary>
-        /// Uninstall the module provided. For internal use only.
-        /// Use UninstallList for user queries, it also does dependency handling.
-        /// This does *NOT* save the registry.
+        ///     Uninstall the module provided. For internal use only.
+        ///     Use UninstallList for user queries, it also does dependency handling.
+        ///     This does *NOT* save the registry.
         /// </summary>
-
         private void Uninstall(string modName)
         {
             using (var transaction = CkanTransaction.CreateTransactionScope())
             {
-                InstalledModule mod = registry_manager.registry.InstalledModule(modName);
+                var mod = _registryManager.registry.InstalledModule(modName);
 
                 if (mod == null)
                 {
-                    log.ErrorFormat("Trying to uninstall {0} but it's not installed", modName);
+                    Log.ErrorFormat("Trying to uninstall {0} but it's not installed", modName);
                     throw new ModNotInstalledKraken(modName);
                 }
 
                 // Walk our registry to find all files for this mod.
-                IEnumerable<string> files = mod.Files;
+                var files = mod.Files;
 
                 var directoriesToDelete = new HashSet<string>();
 
-                foreach (string file in files)
+                foreach (var file in files)
                 {
-                    string path = ksp.ToAbsoluteGameDir(file);
+                    var path = _ksp.ToAbsoluteGameDir(file);
 
                     try
                     {
-                        FileAttributes attr = File.GetAttributes(path);
+                        var attr = File.GetAttributes(path);
 
-                        // [This is] bitwise math. Basically, attr is some binary value with one bit meaning 
-                        // "this is a directory". The bitwise and & operator will return a binary value where
-                        // only the bits that are on (1) in both the operands are turned on. In this case 
-                        // doing a bitwise and operation against attr and the FileAttributes.Directory value
-                        // will return the value of FileAttributes.Directory if the Directory file attribute 
-                        // bit is turned on. See en.wikipedia.org/wiki/Bitwise_operation for a better 
-                        // explanation. – Kyle Trauberman Aug 30 '12 at 21:28 
-                        // (https://stackoverflow.com/questions/1395205/better-way-to-check-if-path-is-a-file-or-a-directory)
-                        // This is the fastest way to do this test.
                         if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
                         {
-                            if ( !(directoriesToDelete.Contains(path)))
-                            {
-                                directoriesToDelete.Add(path);
-                            }
+                            directoriesToDelete.Add(path);
                         }
                         else
                         {
-                            // Add this files' directory to the list for deletion if it isn't already there.
-                            // Helps clean up directories when modules are uninstalled out of dependency order
-                            // Since we check for directory contents when deleting, this should purge empty
-                            // dirs, making less ModuleManager headaches for people.
-                            var directoryName = Path.GetDirectoryName(path);
-                            if ( !(directoriesToDelete.Contains(directoryName)))
-                            {
-                                directoriesToDelete.Add(directoryName);
-                            }
-
-                            log.InfoFormat("Removing {0}", file);
-                            file_transaction.Delete(path);
-
-
+                            Log.InfoFormat("Removing {0}", file);
+                            FileTransaction.Delete(path);
                         }
                     }
                     catch (Exception ex)
                     {
                         // XXX: This is terrible, we're catching all exceptions.
-                        log.ErrorFormat("Failure in locating file {0} : {1}", path, ex.Message);
+                        Log.ErrorFormat("Failure in locating file {0} : {1}", path, ex.Message);
                     }
                 }
 
                 // Remove from registry.
-
-                registry_manager.registry.DeregisterModule(ksp, modName);
 
                 // Our collection of directories may leave empty parent directories.
                 directoriesToDelete = AddParentDirectories(directoriesToDelete);
 
                 // Sort our directories from longest to shortest, to make sure we remove child directories
                 // before parents. GH #78.
-                foreach (string directory in directoriesToDelete.OrderBy(dir => dir.Length).Reverse())
+                foreach (var directory in directoriesToDelete.OrderBy(dir => dir.Length).Reverse())
                 {
                     if (!Directory.EnumerateFileSystemEntries(directory).Any())
                     {
@@ -865,7 +823,7 @@ namespace CKAN
                             .GetValues(typeof(GameDirectory))
                             .Cast<GameDirectory>()
                             .ToList()
-                            .Select(dir => KSPPathUtils.GetGameDirectory(ksp.GameDir, dir));
+                            .Select(dir => KSPPathUtils.GetGameDirectory(_ksp.GameDir, dir));
 
                         if (safeDirs.Contains(directory))
                         {
@@ -881,19 +839,32 @@ namespace CKAN
                         // This works around GH #251.
                         // The filesystem boundry bug is described in https://transactionalfilemgr.codeplex.com/workitem/20
 
-                        log.InfoFormat("Removing {0}", directory);
+                        Log.InfoFormat("Removing {0}", directory);
                         Directory.Delete(directory);
                     }
                     else
                     {
-                        log.InfoFormat("Not removing directory {0}, it's not empty", directory);
+                        Log.InfoFormat("Not removing directory {0}, it's not empty", directory);
                     }
                 }
                 transaction.Complete();
             }
         }
 
-        /// <summary>
+	/// <summary>
+        ///     Makes sure all the specified mods are downloaded.
+        /// </summary>
+        private void DownloadModules(IEnumerable<CkanModule> mods, IDownloader downloader)
+        {
+            var downloads = mods.Where(module => !_ksp.Cache.IsCachedZip(module.download)).ToList();
+
+            if (downloads.Count > 0)
+            {
+                downloader.DownloadModules(_ksp.Cache, downloads);
+            }
+        }
+
+	/// <summary>
         /// Takes a collection of directories and adds all parent directories within the GameData structure.
         /// </summary>
         /// <param name="directories">The collection of directory path strings to examine </param>
@@ -919,87 +890,93 @@ namespace CKAN
             }
                 return newDirectories;
         }
+
         #region AddRemove
 
         /// <summary>
-        /// Adds and removes the listed modules as a single transaction.
-        /// No relationships will be processed.
-        /// This *will* save the registry.
+        ///     Adds and removes the listed modules as a single transaction.
+        ///     No relationships will be processed.
+        ///     This *will* save the registry.
         /// </summary>
         /// <param name="add">Add.</param>
         /// <param name="remove">Remove.</param>
         public void AddRemove(IEnumerable<CkanModule> add = null, IEnumerable<string> remove = null)
         {
-
             // TODO: We should do a consistency check up-front, rather than relying
             // upon our registry catching inconsistencies at the end.
 
             using (var tx = CkanTransaction.CreateTransactionScope())
             {
-
-                foreach (string identifier in remove)
+                foreach (var identifier in remove)
                 {
                     Uninstall(identifier);
                 }
 
-                foreach (CkanModule module in add)
+                foreach (var module in add)
                 {
                     Install(module);
                 }
 
-                registry_manager.Save();
+                _registryManager.Save();
 
                 tx.Complete();
             }
         }
 
         /// <summary>
-        /// Upgrades the mods listed to the latest versions for the user's KSP.
-        /// Will *re-install* with warning even if an upgrade is not available.
-        /// Throws ModuleNotFoundKraken if module is not installed, or not available.
+        ///     Upgrades the mods listed to the latest versions for the user's KSP.
+        ///     Will *re-install* with warning even if an upgrade is not available.
+        ///     Throws ModuleNotFoundKraken if module is not installed, or not available.
         /// </summary>
         public void Upgrade(IEnumerable<string> identifiers, IDownloader netAsyncDownloader)
         {
-            var options = new RelationshipResolverOptions();
-
             // We do not wish to pull in any suggested or recommended mods.
-            options.with_recommends = false;
-            options.with_suggests = false;
+            var options = new RelationshipResolverOptions()
+            {
+                with_recommends = false,
+                with_suggests = false
+            };
 
-            var resolver = new RelationshipResolver(identifiers.ToList(), options, registry_manager.registry, ksp.Version);
-            List<CkanModule> upgrades = resolver.ModList();
+            var resolver = new RelationshipResolver(identifiers.ToList(), options, _registryManager.registry, _ksp.Version);
+            var upgrades = resolver.ModList();
 
             Upgrade(upgrades, netAsyncDownloader);
         }
 
         /// <summary>
-        /// Upgrades or installs the mods listed to the specified versions for the user's KSP.
-        /// Will *re-install* or *downgrade* (with a warning) as well as upgrade.
-        /// Throws ModuleNotFoundKraken if a module is not installed.
+        ///     Upgrades or installs the mods listed to the specified versions for the user's KSP.
+        ///     Will *re-install* or *downgrade* (with a warning) as well as upgrade.
+        ///     Throws ModuleNotFoundKraken if a module is not installed.
         /// </summary>
         public void Upgrade(IEnumerable<CkanModule> modules, IDownloader netAsyncDownloader)
         {
             // Start by making sure we've downloaded everything.
-            DownloadModules(modules, netAsyncDownloader);
+            var ckanModules = modules as IList<CkanModule> ?? modules.ToList();
+            DownloadModules(ckanModules, netAsyncDownloader);
 
             // Our upgrade involves removing everything that's currently installed, then
             // adding everything that needs installing (which may involve new mods to
             // satisfy dependencies). We always know the list passed in is what we need to
             // install, but we need to calculate what needs to be removed.
-            var to_remove = new List<string>();
+            var toRemove = new List<string>();
 
             // Let's discover what we need to do with each module!
-            foreach (CkanModule module in modules)
+            foreach (var module in ckanModules)
             {
-                string ident = module.identifier;
-                InstalledModule installed_mod = registry_manager.registry.InstalledModule(ident);
+                var ident = module.identifier;
+                var installedMod = _registryManager.registry.InstalledModule(ident);
 
-                if (installed_mod == null)
+                if (installedMod == null)
                 {
                     //Maybe ModuleNotInstalled ?
-                    if (registry_manager.registry.IsAutodetected(ident))
+                    if (_registryManager.registry.IsAutodetected(ident))
                     {
-                        throw new ModuleNotFoundKraken(ident, module.version.ToString(), String.Format("Can't upgrade {0} as it was not installed by CKAN. \r\n Please remove manually before trying to install it.", ident));
+                        throw new ModuleNotFoundKraken(ident, module.version.ToString(),
+                            string.Format(
+                                "Can't upgrade {0} as it was not installed by CKAN. " +
+				Environment.NewLine +
+				" Please remove manually before trying to install it.",
+                                ident));
                     }
 
                     User.RaiseMessage("Installing previously uninstalled mod {0}", ident);
@@ -1007,43 +984,27 @@ namespace CKAN
                 else
                 {
                     // Module already installed. We'll need to remove it first.
-                    to_remove.Add(module.identifier);
+                    toRemove.Add(module.identifier);
 
-                    CkanModule installed = installed_mod.Module;
+                    var installed = installedMod.Module;
                     if (installed.version.IsEqualTo(module.version))
                     {
-                        log.WarnFormat("{0} is already at the latest version, reinstalling", installed.identifier);
+                        Log.WarnFormat("{0} is already at the latest version, reinstalling", installed.identifier);
                     }
                     else if (installed.version.IsGreaterThan(module.version))
                     {
-                        log.WarnFormat("Downgrading {0} from {1} to {2}", ident, installed.version, module.version);
+                        Log.WarnFormat("Downgrading {0} from {1} to {2}", ident, installed.version, module.version);
                     }
                     else
                     {
-                        log.InfoFormat("Upgrading {0} to {1}", ident, module.version);
+                        Log.InfoFormat("Upgrading {0} to {1}", ident, module.version);
                     }
                 }
             }
 
-            AddRemove(
-                modules,
-                to_remove
-            );
+            AddRemove(ckanModules, toRemove);
         }
 
         #endregion
-
-        /// <summary>
-        /// Makes sure all the specified mods are downloaded.
-        /// </summary>
-        private void DownloadModules(IEnumerable<CkanModule> mods, IDownloader downloader)
-        {
-            List<CkanModule> downloads = mods.Where(module => !ksp.Cache.IsCachedZip(module.download)).ToList();
-
-            if (downloads.Count > 0)
-            {
-                downloader.DownloadModules(ksp.Cache, downloads);
-            }
-        }
     }
 }

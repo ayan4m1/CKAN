@@ -91,7 +91,7 @@ namespace CKAN.NetKAN.Services
 
             // Get all our version files.
             var files = ModuleInstaller.FindInstallableFiles(module, zipfile, null)
-                .Select(x => x.source)
+                .Select(x => x.Source)
                 .Where(source => source.Name.EndsWith(versionExt))
                 .ToList();
 

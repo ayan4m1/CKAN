@@ -102,15 +102,15 @@ namespace Tests.Core
             foreach (var file in contents)
             {
                 // Make sure the destination paths are null, because we supplied no KSP instance.
-                Assert.IsNull(file.destination);
+                Assert.IsNull(file.Destination);
 
                 // Make sure the source paths are not null, that would be silly!
-                Assert.IsNotNull(file.source);
+                Assert.IsNotNull(file.Source);
 
                 // And make sure our makeDir info is filled in.
-                Assert.IsNotNull(file.makedir);
+                Assert.IsNotNull(file.MakeDir);
 
-                filenames.Add(file.source.Name);
+                filenames.Add(file.Source.Name);
             }
 
             // Ensure we've got an expected file
@@ -126,7 +126,7 @@ namespace Tests.Core
 
                 // See if we can find an expected estination path in the right place.
                 string file = contents
-                    .Select(x => x.destination).FirstOrDefault(
+                    .Select(x => x.Destination).FirstOrDefault(
                     x => Regex.IsMatch(x, "GameData/DogeCoinFlag/Flags/dogecoin\\.png$"));
 
                 Assert.IsNotNull(file);
@@ -158,7 +158,7 @@ namespace Tests.Core
                                                         );
 
                 string file = contents
-                    .Select(x => x.destination).FirstOrDefault(
+                    .Select(x => x.Destination).FirstOrDefault(
                     x => Regex.IsMatch(x, "GameData/SuchTest/DogeCoinFlag/Flags/dogecoin\\.png$"));
 
                 Assert.IsNotNull(file);
@@ -173,7 +173,7 @@ namespace Tests.Core
                 List<InstallableFile> contents = CKAN.ModuleInstaller.FindInstallableFiles(mm_mod, mm_zip, tidy.KSP);
 
                 string file = contents
-                    .Select(x => x.destination).FirstOrDefault(
+                    .Select(x => x.Destination).FirstOrDefault(
                     x => Regex.IsMatch(x, @"ModuleManager\.2\.5\.1\.dll$"));
 
                 Assert.IsNotNull(file, "ModuleManager install");
@@ -188,7 +188,7 @@ namespace Tests.Core
 
             List<InstallableFile> contents = CKAN.ModuleInstaller.FindInstallableFiles(mod, extra_doge, null);
 
-            var files = contents.Select(x => x.source.Name);
+            var files = contents.Select(x => x.Source.Name);
 
             Assert.IsTrue(files.Contains("DogeCoinFlag-1.01/GameData/DogeCoinFlag/Flags/dogecoin.png"), "dogecoin.png");
             Assert.IsFalse(files.Contains("DogeCoinFlag-1.01/GameData/DogeCoinFlag/README.md"), "Filtered README 1");
@@ -584,7 +584,7 @@ namespace Tests.Core
 
             // Assert
             Assert.That(
-                results.Count(i => i.destination.EndsWith(string.Format("/{0}/AwesomeShip.craft", directory))) == 1,
+                results.Count(i => i.Destination.EndsWith(string.Format("/{0}/AwesomeShip.craft", directory))) == 1,
                 Is.True
             );
         }
@@ -625,7 +625,7 @@ namespace Tests.Core
                 var scenarioDir = CKAN.KSPPathUtils.GetGameDirectory(ksp.KSP.GameDir, GameDirectory.Scenarios);
                 Assert.AreEqual(
                     CKAN.KSPPathUtils.NormalizePath(Path.Combine(scenarioDir, "AwesomeRace.sfs")),
-                    results.First().destination
+                    results.First().Destination
                 );
             }
         }
