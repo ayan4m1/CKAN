@@ -24,9 +24,9 @@ namespace CKAN.Net
         private static readonly TxFileManager TxFile = new TxFileManager();
 
         // Forward to keep existing code compiling, will be removed soon.
-        public static readonly Uri DefaultCkanRepo = CKAN.Repository.default_ckan_repo_uri;
+        public static readonly Uri DefaultCkanRepo = Repository.default_ckan_repo_uri;
 
-        internal static void ProcessRegistryMetadataFromJSON(string metadata, Registry registry, string filename)
+        internal static void ProcessRegistryMetadataFromJson(string metadata, Registry registry, string filename)
         {
             Log.DebugFormat("Converting metadata from JSON.");
 
@@ -89,27 +89,27 @@ namespace CKAN.Net
         ///     Optionally takes a URL to the zipfile repo to download.
         ///     Returns the number of unique modules updated.
         /// </summary>
-        public static int UpdateAllRepositories(RegistryManager registry_manager, KSP ksp, IUser user)
+        public static int UpdateAllRepositories(RegistryManager registryManager, KSP ksp, IUser user)
         {
             // If we handle multiple repositories, we will call ClearRegistry() ourselves...
-            registry_manager.registry.ClearAvailable();
+            registryManager.registry.ClearAvailable();
             // TODO this should already give us a pre-sorted list
-            SortedDictionary<string, Repository> sortedRepositories = registry_manager.registry.Repositories;
+            SortedDictionary<string, Repository> sortedRepositories = registryManager.registry.Repositories;
             foreach (KeyValuePair<string, Repository> repository in sortedRepositories)
             {
                 Log.InfoFormat("About to update {0}", repository.Value.name);
-                UpdateRegistry(repository.Value.uri, registry_manager.registry, ksp, user, false);
+                UpdateRegistry(repository.Value.uri, registryManager.registry, ksp, user, false);
                 Log.InfoFormat("Updated {0}", repository.Value.name);
             }
 
             // Save our changes.
-            registry_manager.Save();
+            registryManager.Save();
 
             // Return how many we got!
-            return registry_manager.registry.Available(ksp.Version).Count;
+            return registryManager.registry.Available(ksp.Version).Count;
         }
 
-        public static int Update(RegistryManager registry_manager, KSP ksp, IUser user, Boolean clear = true, Uri repo = null)
+        public static int Update(RegistryManager registryManager, KSP ksp, IUser user, bool clear = true, Uri repo = null)
         {
             // Use our default repo, unless we've been told otherwise.
             if (repo == null)
@@ -117,23 +117,23 @@ namespace CKAN.Net
                 repo = DefaultCkanRepo;
             }
 
-            UpdateRegistry(repo, registry_manager.registry, ksp, user, clear);
+            UpdateRegistry(repo, registryManager.registry, ksp, user, clear);
 
             // Save our changes!
-            registry_manager.Save();
+            registryManager.Save();
 
             // Return how many we got!
-            return registry_manager.registry.Available(ksp.Version).Count;
+            return registryManager.registry.Available(ksp.Version).Count;
         }
 
-        public static int Update(RegistryManager registry_manager, KSP ksp, IUser user, Boolean clear = true, string repo = null)
+        public static int Update(RegistryManager registryManager, KSP ksp, IUser user, Boolean clear = true, string repo = null)
         {
             if (repo == null)
             {
-                return Update(registry_manager, ksp, user, clear, (Uri)null);
+                return Update(registryManager, ksp, user, clear, (Uri)null);
             }
 
-            return Update(registry_manager, ksp, user, clear, new Uri(repo));
+            return Update(registryManager, ksp, user, clear, new Uri(repo));
         }
 
         /// <summary>
@@ -147,10 +147,10 @@ namespace CKAN.Net
 
             Log.InfoFormat("Downloading {0}", repo);
 
-            string repo_file = String.Empty;
+            string repoFile;
             try
             {
-                repo_file = NetUtils.Download(repo);
+                repoFile = NetUtils.Download(repo);
             }
             catch (System.Net.WebException)
             {
@@ -159,22 +159,22 @@ namespace CKAN.Net
             }
 
             // Clear our list of known modules.
-            var old_available = registry.available_modules;
+            var oldAvailable = registry.available_modules;
             if (clear)
             {
                 registry.ClearAvailable();
             }
 
             // Check the filetype.
-            FileType type = FileIdentifier.IdentifyFile(repo_file);
+            var type = FileIdentifier.IdentifyFile(repoFile);
 
             switch (type)
             {
             case FileType.TarGz:
-                UpdateRegistryFromTarGz (repo_file, registry);
+                UpdateRegistryFromTarGz (repoFile, registry);
                 break;
             case FileType.Zip:
-                UpdateRegistryFromZip (repo_file, registry);
+                UpdateRegistryFromZip (repoFile, registry);
                 break;
             default:
                 break;
@@ -182,7 +182,7 @@ namespace CKAN.Net
 
             List<CkanModule> metadataChanges = new List<CkanModule>();
 
-            foreach (var identifierModulePair in old_available)
+            foreach (var identifierModulePair in oldAvailable)
             {
                 var identifier = identifierModulePair.Key;
 
@@ -203,17 +203,18 @@ namespace CKAN.Net
                     // if the mod is installed and the metadata is different we have to reinstall it
                     var metadata = registry.available_modules[identifier].module_version[installedVersion];
 
-                    if (!old_available.ContainsKey(identifier) ||
-                        !old_available[identifier].module_version.ContainsKey(installedVersion))
+                    if (!oldAvailable.ContainsKey(identifier) ||
+                        !oldAvailable[identifier].module_version.ContainsKey(installedVersion))
                     {
                         continue;
                     }
 
-                    var oldMetadata = old_available[identifier].module_version[installedVersion];
-
-                    bool same = true;
+                    var oldMetadata = oldAvailable[identifier].module_version[installedVersion];
+                    var oldInstallMetaData = oldMetadata.install;
+                    var same = true;
+                    
                     if ((metadata.install == null) != (oldMetadata.install == null) ||
-                        (metadata.install != null && metadata.install.Length != oldMetadata.install.Length))
+                        (metadata.install != null && metadata.install.Length != oldInstallMetaData.Length))
                     {
                         same = false;
                     }
@@ -222,45 +223,45 @@ namespace CKAN.Net
                         if(metadata.install != null)
                         for (int i = 0; i < metadata.install.Length; i++)
                         {
-                            if (metadata.install[i].file != oldMetadata.install[i].file)
+                            if (metadata.install[i].file != oldInstallMetaData[i].file)
                             {
                                 same = false;
                                 break;
                             }
 
-                            if (metadata.install[i].install_to != oldMetadata.install[i].install_to)
+                            if (metadata.install[i].install_to != oldInstallMetaData[i].install_to)
                             {
                                 same = false;
                                 break;
                             }
 
-                            if (metadata.install[i].@as != oldMetadata.install[i].@as)
+                            if (metadata.install[i].@as != oldInstallMetaData[i].@as)
                             {
                                 same = false;
                                 break;
                             }
 
-                            if ((metadata.install[i].filter == null) != (oldMetadata.install[i].filter == null))
+                            if ((metadata.install[i].filter == null) != (oldInstallMetaData[i].filter == null))
                             {
                                 same = false;
                                 break;
                             }
 
                             if(metadata.install[i].filter != null)
-                            if (!metadata.install[i].filter.SequenceEqual(oldMetadata.install[i].filter))
+                            if (!metadata.install[i].filter.SequenceEqual(oldInstallMetaData[i].filter))
                             {
                                 same = false;
                                 break;
                             }
 
-                            if ((metadata.install[i].filter_regexp == null) != (oldMetadata.install[i].filter_regexp == null))
+                            if ((metadata.install[i].filter_regexp == null) != (oldInstallMetaData[i].filter_regexp == null))
                             {
                                 same = false;
                                 break;
                             }
 
                             if(metadata.install[i].filter_regexp != null)
-                            if (!metadata.install[i].filter_regexp.SequenceEqual(oldMetadata.install[i].filter_regexp))
+                            if (!metadata.install[i].filter_regexp.SequenceEqual(oldInstallMetaData[i].filter_regexp))
                             {
                                 same = false;
                                 break;
@@ -295,7 +296,7 @@ It is advisable that you reinstall them in order to preserve consistency with th
 
             // Remove our downloaded meta-data now we've processed it.
             // Seems weird to do this as part of a transaction, but NetUtils.Download uses them, so let's be consistent.
-            TxFile.Delete(repo_file);
+            TxFile.Delete(repoFile);
         }
 
         /// <summary>
@@ -341,11 +342,11 @@ It is advisable that you reinstall them in order to preserve consistency with th
                             Log.DebugFormat("Reading CKAN data from {0}", filename);
 
                             // Read each file into a buffer.
-                            int buffer_size;
+                            int bufferSize;
 
                             try
                             {
-                                buffer_size = Convert.ToInt32(entry.Size);
+                                bufferSize = Convert.ToInt32(entry.Size);
                             }
                             catch (OverflowException)
                             {
@@ -353,14 +354,14 @@ It is advisable that you reinstall them in order to preserve consistency with th
                                 continue;
                             }
 
-                            byte[] buffer = new byte[buffer_size];
+                            var buffer = new byte[bufferSize];
 
-                            tarStream.Read(buffer, 0, buffer_size);
+                            tarStream.Read(buffer, 0, bufferSize);
 
                             // Convert the buffer data to a string.
-                            string metadata_json = Encoding.ASCII.GetString(buffer);
+                            var metadataJson = Encoding.ASCII.GetString(buffer);
 
-                            ProcessRegistryMetadataFromJSON(metadata_json, registry, filename);
+                            ProcessRegistryMetadataFromJson(metadataJson, registry, filename);
                         }
                     }
                 }
@@ -395,14 +396,14 @@ It is advisable that you reinstall them in order to preserve consistency with th
                     Log.DebugFormat("Reading CKAN data from {0}", filename);
 
                     // Read each file into a string.
-                    string metadata_json;
+                    string metadataJson;
                     using (var stream = new StreamReader(zipfile.GetInputStream(entry)))
                     {
-                        metadata_json = stream.ReadToEnd();
+                        metadataJson = stream.ReadToEnd();
                         stream.Close();
                     }
 
-                    ProcessRegistryMetadataFromJSON(metadata_json, registry, filename);
+                    ProcessRegistryMetadataFromJson(metadataJson, registry, filename);
                 }
 
                 zipfile.Close();

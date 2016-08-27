@@ -153,9 +153,8 @@ namespace Tests.Core
             dogemod.install[0].install_to = path;
             using (var tidy = new DisposableKSP())
             {
-                IEnumerable<InstallableFile> contents = CKAN.ModuleInstaller.FindInstallableFiles(
-                                                            dogemod, dogezip, tidy.KSP
-                                                        );
+                IEnumerable<InstallableFile> contents =
+                    CKAN.ModuleInstaller.FindInstallableFiles(dogemod, dogezip, tidy.KSP);
 
                 string file = contents
                     .Select(x => x.Destination).FirstOrDefault(
