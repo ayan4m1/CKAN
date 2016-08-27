@@ -10,13 +10,12 @@ before_install:
     - "sh -e /etc/init.d/xvfb start"
 
 install:
-    - sudo apt-get install mono-devel nunit-console libtest-most-perl libipc-system-simple-perl
+    - sudo apt-get install libtest-most-perl libipc-system-simple-perl
     - cert-sync /etc/ssl/certificates/ca-certificates.crt || true
 
 script:
-    - bin/build
-    - nunit-console --exclude=FlakyNetwork build/Tests/bin/Debug/CKAN.Tests.dll
-    - prove  # Run all the tests in t/
+    - nuget restore CKAN.sln
+    - ./build.sh
 
 before_deploy:
     # S3 doesn't support file for some reason, so we have to put things in
