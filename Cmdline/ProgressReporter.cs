@@ -1,16 +1,15 @@
-using System;
 using System.Text.RegularExpressions;
 
 namespace CKAN.CmdLine
 {
     /// <summary>
-    /// A simple class that manages progress report events for the CmdLine.
-    /// This will almost certainly need extra functionality if we deprecate the User class.
+    ///     A simple class that manages progress report events for the CmdLine.
+    ///     This will almost certainly need extra functionality if we deprecate the User class.
     /// </summary>
     public static class ProgressReporter
     {
         /// <summary>
-        /// Only shows download report messages, and nothing else.
+        ///     Only shows download report messages, and nothing else.
         /// </summary>
         public static void FormattedDownloads(string message, int progress, IUser user)
         {
@@ -18,8 +17,8 @@ namespace CKAN.CmdLine
             {
                 user.RaiseMessage(
                     // The \r at the front here causes download messages to *overwrite* each other.
-                    String.Format("\r{0} - {1}%           ", message, progress)
-                );
+                    string.Format("\r{0} - {1}%           ", message, progress)
+                    );
             }
             else
             {
@@ -31,4 +30,3 @@ namespace CKAN.CmdLine
         }
     }
 }
-

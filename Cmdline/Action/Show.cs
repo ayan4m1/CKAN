@@ -3,21 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using CKAN.Net;
+using CKAN.Registry;
+using CKAN.Types;
 
-namespace CKAN.CmdLine
+namespace CKAN.CmdLine.Action
 {
     public class Show : ICommand
     {
-        public IUser user { get; set; }
-
         public Show(IUser user)
         {
             this.user = user;
         }
 
+        public IUser user { get; set; }
+
         public int RunCommand(CKAN.KSP ksp, object raw_options)
         {
-            ShowOptions options = (ShowOptions) raw_options;
+            var options = (ShowOptions) raw_options;
 
             if (options.Modname == null)
             {
@@ -27,7 +29,7 @@ namespace CKAN.CmdLine
             }
 
             // Check installed modules for an exact match.
-            InstalledModule installedModuleToShow = ksp.Registry.InstalledModule(options.Modname);
+            var installedModuleToShow = ksp.Registry.InstalledModule(options.Modname);
 
             if (installedModuleToShow != null)
             {
@@ -37,12 +39,12 @@ namespace CKAN.CmdLine
 
             // Module was not installed, look for an exact match in the available modules,
             // either by "name" (the user-friendly display name) or by identifier
-            CkanModule moduleToShow = ksp.Registry                  
-                                      .Available(ksp.Version)
-                                      .SingleOrDefault(
-                                            mod => mod.name == options.Modname
-                                                || mod.identifier == options.Modname
-                                      );
+            var moduleToShow = ksp.Registry
+                .Available(ksp.Version)
+                .SingleOrDefault(
+                    mod => mod.name == options.Modname
+                           || mod.identifier == options.Modname
+                );
 
             if (moduleToShow == null)
             {
@@ -50,7 +52,7 @@ namespace CKAN.CmdLine
                 user.RaiseMessage("{0} not found or installed.", options.Modname);
                 user.RaiseMessage("Looking for close matches in available mods for KSP {0}.", ksp.Version);
 
-                Search search = new Search(user);
+                var search = new Search(user);
                 var matches = search.PerformSearch(ksp, options.Modname);
 
                 // Display the results of the search.
@@ -71,14 +73,14 @@ namespace CKAN.CmdLine
                 else
                 {
                     // Display the found close matches.
-                    string[] strings_matches = new string[matches.Count];
+                    var strings_matches = new string[matches.Count];
 
-                    for (int i = 0; i < matches.Count; i++)
+                    for (var i = 0; i < matches.Count; i++)
                     {
                         strings_matches[i] = matches[i].name;
                     }
 
-                    int selection = user.RaiseSelectionDialog("Close matches", strings_matches);
+                    var selection = user.RaiseSelectionDialog("Close matches", strings_matches);
 
                     if (selection < 0)
                     {
@@ -94,21 +96,21 @@ namespace CKAN.CmdLine
         }
 
         /// <summary>
-        /// Shows information about the mod.
+        ///     Shows information about the mod.
         /// </summary>
         /// <returns>Success status.</returns>
         /// <param name="module">The module to show.</param>
         public int ShowMod(InstalledModule module)
         {
             // Display the basic info.
-            int return_value = ShowMod(module.Module);
+            var return_value = ShowMod(module.Module);
 
             // Display InstalledModule specific information.
-            ICollection<string> files = module.Files as ICollection<string>;
+            var files = module.Files as ICollection<string>;
             if (files == null) throw new InvalidCastException();
 
             user.RaiseMessage("\r\nShowing {0} installed files:", files.Count);
-            foreach (string file in files)
+            foreach (var file in files)
             {
                 user.RaiseMessage("- {0}", file);
             }
@@ -117,13 +119,14 @@ namespace CKAN.CmdLine
         }
 
         /// <summary>
-        /// Shows information about the mod.
+        ///     Shows information about the mod.
         /// </summary>
         /// <returns>Success status.</returns>
         /// <param name="module">The module to show.</param>
         public int ShowMod(CkanModule module)
         {
             #region Abstract and description
+
             if (!string.IsNullOrEmpty(module.@abstract))
             {
                 user.RaiseMessage("{0}: {1}", module.name, module.@abstract);
@@ -137,9 +140,11 @@ namespace CKAN.CmdLine
             {
                 user.RaiseMessage("\r\n{0}\r\n", module.description);
             }
+
             #endregion
 
             #region General info (author, version...)
+
             user.RaiseMessage("\r\nModule info:");
             user.RaiseMessage("- version:\t{0}", module.version);
 
@@ -155,37 +160,40 @@ namespace CKAN.CmdLine
             }
 
             user.RaiseMessage("- status:\t{0}", module.release_status);
-            user.RaiseMessage("- license:\t{0}", string.Join(", ", module.license)); 
+            user.RaiseMessage("- license:\t{0}", string.Join(", ", module.license));
+
             #endregion
 
             #region Relationships
+
             if (module.depends != null && module.depends.Count > 0)
             {
                 user.RaiseMessage("\r\nDepends:");
-                foreach (RelationshipDescriptor dep in module.depends)
+                foreach (var dep in module.depends)
                     user.RaiseMessage("- {0}", RelationshipToPrintableString(dep));
             }
 
             if (module.recommends != null && module.recommends.Count > 0)
             {
                 user.RaiseMessage("\r\nRecommends:");
-                foreach (RelationshipDescriptor dep in module.recommends)
+                foreach (var dep in module.recommends)
                     user.RaiseMessage("- {0}", RelationshipToPrintableString(dep));
             }
 
             if (module.suggests != null && module.suggests.Count > 0)
             {
                 user.RaiseMessage("\r\nSuggests:");
-                foreach (RelationshipDescriptor dep in module.suggests)
+                foreach (var dep in module.suggests)
                     user.RaiseMessage("- {0}", RelationshipToPrintableString(dep));
             }
 
             if (module.ProvidesList != null && module.ProvidesList.Count > 0)
             {
                 user.RaiseMessage("\r\nProvides:");
-                foreach (string prov in module.ProvidesList)
+                foreach (var prov in module.ProvidesList)
                     user.RaiseMessage("- {0}", prov);
-            } 
+            }
+
             #endregion
 
             user.RaiseMessage("\r\nResources:");
@@ -202,8 +210,8 @@ namespace CKAN.CmdLine
             }
 
             // Compute the CKAN filename.
-            string file_uri_hash = NetFileCache.CreateURLHash(module.download);
-            string file_name = CkanModule.StandardName(module.identifier, module.version);
+            var file_uri_hash = NetFileCache.CreateURLHash(module.download);
+            var file_name = CkanModule.StandardName(module.identifier, module.version);
 
             user.RaiseMessage("\r\nFilename: {0}", file_uri_hash + "-" + file_name);
 
@@ -211,12 +219,12 @@ namespace CKAN.CmdLine
         }
 
         /// <summary>
-        /// Formats a RelationshipDescriptor into a user-readable string:
-        /// Name, version: x, min: x, max: x
+        ///     Formats a RelationshipDescriptor into a user-readable string:
+        ///     Name, version: x, min: x, max: x
         /// </summary>
         private static string RelationshipToPrintableString(RelationshipDescriptor dep)
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             sb.Append(dep.name);
             if (dep.version != null) sb.Append(", version: " + dep.version);
             if (dep.min_version != null) sb.Append(", min: " + dep.min_version);
@@ -224,5 +232,4 @@ namespace CKAN.CmdLine
             return sb.ToString();
         }
     }
-}
-
+}

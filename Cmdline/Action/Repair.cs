@@ -1,29 +1,25 @@
-﻿using CommandLine;
+﻿using CKAN.Types;
+using CommandLine;
 
-namespace CKAN.CmdLine
+namespace CKAN.CmdLine.Action
 {
     public class Repair : ISubCommand
     {
-        public CKAN.KSP CurrentInstance { get; set; }
-        public IUser User { get; set; }
         public string option;
         public object suboptions;
 
-        internal class RepairSubOptions : CommonOptions
-        {
-            [VerbOption("registry", HelpText="Try to repair the CKAN registry")]
-            public CommonOptions Registry { get; set; }
-        }
-
-        public Repair(CKAN.KSP current_instance,IUser user)
+        public Repair(CKAN.KSP current_instance, IUser user)
         {
             CurrentInstance = current_instance;
             User = user;
         }
 
+        public CKAN.KSP CurrentInstance { get; set; }
+        public IUser User { get; set; }
+
         public int RunSubCommand(SubCommandOptions unparsed)
         {
-            string[] args = unparsed.options.ToArray();
+            var args = unparsed.options.ToArray();
 
             if (args.Length == 0)
             {
@@ -33,7 +29,7 @@ namespace CKAN.CmdLine
             }
 
             // Parse and process our sub-verbs
-            Parser.Default.ParseArgumentsStrict(args, new RepairSubOptions (), Parse);
+            Parser.Default.ParseArgumentsStrict(args, new RepairSubOptions(), Parse);
 
             switch (option)
             {
@@ -51,7 +47,7 @@ namespace CKAN.CmdLine
         }
 
         /// <summary>
-        /// Try to repair our registry.
+        ///     Try to repair our registry.
         /// </summary>
         private int Registry()
         {
@@ -61,6 +57,11 @@ namespace CKAN.CmdLine
             User.RaiseMessage("Registry repairs attempted. Hope it helped.");
             return Exit.OK;
         }
+
+        internal class RepairSubOptions : CommonOptions
+        {
+            [VerbOption("registry", HelpText = "Try to repair the CKAN registry")]
+            public CommonOptions Registry { get; set; }
+        }
     }
 }
-

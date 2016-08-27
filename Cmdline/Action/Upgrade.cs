@@ -1,33 +1,33 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
 using CKAN.Net;
+using CKAN.Registry;
+using CKAN.Types;
 using log4net;
 
-namespace CKAN.CmdLine
+namespace CKAN.CmdLine.Action
 {
     public class Upgrade : ICommand
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(Upgrade));
-
-        public IUser User { get; set; }
 
         public Upgrade(IUser user)
         {
             User = user;
         }
 
+        public IUser User { get; set; }
+
 
         public int RunCommand(CKAN.KSP ksp, object raw_options)
         {
-            UpgradeOptions options = (UpgradeOptions) raw_options;
+            var options = (UpgradeOptions) raw_options;
 
             if (options.ckan_file != null)
-            {                
+            {
                 options.modules.Add(LoadCkanFromFile(ksp, options.ckan_file).identifier);
             }
 
-            if (options.modules.Count == 0 && ! options.upgrade_all)
+            if (options.modules.Count == 0 && !options.upgrade_all)
             {
                 // What? No files specified?
                 User.RaiseMessage("Usage: ckan upgrade Mod [Mod2, ...]");
@@ -73,11 +73,11 @@ namespace CKAN.CmdLine
                     var installed = new Dictionary<string, Version>(ksp.Registry.Installed());
                     var to_upgrade = new List<CkanModule>();
 
-                    foreach (KeyValuePair<string, Version> mod in installed)
+                    foreach (var mod in installed)
                     {
-                        Version current_version = mod.Value;
+                        var current_version = mod.Value;
 
-                        if ((current_version is ProvidesVersion) || (current_version is DllVersion))
+                        if (current_version is ProvidesVersion || current_version is DllVersion)
                         {
                             continue;
                         }
@@ -102,7 +102,6 @@ namespace CKAN.CmdLine
                                         latest.version, latest.identifier);
                                     to_upgrade.Add(latest);
                                 }
-
                             }
                             catch (ModuleNotFoundKraken)
                             {
@@ -110,7 +109,6 @@ namespace CKAN.CmdLine
                                     mod.Key);
                             }
                         }
-
                     }
 
                     ModuleInstaller.GetInstance(ksp, User).Upgrade(to_upgrade, new NetAsyncModulesDownloader(User));
@@ -133,10 +131,10 @@ namespace CKAN.CmdLine
 
         internal static CkanModule LoadCkanFromFile(CKAN.KSP current_instance, string ckan_file)
         {
-            CkanModule module = CkanModule.FromFile(ckan_file);
+            var module = CkanModule.FromFile(ckan_file);
 
             // We'll need to make some registry changes to do this.
-            RegistryManager registry_manager = RegistryManager.Instance(current_instance);
+            var registry_manager = RegistryManager.Instance(current_instance);
 
             // Remove this version of the module in the registry, if it exists.
             registry_manager.registry.RemoveAvailable(module);

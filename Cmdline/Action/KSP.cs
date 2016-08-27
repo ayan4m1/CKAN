@@ -1,14 +1,11 @@
-using System;
 using System.Linq;
-using System.Text;
+using CKAN.Types;
 using CommandLine;
 
-namespace CKAN.CmdLine
+namespace CKAN.CmdLine.Action
 {
     public class KSP : ISubCommand
     {
-        public KSPManager Manager { get; set; }
-        public IUser User { get; set; }
         public string option;
         public object suboptions;
 
@@ -18,64 +15,13 @@ namespace CKAN.CmdLine
             User = user;
         }
 
-        internal class KSPSubOptions : CommonOptions
-        {
-            [VerbOption("list", HelpText="List KSP installs")]
-            public CommonOptions ListOptions { get; set; }
-
-            [VerbOption("add", HelpText="Add a KSP install")]
-            public AddOptions AddOptions { get; set; }
-
-            [VerbOption("rename", HelpText="Rename a KSP install")]
-            public RenameOptions RenameOptions { get; set; }
-
-            [VerbOption("forget", HelpText="Forget a KSP install")]
-            public ForgetOptions ForgetOptions { get; set; }
-
-            [VerbOption("default", HelpText="Set the default KSP install")]
-            public DefaultOptions DefaultOptions { get; set; }
-        }
-
-        internal class AddOptions : CommonOptions
-        {
-            [ValueOption(0)]
-            public string name { get; set; }
-
-            [ValueOption(1)]
-            public string path { get; set; }
-        }
-
-        internal class RenameOptions : CommonOptions
-        {
-            [ValueOption(0)]
-            public string old_name { get; set; }
-
-            [ValueOption(1)]
-            public string new_name { get; set; }
-        }
-
-        internal class ForgetOptions : CommonOptions
-        {
-            [ValueOption(0)]
-            public string name { get; set; }
-        }
-
-        internal class DefaultOptions : CommonOptions
-        {
-            [ValueOption(0)]
-            public string name { get; set; }
-        }
-
-        internal void Parse(string option, object suboptions)
-        {
-            this.option = option;
-            this.suboptions = suboptions;
-        }
+        public KSPManager Manager { get; set; }
+        public IUser User { get; set; }
 
         // This is required by ISubCommand
         public int RunSubCommand(SubCommandOptions unparsed)
         {
-            string[] args = unparsed.options.ToArray();
+            var args = unparsed.options.ToArray();
 
             if (args.Length == 0)
             {
@@ -86,7 +32,7 @@ namespace CKAN.CmdLine
 
             #region Aliases
 
-            for (int i = 0; i < args.Length; i++)
+            for (var i = 0; i < args.Length; i++)
             {
                 switch (args[i])
                 {
@@ -102,7 +48,7 @@ namespace CKAN.CmdLine
             #endregion
 
             // Parse and process our sub-verbs
-            Parser.Default.ParseArgumentsStrict(args, new KSPSubOptions (), Parse);
+            Parser.Default.ParseArgumentsStrict(args, new KSPSubOptions(), Parse);
 
             // That line above will have set our 'option' and 'suboption' fields.
 
@@ -112,21 +58,27 @@ namespace CKAN.CmdLine
                     return ListInstalls();
 
                 case "add":
-                    return AddInstall((AddOptions)suboptions);
+                    return AddInstall((AddOptions) suboptions);
 
                 case "rename":
-                    return RenameInstall((RenameOptions)suboptions);
+                    return RenameInstall((RenameOptions) suboptions);
 
                 case "forget":
-                    return ForgetInstall((ForgetOptions)suboptions);
+                    return ForgetInstall((ForgetOptions) suboptions);
 
                 case "default":
-                    return SetDefaultInstall((DefaultOptions)suboptions);
+                    return SetDefaultInstall((DefaultOptions) suboptions);
 
                 default:
                     User.RaiseMessage("Unknown command: ksp {0}", option);
                     return Exit.BADOPT;
             }
+        }
+
+        internal void Parse(string option, object suboptions)
+        {
+            this.option = option;
+            this.suboptions = suboptions;
         }
 
         private int ListInstalls()
@@ -159,8 +111,10 @@ namespace CKAN.CmdLine
             const string pathHeader = "Path";
 
             var nameWidth = Enumerable.Repeat(nameHeader, 1).Concat(output.Select(i => i.Name)).Max(i => i.Length);
-            var versionWidth = Enumerable.Repeat(versionHeader, 1).Concat(output.Select(i => i.Version)).Max(i => i.Length);
-            var defaultWidth = Enumerable.Repeat(defaultHeader, 1).Concat(output.Select(i => i.Default)).Max(i => i.Length);
+            var versionWidth =
+                Enumerable.Repeat(versionHeader, 1).Concat(output.Select(i => i.Version)).Max(i => i.Length);
+            var defaultWidth =
+                Enumerable.Repeat(defaultHeader, 1).Concat(output.Select(i => i.Default)).Max(i => i.Length);
             var pathWidth = Enumerable.Repeat(pathHeader, 1).Concat(output.Select(i => i.Path)).Max(i => i.Length);
 
             const string columnFormat = "{0}  {1}  {2}  {3}";
@@ -170,23 +124,23 @@ namespace CKAN.CmdLine
                 versionHeader.PadRight(versionWidth),
                 defaultHeader.PadRight(defaultWidth),
                 pathHeader.PadRight(pathWidth)
-            ));
+                ));
 
             User.RaiseMessage(string.Format(columnFormat,
                 new string('-', nameWidth),
                 new string('-', versionWidth),
                 new string('-', defaultWidth),
                 new string('-', pathWidth)
-            ));
+                ));
 
             foreach (var line in output)
             {
                 User.RaiseMessage(string.Format(columnFormat,
-                   line.Name.PadRight(nameWidth),
-                   line.Version.PadRight(versionWidth),
-                   line.Default.PadRight(defaultWidth),
-                   line.Path.PadRight(pathWidth)
-               ));
+                    line.Name.PadRight(nameWidth),
+                    line.Version.PadRight(versionWidth),
+                    line.Default.PadRight(defaultWidth),
+                    line.Path.PadRight(pathWidth)
+                    ));
             }
 
             return Exit.OK;
@@ -208,7 +162,7 @@ namespace CKAN.CmdLine
 
             try
             {
-                string path = options.path;
+                var path = options.path;
                 Manager.AddInstance(options.name, new CKAN.KSP(path, User));
                 User.RaiseMessage("Added \"{0}\" with root \"{1}\" to known installs", options.name, options.path);
                 return Exit.OK;
@@ -262,34 +216,35 @@ namespace CKAN.CmdLine
 
         private int SetDefaultInstall(DefaultOptions options)
         {
-            string name = options.name;
+            var name = options.name;
 
             if (name == null)
             {
                 // No input argument from the user. Present a list of the possible instances.
-                string message = "default <name> - argument missing, please select from the list below.";
+                var message = "default <name> - argument missing, please select from the list below.";
 
                 // Check if there is a default instance.
-                string defaultInstance = Manager.Win32Registry.AutoStartInstance;
-                int defaultInstancePresent = 0;
+                var defaultInstance = Manager.Win32Registry.AutoStartInstance;
+                var defaultInstancePresent = 0;
 
-                if (!String.IsNullOrWhiteSpace(defaultInstance))
+                if (!string.IsNullOrWhiteSpace(defaultInstance))
                 {
                     defaultInstancePresent = 1;
                 }
 
-                object[] keys = new object[Manager.Instances.Count + defaultInstancePresent];
+                var keys = new object[Manager.Instances.Count + defaultInstancePresent];
 
                 // Populate the list of instances.
-                for (int i = 0; i < Manager.Instances.Count; i++)
+                for (var i = 0; i < Manager.Instances.Count; i++)
                 {
                     var instance = Manager.Instances.ElementAt(i);
 
-                    keys[i + defaultInstancePresent] = String.Format("\"{0}\" - {1}", instance.Key, instance.Value.GameDir);
+                    keys[i + defaultInstancePresent] = string.Format("\"{0}\" - {1}", instance.Key,
+                        instance.Value.GameDir);
                 }
 
                 // Mark the default intance for the user.
-                if (!String.IsNullOrWhiteSpace(defaultInstance))
+                if (!string.IsNullOrWhiteSpace(defaultInstance))
                 {
                     keys[0] = Manager.Instances.IndexOfKey(defaultInstance);
                 }
@@ -323,6 +278,54 @@ namespace CKAN.CmdLine
 
             User.RaiseMessage("Successfully set \"{0}\" as the default KSP installation", name);
             return Exit.OK;
+        }
+
+        internal class KSPSubOptions : CommonOptions
+        {
+            [VerbOption("list", HelpText = "List KSP installs")]
+            public CommonOptions ListOptions { get; set; }
+
+            [VerbOption("add", HelpText = "Add a KSP install")]
+            public AddOptions AddOptions { get; set; }
+
+            [VerbOption("rename", HelpText = "Rename a KSP install")]
+            public RenameOptions RenameOptions { get; set; }
+
+            [VerbOption("forget", HelpText = "Forget a KSP install")]
+            public ForgetOptions ForgetOptions { get; set; }
+
+            [VerbOption("default", HelpText = "Set the default KSP install")]
+            public DefaultOptions DefaultOptions { get; set; }
+        }
+
+        internal class AddOptions : CommonOptions
+        {
+            [ValueOption(0)]
+            public string name { get; set; }
+
+            [ValueOption(1)]
+            public string path { get; set; }
+        }
+
+        internal class RenameOptions : CommonOptions
+        {
+            [ValueOption(0)]
+            public string old_name { get; set; }
+
+            [ValueOption(1)]
+            public string new_name { get; set; }
+        }
+
+        internal class ForgetOptions : CommonOptions
+        {
+            [ValueOption(0)]
+            public string name { get; set; }
+        }
+
+        internal class DefaultOptions : CommonOptions
+        {
+            [ValueOption(0)]
+            public string name { get; set; }
         }
     }
 }

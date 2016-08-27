@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using CKAN.Types;
 using CommandLine;
 
 namespace CKAN.CmdLine
@@ -8,28 +9,25 @@ namespace CKAN.CmdLine
 
     public class Options
     {
-        public string action { get; set; }
-        public object options { get; set; }
-
         /// <summary>
-        /// Returns an options object on success. Prints a default help
-        /// screen and throws a BadCommandKraken on failure.
+        ///     Returns an options object on success. Prints a default help
+        ///     screen and throws a BadCommandKraken on failure.
         /// </summary>
         public Options(string[] args)
         {
             Parser.Default.ParseArgumentsStrict
-            (
-                args, new Actions(), (verb, suboptions) =>
-                {
-                    action = verb;
-                    options = suboptions;
-                },
-                delegate
-                {
-                    throw (new BadCommandKraken());
-                }
-            );
+                (
+                    args, new Actions(), (verb, suboptions) =>
+                    {
+                        action = verb;
+                        options = suboptions;
+                    },
+                    delegate { throw new BadCommandKraken(); }
+                );
         }
+
+        public string action { get; set; }
+        public object options { get; set; }
     }
 
     // Actions supported by our client go here.
@@ -116,8 +114,8 @@ namespace CKAN.CmdLine
     }
 
     /// <summary>
-    /// For things which are subcommands ('ksp', 'repair' etc), we just grab a list
-    /// we can pass on.
+    ///     For things which are subcommands ('ksp', 'repair' etc), we just grab a list
+    ///     we can pass on.
     /// </summary>
     public class SubCommandOptions : CommonOptions
     {
@@ -143,7 +141,7 @@ namespace CKAN.CmdLine
         public bool with_all_suggests { get; set; }
 
         // TODO: How do we provide helptext on this?
-        [ValueList(typeof (List<string>))]
+        [ValueList(typeof(List<string>))]
         public List<string> modules { get; set; }
     }
 
@@ -165,7 +163,7 @@ namespace CKAN.CmdLine
         public bool upgrade_all { get; set; }
 
         // TODO: How do we provide helptext on this?
-        [ValueList(typeof (List<string>))]
+        [ValueList(typeof(List<string>))]
         public List<string> modules { get; set; }
     }
 

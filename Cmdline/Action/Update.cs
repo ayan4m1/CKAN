@@ -1,22 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
+using CKAN.Registry;
+using CKAN.Types;
 
-namespace CKAN.CmdLine
+namespace CKAN.CmdLine.Action
 {
     public class Update : ICommand
     {
-        public IUser user { get; set; }
-
         public Update(IUser user)
         {
             this.user = user;
         }
 
+        public IUser user { get; set; }
+
         public int RunCommand(CKAN.KSP ksp, object raw_options)
         {
-            UpdateOptions options = (UpdateOptions) raw_options;
+            var options = (UpdateOptions) raw_options;
 
             List<CkanModule> available_prior = null;
 
@@ -61,7 +61,7 @@ namespace CKAN.CmdLine
         }
 
         /// <summary>
-        /// Locates the changes between the prior and post state of the modules..
+        ///     Locates the changes between the prior and post state of the modules..
         /// </summary>
         /// <param name="modules_prior">List of the available modules prior to the update.</param>
         /// <param name="modules_post">List of the available modules after the update.</param>
@@ -75,11 +75,12 @@ namespace CKAN.CmdLine
             var removed = new HashSet<CkanModule>(prior.Except(post, new NameComparer()));
 
 
-            var unchanged = post.Intersect(prior);//Default compare includes versions
+            var unchanged = post.Intersect(prior); //Default compare includes versions
             var updated = post.Except(unchanged).Except(added).Except(removed).ToList();
 
             // Print the changes.
-            user.RaiseMessage("Found {0} new modules, {1} removed modules and {2} updated modules.", added.Count(), removed.Count(), updated.Count());
+            user.RaiseMessage("Found {0} new modules, {1} removed modules and {2} updated modules.", added.Count(),
+                removed.Count(), updated.Count());
 
             if (added.Count > 0)
             {
@@ -98,7 +99,7 @@ namespace CKAN.CmdLine
         }
 
         /// <summary>
-        /// Prints a message and a list of modules. Ends with a blank line.
+        ///     Prints a message and a list of modules. Ends with a blank line.
         /// </summary>
         /// <param name="message">The message to print.</param>
         /// <param name="modules">The modules to list.</param>
@@ -117,7 +118,7 @@ namespace CKAN.CmdLine
 
             user.RaiseMessage(message);
 
-            foreach(CkanModule module in modules)
+            foreach (var module in modules)
             {
                 user.RaiseMessage("{0} ({1})", module.name, module.identifier);
             }
@@ -126,13 +127,13 @@ namespace CKAN.CmdLine
         }
 
         /// <summary>
-        /// Updates the repository.
+        ///     Updates the repository.
         /// </summary>
         /// <param name="ksp">The KSP instance to work on.</param>
         /// <param name="repository">Repository to update. If null all repositories are used.</param>
         private void UpdateRepository(CKAN.KSP ksp, string repository = null)
         {
-            RegistryManager registry_manager = RegistryManager.Instance(ksp);
+            var registry_manager = RegistryManager.Instance(ksp);
 
             var updated = repository == null
                 ? Net.Repo.UpdateAllRepositories(registry_manager, ksp, user)

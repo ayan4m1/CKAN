@@ -1,8 +1,10 @@
-﻿namespace CKAN.CmdLine
+﻿using CKAN.Types;
+
+namespace CKAN.CmdLine.Action
 {
     public class Compare : ICommand
     {
-        private IUser user;
+        private readonly IUser user;
 
         public Compare(IUser user)
         {
@@ -11,14 +13,14 @@
 
         public int RunCommand(CKAN.KSP ksp, object rawOptions)
         {
-            var options = (CompareOptions)rawOptions;
+            var options = (CompareOptions) rawOptions;
 
             if (options.Left != null && options.Right != null)
             {
                 var leftVersion = new Version(options.Left);
                 var rightVersion = new Version(options.Right);
 
-                int compareResult = leftVersion.CompareTo(rightVersion);
+                var compareResult = leftVersion.CompareTo(rightVersion);
                 if (compareResult == 0)
                 {
                     user.RaiseMessage(

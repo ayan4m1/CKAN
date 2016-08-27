@@ -4,17 +4,20 @@
 // License: CC-BY 4.0, LGPL, or MIT (your choice)
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using CKAN.CmdLine.Action;
 using CKAN.Net;
+using CKAN.Registry;
+using CKAN.Types;
 using log4net;
 using log4net.Config;
 using log4net.Core;
+using Repo = CKAN.CmdLine.Action.Repo;
 
 namespace CKAN.CmdLine
 {
@@ -77,7 +80,7 @@ namespace CKAN.CmdLine
 
             // Process commandline options.
 
-            var options = (CommonOptions)cmdline.options;
+            var options = (CommonOptions) cmdline.options;
             user = new ConsoleUser(options.Headless);
             CheckMonoVersion(user, 3, 1, 0);
 
@@ -92,10 +95,7 @@ namespace CKAN.CmdLine
 This is a bad idea and there is absolutely no good reason to do it. Please run CKAN from a user account (or use --asroot if you are feeling brave).");
                     return Exit.ERROR;
                 }
-                else
-                {
-                    user.RaiseMessage("Warning: Running CKAN as root!");
-                }
+                user.RaiseMessage("Warning: Running CKAN as root!");
             }
 
             if (options.Debug)
@@ -122,9 +122,7 @@ This is a bad idea and there is absolutely no good reason to do it. Please run C
                 user.RaiseMessage("--ksp and --kspdir can't be specified at the same time");
                 return Exit.BADOPT;
             }
-
             var manager = new KSPManager(user);
-
             if (options.KSP != null)
             {
                 // Set a KSP directory by its alias.
@@ -144,11 +142,11 @@ This is a bad idea and there is absolutely no good reason to do it. Please run C
                 // Set a KSP directory by its path
                 manager.SetCurrentInstanceByPath(options.KSPdir);
             }
-            else if (! (cmdline.action == "ksp" || cmdline.action == "version" || cmdline.action == "gui"))
+            else if (!(cmdline.action == "ksp" || cmdline.action == "version" || cmdline.action == "gui"))
             {
                 // Find whatever our preferred instance is.
                 // We don't do this on `ksp/version/gui` commands, they don't need it.
-                CKAN.KSP ksp = manager.GetPreferredInstance();
+                var ksp = manager.GetPreferredInstance();
 
                 if (ksp == null)
                 {
@@ -156,10 +154,7 @@ This is a bad idea and there is absolutely no good reason to do it. Please run C
                     user.RaiseMessage("Use 'ckan ksp help' for assistance on setting this.");
                     return Exit.ERROR;
                 }
-                else
-                {
-                    log.InfoFormat("Using KSP install at {0}", ksp.GameDir);
-                }
+                log.InfoFormat("Using KSP install at {0}", ksp.GameDir);
             }
 
             #region Aliases
@@ -177,90 +172,60 @@ This is a bad idea and there is absolutely no good reason to do it. Please run C
 
             #endregion
 
-            //If we have found a preferred KSP instance, try to lock the registry
-            if (manager.CurrentInstance != null)
-            {
-                try
-                {
-                    using (var registry = RegistryManager.Instance(manager.CurrentInstance))
-                    {
-                        log.InfoFormat("About to run action {0}", cmdline.action);
-                        return RunAction(cmdline, options, args, user, manager);
-                    }
-                }
-                catch (RegistryInUseKraken kraken)
-                {
-                    log.Info("Registry in use detected");
-                    user.RaiseMessage(kraken.ToString());
-                    return Exit.ERROR;
-                }
-            }
-            else // we have no preferred KSP instance, so no need to lock the registry
-            {
-                return RunAction(cmdline, options, args, user, manager);
-            }
-        }
-
-        /// <summary>
-        /// Run whatever action the user has provided
-        /// </summary>
-        /// <returns>The exit status that should be returned to the system.</returns>
-        private static int RunAction(Options cmdline, CommonOptions options, string[] args, IUser user, KSPManager manager)
-        {
             switch (cmdline.action)
             {
                 case "gui":
-                    return Gui((GuiOptions)options, args);
+                    return Gui((GuiOptions) options, args);
 
                 case "version":
                     return Version(user);
 
                 case "update":
-                    return (new Update(user)).RunCommand(manager.CurrentInstance, (UpdateOptions)cmdline.options);
+                    return new Update(user).RunCommand(manager.CurrentInstance, (UpdateOptions) cmdline.options);
 
                 case "available":
                     return Available(manager.CurrentInstance, user);
 
                 case "install":
                     Scan(manager.CurrentInstance, user, cmdline.action);
-                    return (new Install(user)).RunCommand(manager.CurrentInstance, (InstallOptions)cmdline.options);
+                    return new Install(user).RunCommand(manager.CurrentInstance, (InstallOptions) cmdline.options);
 
                 case "scan":
-                    return Scan(manager.CurrentInstance,user);
+                    return Scan(manager.CurrentInstance, user);
 
                 case "list":
-                    return (new List(user)).RunCommand(manager.CurrentInstance, (ListOptions)cmdline.options);
+                    return new List(user).RunCommand(manager.CurrentInstance, (ListOptions) cmdline.options);
 
                 case "show":
-                    return (new Show(user)).RunCommand(manager.CurrentInstance, (ShowOptions)cmdline.options);
+                    return new Show(user).RunCommand(manager.CurrentInstance, (ShowOptions) cmdline.options);
 
                 case "search":
-                    return (new Search(user)).RunCommand(manager.CurrentInstance, options);
+                    return new Search(user).RunCommand(manager.CurrentInstance, options);
 
                 case "remove":
-                    return (new Remove(user)).RunCommand(manager.CurrentInstance, cmdline.options);
+                    return new Remove(user).RunCommand(manager.CurrentInstance, cmdline.options);
 
                 case "upgrade":
                     Scan(manager.CurrentInstance, user, cmdline.action);
-                    return (new Upgrade(user)).RunCommand(manager.CurrentInstance, cmdline.options);
+                    return new Upgrade(user).RunCommand(manager.CurrentInstance, cmdline.options);
 
                 case "clean":
                     return Clean(manager.CurrentInstance);
 
                 case "repair":
-                    var repair = new Repair(manager.CurrentInstance,user);
+                    var repair = new Repair(manager.CurrentInstance, user);
                     return repair.RunSubCommand((SubCommandOptions) cmdline.options);
 
                 case "ksp":
-                    var ksp = new KSP(manager, user);
+                    var ksp = new Action.KSP(manager, user);
                     return ksp.RunSubCommand((SubCommandOptions) cmdline.options);
 
                 case "repo":
-                    var repo = new Repo (manager, user);
+                    var repo = new Repo(manager, user);
                     return repo.RunSubCommand((SubCommandOptions) cmdline.options);
 
                 case "compare":
-                    return (new Compare(user)).RunCommand(manager.CurrentInstance, cmdline.options);
+                    return new Compare(user).RunCommand(manager.CurrentInstance, cmdline.options);
 
                 default:
                     user.RaiseMessage("Unknown command, try --help");
@@ -272,10 +237,10 @@ This is a bad idea and there is absolutely no good reason to do it. Please run C
         {
             try
             {
-                Type type = Type.GetType("Mono.Runtime");
+                var type = Type.GetType("Mono.Runtime");
                 if (type == null) return;
 
-                MethodInfo display_name = type.GetMethod("GetDisplayName", BindingFlags.NonPublic | BindingFlags.Static);
+                var display_name = type.GetMethod("GetDisplayName", BindingFlags.NonPublic | BindingFlags.Static);
                 if (display_name != null)
                 {
                     var version_string = (string) display_name.Invoke(null, null);
@@ -283,16 +248,16 @@ This is a bad idea and there is absolutely no good reason to do it. Please run C
 
                     if (match.Success)
                     {
-                        int major = Int32.Parse(match.Groups["major"].Value);
-                        int minor = Int32.Parse(match.Groups["minor"].Value);
-                        int patch = Int32.Parse(match.Groups["revision"].Value);
+                        var major = int.Parse(match.Groups["major"].Value);
+                        var minor = int.Parse(match.Groups["minor"].Value);
+                        var patch = int.Parse(match.Groups["revision"].Value);
 
                         if (major < rec_major || (major == rec_major && minor < rec_minor))
                         {
                             user.RaiseMessage(
                                 "Warning. Detected mono runtime of {0} is less than the recommended version of {1}\r\n",
-                                String.Join(".", major, minor, patch),
-                                String.Join(".", rec_major, rec_minor, rec_patch)
+                                string.Join(".", major, minor, patch),
+                                string.Join(".", rec_major, rec_minor, rec_patch)
                                 );
                             user.RaiseMessage("Update recommend\r\n");
                         }
@@ -323,18 +288,18 @@ This is a bad idea and there is absolutely no good reason to do it. Please run C
             return Exit.OK;
         }
 
-        private static int Available(CKAN.KSP current_instance, IUser user)
+        private static int Available(KSP current_instance, IUser user)
         {
-            List<CkanModule> available = RegistryManager.Instance(current_instance).registry.Available(current_instance.Version);
+            var available = RegistryManager.Instance(current_instance).registry.Available(current_instance.Version);
 
             user.RaiseMessage("Mods available for KSP {0}", current_instance.Version);
             user.RaiseMessage("");
 
             var width = user.WindowWidth;
 
-            foreach (CkanModule module in available)
+            foreach (var module in available)
             {
-                string entry = String.Format("* {0} ({1}) - {2}", module.identifier, module.version, module.name);
+                var entry = string.Format("* {0} ({1}) - {2}", module.identifier, module.version, module.name);
                 user.RaiseMessage(width > 0 ? entry.PadRight(width).Substring(0, width - 1) : entry);
             }
 
@@ -342,13 +307,13 @@ This is a bad idea and there is absolutely no good reason to do it. Please run C
         }
 
         /// <summary>
-        /// Scans the ksp instance. Detects installed mods to mark as auto-detected and checks the consistency
+        ///     Scans the ksp instance. Detects installed mods to mark as auto-detected and checks the consistency
         /// </summary>
         /// <param name="kspInstance">The instance to scan</param>
         /// <param name="user"></param>
         /// <param name="next_command">Changes the output message if set.</param>
         /// <returns>Exit.OK if instance is consistent, Exit.ERROR otherwise </returns>
-        private static int Scan(CKAN.KSP kspInstance, IUser user, string next_command=null)
+        private static int Scan(KSP kspInstance, IUser user, string next_command = null)
         {
             try
             {
@@ -357,8 +322,7 @@ This is a bad idea and there is absolutely no good reason to do it. Please run C
             }
             catch (InconsistentKraken kraken)
             {
-
-                if (next_command==null)
+                if (next_command == null)
                 {
                     user.RaiseError(kraken.InconsistenciesPretty);
                     user.RaiseError("The repo has not been saved.");
@@ -374,7 +338,7 @@ This is a bad idea and there is absolutely no good reason to do it. Please run C
             }
         }
 
-        private static int Clean(CKAN.KSP currentInstance)
+        private static int Clean(KSP currentInstance)
         {
             currentInstance.Cache.Cleanup();
             return Exit.OK;

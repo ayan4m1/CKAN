@@ -1,32 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
 using CKAN.Net;
+using CKAN.Registry;
+using CKAN.Relationships;
+using CKAN.Types;
 using log4net;
 
-namespace CKAN.CmdLine
+namespace CKAN.CmdLine.Action
 {
     public class Install : ICommand
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(Install));
-
-        public IUser user { get; set; }
 
         public Install(IUser user)
         {
             this.user = user;
         }
 
+        public IUser user { get; set; }
+
         public int RunCommand(CKAN.KSP ksp, object raw_options)
         {
-            InstallOptions options = (InstallOptions) raw_options;
+            var options = (InstallOptions) raw_options;
 
             if (options.ckan_files != null)
             {
                 // Oooh! We're installing from a CKAN file.
-                foreach (string ckan_file in options.ckan_files)
+                foreach (var ckan_file in options.ckan_files)
                 {
                     Uri ckan_uri;
 
@@ -52,7 +52,7 @@ namespace CKAN.CmdLine
                         ckan_uri = new Uri(ckan_file);
                     }
 
-                    string filename = String.Empty;
+                    var filename = string.Empty;
 
                     // If it is a local file, we already know the filename. If it is remote, create a temporary file and download the remote resource.
                     if (ckan_uri.IsFile)
@@ -107,7 +107,8 @@ namespace CKAN.CmdLine
             }
             catch (ModuleNotFoundKraken ex)
             {
-                user.RaiseMessage("Module {0} required, but not listed in index, or not available for your version of KSP", ex.module);
+                user.RaiseMessage(
+                    "Module {0} required, but not listed in index, or not available for your version of KSP", ex.module);
                 user.RaiseMessage("If you're lucky, you can do a `ckan update` and try again.");
                 user.RaiseMessage("Try `ckan install --no-recommends` to skip installation of recommended modules");
                 return Exit.ERROR;
@@ -121,14 +122,15 @@ namespace CKAN.CmdLine
             catch (TooManyModsProvideKraken ex)
             {
                 // Request the user selects one of the mods.
-                string[] mods = new string[ex.modules.Count];
+                var mods = new string[ex.modules.Count];
 
-                for (int i = 0; i < ex.modules.Count; i++)
+                for (var i = 0; i < ex.modules.Count; i++)
                 {
-                    mods[i] = String.Format("{0} ({1})", ex.modules[i].identifier, ex.modules[i].name);
+                    mods[i] = string.Format("{0} ({1})", ex.modules[i].identifier, ex.modules[i].name);
                 }
 
-                string message = String.Format("Too many mods provide {0}. Please pick from the following:\r\n", ex.requested);
+                var message = string.Format("Too many mods provide {0}. Please pick from the following:\r\n",
+                    ex.requested);
 
                 int result;
 
@@ -145,7 +147,7 @@ namespace CKAN.CmdLine
 
                 if (result < 0)
                 {
-                    user.RaiseMessage(String.Empty); // Looks tidier.
+                    user.RaiseMessage(string.Empty); // Looks tidier.
 
                     return Exit.ERROR;
                 }
@@ -153,16 +155,16 @@ namespace CKAN.CmdLine
                 // Add the module to the list.
                 options.modules.Add(ex.modules[result].identifier);
 
-                return (new Install(user).RunCommand(ksp, options));
+                return new Install(user).RunCommand(ksp, options);
             }
             catch (FileExistsKraken ex)
             {
                 if (ex.owningModule != null)
                 {
                     user.RaiseMessage(
-                        "\r\nOh no! We tried to overwrite a file owned by another mod!\r\n"+
-                        "Please try a `ckan update` and try again.\r\n\r\n"+
-                        "If this problem re-occurs, then it maybe a packaging bug.\r\n"+
+                        "\r\nOh no! We tried to overwrite a file owned by another mod!\r\n" +
+                        "Please try a `ckan update` and try again.\r\n\r\n" +
+                        "If this problem re-occurs, then it maybe a packaging bug.\r\n" +
                         "Please report it at:\r\n\r\n" +
                         "https://github.com/KSP-CKAN/NetKAN/issues/new\r\n\r\n" +
                         "Please including the following information in your report:\r\n\r\n" +
@@ -172,21 +174,21 @@ namespace CKAN.CmdLine
                         "CKAN Version   : {3}\r\n",
                         ex.filename, ex.installingModule, ex.owningModule,
                         Meta.Version()
-                    );
+                        );
                 }
                 else
                 {
                     user.RaiseMessage(
-                        "\r\n\r\nOh no!\r\n\r\n"+
-                        "It looks like you're trying to install a mod which is already installed,\r\n"+
-                        "or which conflicts with another mod which is already installed.\r\n\r\n"+
-                        "As a safety feature, the CKAN will *never* overwrite or alter a file\r\n"+
-                        "that it did not install itself.\r\n\r\n"+
-                        "If you wish to install {0} via the CKAN,\r\n"+
-                        "then please manually uninstall the mod which owns:\r\n\r\n"+
-                        "{1}\r\n\r\n"+"and try again.\r\n",
+                        "\r\n\r\nOh no!\r\n\r\n" +
+                        "It looks like you're trying to install a mod which is already installed,\r\n" +
+                        "or which conflicts with another mod which is already installed.\r\n\r\n" +
+                        "As a safety feature, the CKAN will *never* overwrite or alter a file\r\n" +
+                        "that it did not install itself.\r\n\r\n" +
+                        "If you wish to install {0} via the CKAN,\r\n" +
+                        "then please manually uninstall the mod which owns:\r\n\r\n" +
+                        "{1}\r\n\r\n" + "and try again.\r\n",
                         ex.installingModule, ex.filename
-                    );
+                        );
                 }
 
                 user.RaiseMessage("Your GameData has been returned to its original state.\r\n");
@@ -226,10 +228,10 @@ namespace CKAN.CmdLine
 
         internal static CkanModule LoadCkanFromFile(CKAN.KSP current_instance, string ckan_file)
         {
-            CkanModule module = CkanModule.FromFile(ckan_file);
+            var module = CkanModule.FromFile(ckan_file);
 
             // We'll need to make some registry changes to do this.
-            RegistryManager registry_manager = RegistryManager.Instance(current_instance);
+            var registry_manager = RegistryManager.Instance(current_instance);
 
             // Remove this version of the module in the registry, if it exists.
             registry_manager.registry.RemoveAvailable(module);

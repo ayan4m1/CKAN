@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using CKAN.Types;
 using log4net;
 
 namespace CKAN.CmdLine
@@ -8,7 +9,8 @@ namespace CKAN.CmdLine
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(ConsoleUser));
 
-        private bool m_Headless = false;
+        private readonly bool m_Headless;
+
         public ConsoleUser(bool headless)
         {
             m_Headless = headless;
@@ -16,10 +18,12 @@ namespace CKAN.CmdLine
 
         public override bool Headless
         {
-            get
-            {
-                return m_Headless;
-            }
+            get { return m_Headless; }
+        }
+
+        public override int WindowWidth
+        {
+            get { return Console.WindowWidth; }
         }
 
         protected override bool DisplayYesNoDialog(string message)
@@ -82,7 +86,7 @@ namespace CKAN.CmdLine
             }
 
             // Validate input.
-            if (String.IsNullOrWhiteSpace(message))
+            if (string.IsNullOrWhiteSpace(message))
             {
                 throw new Kraken("Passed message string must be non-empty.");
             }
@@ -93,12 +97,12 @@ namespace CKAN.CmdLine
             }
 
             // Check if we have a default selection.
-            int defaultSelection = -1;
+            var defaultSelection = -1;
 
             if (args[0] is int)
             {
                 // Check that the default selection makes sense.
-                defaultSelection = (int)args[0];
+                defaultSelection = (int) args[0];
 
                 if (defaultSelection < 0 || defaultSelection > args.Length - 1)
                 {
@@ -106,9 +110,9 @@ namespace CKAN.CmdLine
                 }
 
                 // Extract the relevant arguments.
-                object[] newArgs = new object[args.Length - 1];
+                var newArgs = new object[args.Length - 1];
 
-                for (int i = 1; i < args.Length; i++)
+                for (var i = 1; i < args.Length; i++)
                 {
                     newArgs[i - 1] = args[i];
                 }
@@ -117,48 +121,49 @@ namespace CKAN.CmdLine
             }
 
             // Further data validation.
-            foreach (object argument in args)
+            foreach (var argument in args)
             {
-                if (String.IsNullOrWhiteSpace(argument.ToString()))
+                if (string.IsNullOrWhiteSpace(argument.ToString()))
                 {
                     throw new Kraken("Candidate may not be empty.");
                 }
             }
 
             // List options.
-            for (int i = 0; i < args.Length; i++)
+            for (var i = 0; i < args.Length; i++)
             {
-                string CurrentRow = String.Format("{0}", i + 1);
+                var CurrentRow = string.Format("{0}", i + 1);
 
                 if (i == defaultSelection)
                 {
                     CurrentRow += "*";
                 }
 
-                CurrentRow += String.Format(") {0}", args[i]);
+                CurrentRow += string.Format(") {0}", args[i]);
 
                 RaiseMessage(CurrentRow);
             }
 
             // Create message string.
-            string output = String.Format("Enter a number between {0} and {1} (To cancel press \"c\" or \"n\".", 1, args.Length);
+            var output = string.Format("Enter a number between {0} and {1} (To cancel press \"c\" or \"n\".", 1,
+                args.Length);
 
             if (defaultSelection >= 0)
             {
-                output += String.Format(" \"Enter\" will select {0}.", defaultSelection + 1);
+                output += string.Format(" \"Enter\" will select {0}.", defaultSelection + 1);
             }
 
             output += "): ";
 
             RaiseMessage(output);
 
-            bool valid = false;
-            int result = 0;
+            var valid = false;
+            var result = 0;
 
             while (!valid)
             {
                 // Wait for input from the command line.
-                string input = Console.In.ReadLine();
+                var input = Console.In.ReadLine();
 
                 if (input == null)
                 {
@@ -169,7 +174,7 @@ namespace CKAN.CmdLine
                 input = input.Trim().ToLower();
 
                 // Check for default selection.
-                if (String.IsNullOrEmpty(input))
+                if (string.IsNullOrEmpty(input))
                 {
                     if (defaultSelection >= 0)
                     {
@@ -209,7 +214,7 @@ namespace CKAN.CmdLine
 
                     continue;
                 }
-                else if (result < 1)
+                if (result < 1)
                 {
                     RaiseMessage("The number in the input is too small.");
                     RaiseMessage(output);
@@ -243,13 +248,9 @@ namespace CKAN.CmdLine
                 Console.Write("\r\n{0}", format);
             }
         }
+
         protected override void ReportDownloadsComplete(Uri[] urls, string[] filenames, Exception[] errors)
         {
         }
-        public override int WindowWidth
-        {
-            get { return Console.WindowWidth; }
-        }
-
     }
 }

@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using CKAN.Types;
 using CommandLine;
 using log4net;
 using Newtonsoft.Json;
 
-namespace CKAN.CmdLine
+namespace CKAN.CmdLine.Action
 {
     public struct RepositoryList
     {
@@ -15,10 +15,7 @@ namespace CKAN.CmdLine
 
     public class Repo : ISubCommand
     {
-        private static readonly ILog log = LogManager.GetLogger(typeof (Repo));
-
-        public KSPManager Manager { get; set; }
-        public IUser User { get; set; }
+        private static readonly ILog log = LogManager.GetLogger(typeof(Repo));
         public string option;
         public object suboptions;
 
@@ -29,63 +26,13 @@ namespace CKAN.CmdLine
             User = user;
         }
 
-        internal class RepoSubOptions : CommonOptions
-        {
-            [VerbOption("available", HelpText="List (canonical) available repositories")]
-            public CommonOptions AvailableOptions { get; set; }
-
-            [VerbOption("list", HelpText="List repositories")]
-            public CommonOptions ListOptions { get; set; }
-
-            [VerbOption("add", HelpText="Add a repository")]
-            public AddOptions AddOptions { get; set; }
-
-            [VerbOption("forget", HelpText="Forget a repository")]
-            public ForgetOptions ForgetOptions { get; set; }
-
-            [VerbOption("default", HelpText="Set the default repository")]
-            public DefaultOptions DefaultOptions { get; set; }
-        }
-
-        internal class AvailableOptions : CommonOptions
-        {
-        }
-
-        internal class ListOptions : CommonOptions
-        {
-        }
-
-        internal class AddOptions : CommonOptions
-        {
-            [ValueOption(0)]
-            public string name { get; set; }
-
-            [ValueOption(1)]
-            public string uri { get; set; }
-        }
-
-        internal class DefaultOptions : CommonOptions
-        {
-            [ValueOption(0)]
-            public string uri { get; set; }
-        }
-
-        internal class ForgetOptions : CommonOptions
-        {
-            [ValueOption(0)]
-            public string name { get; set; }
-        }
-
-        internal void Parse(string option, object suboptions)
-        {
-            this.option = option;
-            this.suboptions = suboptions;
-        }
+        public KSPManager Manager { get; set; }
+        public IUser User { get; set; }
 
         // This is required by ISubCommand
         public int RunSubCommand(SubCommandOptions unparsed)
         {
-            string[] args = unparsed.options.ToArray();
+            var args = unparsed.options.ToArray();
 
             if (args.Length == 0)
             {
@@ -96,7 +43,7 @@ namespace CKAN.CmdLine
 
             #region Aliases
 
-            for (int i = 0; i < args.Length; i++)
+            for (var i = 0; i < args.Length; i++)
             {
                 switch (args[i])
                 {
@@ -107,8 +54,9 @@ namespace CKAN.CmdLine
             }
 
             #endregion
+
             // Parse and process our sub-verbs
-            Parser.Default.ParseArgumentsStrict(args, new RepoSubOptions (), Parse);
+            Parser.Default.ParseArgumentsStrict(args, new RepoSubOptions(), Parse);
 
             // That line above will have set our 'option' and 'suboption' fields.
 
@@ -121,13 +69,13 @@ namespace CKAN.CmdLine
                     return ListRepositories();
 
                 case "add":
-                    return AddRepository((AddOptions)suboptions);
+                    return AddRepository((AddOptions) suboptions);
 
                 case "forget":
-                    return ForgetRepository((ForgetOptions)suboptions);
+                    return ForgetRepository((ForgetOptions) suboptions);
 
                 case "default":
-                    return DefaultRepository((DefaultOptions)suboptions);
+                    return DefaultRepository((DefaultOptions) suboptions);
 
                 default:
                     User.RaiseMessage("Unknown command: repo {0}", option);
@@ -135,16 +83,22 @@ namespace CKAN.CmdLine
             }
         }
 
+        internal void Parse(string option, object suboptions)
+        {
+            this.option = option;
+            this.suboptions = suboptions;
+        }
+
         public static RepositoryList FetchMasterRepositoryList(Uri master_uri = null)
         {
-            WebClient client = new WebClient();
+            var client = new WebClient();
 
             if (master_uri == null)
             {
                 master_uri = Repository.default_repo_master_list;
             }
 
-            string json = client.DownloadString(master_uri);
+            var json = client.DownloadString(master_uri);
             return JsonConvert.DeserializeObject<RepositoryList>(json);
         }
 
@@ -159,17 +113,18 @@ namespace CKAN.CmdLine
             }
             catch
             {
-                User.RaiseError("Couldn't fetch CKAN repositories master list from {0}", Repository.default_repo_master_list.ToString());
+                User.RaiseError("Couldn't fetch CKAN repositories master list from {0}",
+                    Repository.default_repo_master_list.ToString());
                 return Exit.ERROR;
             }
 
-            int maxNameLen = 0;
-            foreach (Repository repository in repositories.repositories)
+            var maxNameLen = 0;
+            foreach (var repository in repositories.repositories)
             {
                 maxNameLen = Math.Max(maxNameLen, repository.name.Length);
             }
 
-            foreach (Repository repository in repositories.repositories)
+            foreach (var repository in repositories.repositories)
             {
                 User.RaiseMessage("  {0}: {1}", repository.name.PadRight(maxNameLen), repository.uri);
             }
@@ -180,18 +135,18 @@ namespace CKAN.CmdLine
         private int ListRepositories()
         {
             User.RaiseMessage("Listing all known repositories:");
-            var manager = RegistryManager.Instance(Manager.CurrentInstance);
-            SortedDictionary<string, Repository> repositories = manager.registry.Repositories;
+            var repositories = Manager.CurrentInstance.Registry.Repositories;
 
-            int maxNameLen = 0;
-            foreach(Repository repository in repositories.Values)
+            var maxNameLen = 0;
+            foreach (var repository in repositories.Values)
             {
                 maxNameLen = Math.Max(maxNameLen, repository.name.Length);
             }
 
-            foreach(Repository repository in repositories.Values)
+            foreach (var repository in repositories.Values)
             {
-                User.RaiseMessage("  {0}: {1}: {2}", repository.name.PadRight(maxNameLen), repository.priority, repository.uri);
+                User.RaiseMessage("  {0}: {1}: {2}", repository.name.PadRight(maxNameLen), repository.priority,
+                    repository.uri);
             }
 
             return Exit.OK;
@@ -199,7 +154,7 @@ namespace CKAN.CmdLine
 
         private int AddRepository(AddOptions options)
         {
-            RegistryManager manager = RegistryManager.Instance(Manager.CurrentInstance);
+            var manager = Manager.CurrentInstance.RegistryManager;
 
             if (options.name == null)
             {
@@ -217,13 +172,14 @@ namespace CKAN.CmdLine
                 }
                 catch
                 {
-                    User.RaiseError("Couldn't fetch CKAN repositories master list from {0}", Repository.default_repo_master_list.ToString());
+                    User.RaiseError("Couldn't fetch CKAN repositories master list from {0}",
+                        Repository.default_repo_master_list.ToString());
                     return Exit.ERROR;
                 }
 
-                foreach (Repository candidate in repositoryList.repositories)
+                foreach (var candidate in repositoryList.repositories)
                 {
-                    if (String.Equals(candidate.name, options.name, StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(candidate.name, options.name, StringComparison.OrdinalIgnoreCase))
                     {
                         options.name = candidate.name;
                         options.uri = candidate.uri.ToString();
@@ -263,13 +219,13 @@ namespace CKAN.CmdLine
                 return Exit.BADOPT;
             }
 
-            RegistryManager manager = RegistryManager.Instance(Manager.CurrentInstance);
+            var manager = Manager.CurrentInstance.RegistryManager;
             var registry = manager.registry;
             log.DebugFormat("About to forget repository '{0}'", options.name);
 
             var repos = registry.Repositories;
 
-            string name = options.name;
+            var name = options.name;
             if (!repos.ContainsKey(options.name))
             {
                 name = repos.Keys.FirstOrDefault(repo => repo.Equals(options.name, StringComparison.OrdinalIgnoreCase));
@@ -290,7 +246,7 @@ namespace CKAN.CmdLine
 
         private int DefaultRepository(DefaultOptions options)
         {
-            RegistryManager manager = RegistryManager.Instance(Manager.CurrentInstance);
+            var manager = Manager.CurrentInstance.RegistryManager;
 
             if (options.uri == null)
             {
@@ -299,14 +255,15 @@ namespace CKAN.CmdLine
             }
 
             log.DebugFormat("About to add repository '{0}' - '{1}'", Repository.default_ckan_repo_name, options.uri);
-            SortedDictionary<string, Repository> repositories = manager.registry.Repositories;
+            var repositories = manager.registry.Repositories;
 
-            if (repositories.ContainsKey (Repository.default_ckan_repo_name))
+            if (repositories.ContainsKey(Repository.default_ckan_repo_name))
             {
-                repositories.Remove (Repository.default_ckan_repo_name);
+                repositories.Remove(Repository.default_ckan_repo_name);
             }
 
-            repositories.Add(Repository.default_ckan_repo_name, new Repository(Repository.default_ckan_repo_name, Repository.default_ckan_repo_uri));
+            repositories.Add(Repository.default_ckan_repo_name,
+                new Repository(Repository.default_ckan_repo_name, Repository.default_ckan_repo_uri));
 
             User.RaiseMessage("Set {0} repository to '{1}'", Repository.default_ckan_repo_name, options.uri);
             manager.Save();

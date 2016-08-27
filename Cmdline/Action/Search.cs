@@ -1,25 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
+using CKAN.Types;
 
-namespace CKAN.CmdLine
+namespace CKAN.CmdLine.Action
 {
     public class Search : ICommand
     {
-        public IUser user { get; set; }
-
         public Search(IUser user)
         {
             this.user = user;
         }
 
+        public IUser user { get; set; }
+
         public int RunCommand(CKAN.KSP ksp, object raw_options)
         {
-            SearchOptions options = (SearchOptions) raw_options;
+            var options = (SearchOptions) raw_options;
 
             // Check the input.
-            if (String.IsNullOrWhiteSpace(options.search_term))
+            if (string.IsNullOrWhiteSpace(options.search_term))
             {
                 user.RaiseError("No search term?");
 
@@ -29,7 +28,7 @@ namespace CKAN.CmdLine
             var matching_mods = PerformSearch(ksp, options.search_term);
 
             // Show how many matches we have.
-            user.RaiseMessage("Found " + matching_mods.Count.ToString() + " mods matching \"" + options.search_term + "\".");
+            user.RaiseMessage("Found " + matching_mods.Count + " mods matching \"" + options.search_term + "\".");
 
             // Present the results.
             if (matching_mods.Count == 0)
@@ -38,7 +37,7 @@ namespace CKAN.CmdLine
             }
 
             // Print each mod on a separate line.
-            foreach (CkanModule mod in matching_mods)
+            foreach (var mod in matching_mods)
             {
                 user.RaiseMessage(mod.identifier);
             }

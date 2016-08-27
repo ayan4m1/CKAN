@@ -1,26 +1,27 @@
-﻿using log4net;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using CKAN.Registry;
+using CKAN.Types;
+using log4net;
 
-namespace CKAN.CmdLine
+namespace CKAN.CmdLine.Action
 {
     public class Remove : ICommand
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(Remove));
-
-        public IUser user { get; set; }
 
         public Remove(IUser user)
         {
             this.user = user;
         }
 
+        public IUser user { get; set; }
+
         // Uninstalls a module, if it exists.
         public int RunCommand(CKAN.KSP ksp, object raw_options)
         {
-
-            RemoveOptions options = (RemoveOptions) raw_options;
+            var options = (RemoveOptions) raw_options;
 
             // Use one (or more!) regex to select the modules to remove
             if (options.regex)
@@ -30,7 +31,7 @@ namespace CKAN.CmdLine
                 var justins = options.modules.Select(s => new Regex(s));
 
                 // Modules that have been selected by one regex
-                List<string> selectedModules = new List<string>();
+                var selectedModules = new List<string>();
 
                 // Get the list of installed modules
                 IRegistryQuerier registry = RegistryManager.Instance(ksp).registry;
@@ -38,7 +39,7 @@ namespace CKAN.CmdLine
 
                 // Try every regex on every installed module:
                 // if it matches, select for removal
-                foreach (string mod in installed.Keys)
+                foreach (var mod in installed.Keys)
                 {
                     if (justins.Any(re => re.IsMatch(mod)))
                         selectedModules.Add(mod);
@@ -84,4 +85,3 @@ namespace CKAN.CmdLine
         }
     }
 }
-
