@@ -16,9 +16,18 @@ check_nunit () {
 }
 
 xbuild /verbosity:minimal CKAN-netkan.sln
-chmod a+x ../CKAN-core/packages/ILRepack.1.25.0/tools/ILRepack.exe
+chmod a+x ../packages/ILRepack.2.0.10/tools/ILRepack.exe
 
-mono ../CKAN-core/packages/ILRepack.1.25.0/tools/ILRepack.exe /target:exe /out:../netkan.exe bin/Debug/NetKAN.exe bin/Debug/log4net.dll bin/Debug/Newtonsoft.Json.dll bin/Debug/ICSharpCode.SharpZipLib.dll bin/Debug/ChinhDo.Transactions.dll bin/Debug/CKAN.dll bin/Debug/CommandLine.dll bin/Debug/nunit.framework.dll bin/Debug/CurlSharp.dll
+mono ../packages/ILRepack.2.0.10/tools/ILRepack.exe /target:exe /out:../netkan.exe \
+	bin/Debug/NetKAN.exe \
+	bin/Debug/log4net.dll \
+	bin/Debug/Newtonsoft.Json.dll \
+	bin/Debug/ICSharpCode.SharpZipLib.dll 
+	bin/Debug/ChinhDo.Transactions.FileManager.dll \
+	bin/Debug/CKAN.dll \
+	bin/Debug/CommandLine.dll \
+	bin/Debug/nunit.framework.dll \
+	bin/Debug/CurlSharp.dll
 
 # Find a suitable version of nunit.
 echo "Checking if nunit-console is available..."

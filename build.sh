@@ -39,7 +39,7 @@ mono packages/ILRepack.2.0.10/tools/ILRepack.exe \
 	/out:ckan.exe \
 	Cmdline/bin/Debug/CmdLine.exe \
 	Cmdline/bin/Debug/CKAN-GUI.exe \
-	Cmdline/bin/Debug/ChinhDo.Transactions.dll \
+	Cmdline/bin/Debug/ChinhDo.Transactions.FileManager.dll \
 	Cmdline/bin/Debug/CKAN.dll \
 	Cmdline/bin/Debug/CommandLine.dll \
 	Cmdline/bin/Debug/ICSharpCode.SharpZipLib.dll \
@@ -52,7 +52,7 @@ mono packages/ILRepack.2.0.10/tools/ILRepack.exe \
 	/target:exe \
 	/out:netkan.exe \
 	Netkan/bin/Debug/NetKAN.exe \
-	Cmdline/bin/Debug/ChinhDo.Transactions.dll \
+	Cmdline/bin/Debug/ChinhDo.Transactions.FileManager.dll \
 	Cmdline/bin/Debug/CKAN.dll \
 	Cmdline/bin/Debug/CommandLine.dll \
 	Cmdline/bin/Debug/ICSharpCode.SharpZipLib.dll \
