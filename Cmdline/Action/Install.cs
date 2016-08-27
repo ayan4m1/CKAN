@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using CKAN.Net;
-using CKAN.Registry;
 using CKAN.Relationships;
 using CKAN.Types;
 using log4net;

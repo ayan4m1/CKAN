@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using CKAN.Net;
-using CKAN.Registry;
 using CKAN.Types;
 using log4net;
 
@@ -41,7 +40,7 @@ namespace CKAN.CmdLine.Action
                 User.RaiseMessage("Querying the latest CKAN version");
                 AutoUpdate.Instance.FetchLatestReleaseInfo();
                 var latestVersion = AutoUpdate.Instance.LatestVersion;
-                var currentVersion = new Version(Meta.Version());
+                var currentVersion = new GameVersion(Meta.Version());
 
                 if (latestVersion.IsGreaterThan(currentVersion))
                 {
@@ -70,7 +69,7 @@ namespace CKAN.CmdLine.Action
             {
                 if (options.upgrade_all)
                 {
-                    var installed = new Dictionary<string, Version>(ksp.Registry.Installed());
+                    var installed = new Dictionary<string, GameVersion>(ksp.Registry.Installed());
                     var to_upgrade = new List<CkanModule>();
 
                     foreach (var mod in installed)

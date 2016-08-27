@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using CKAN.Registry;
 using CKAN.Types;
 using log4net;
 
@@ -35,7 +34,7 @@ namespace CKAN.CmdLine.Action
 
                 // Get the list of installed modules
                 IRegistryQuerier registry = RegistryManager.Instance(ksp).registry;
-                var installed = new SortedDictionary<string, Version>(registry.Installed(false));
+                var installed = new SortedDictionary<string, GameVersion>(registry.Installed(false));
 
                 // Try every regex on every installed module:
                 // if it matches, select for removal
@@ -55,7 +54,7 @@ namespace CKAN.CmdLine.Action
                 log.Debug("Removing all mods");
                 // Get the list of installed modules
                 IRegistryQuerier registry = RegistryManager.Instance(ksp).registry;
-                var installed = new SortedDictionary<string, Version>(registry.Installed(false));
+                var installed = new SortedDictionary<string, GameVersion>(registry.Installed(false));
 
                 // Add it to the list that should be uninstalled.
                 options.modules.AddRange(installed.Keys);

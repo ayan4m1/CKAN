@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using CKAN.Exporters;
-using CKAN.Registry;
 using CKAN.Types;
 using log4net;
-using Version = CKAN.Types.Version;
 
 namespace CKAN.CmdLine.Action
 {
@@ -48,7 +46,7 @@ namespace CKAN.CmdLine.Action
 
             if (exportFileType == null)
             {
-                var installed = new SortedDictionary<string, Version>(registry.Installed());
+                var installed = new SortedDictionary<string, GameVersion>(registry.Installed());
 
                 foreach (var mod in installed)
                 {

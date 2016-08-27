@@ -17,8 +17,8 @@ namespace CKAN.CmdLine.Action
 
             if (options.Left != null && options.Right != null)
             {
-                var leftVersion = new Version(options.Left);
-                var rightVersion = new Version(options.Right);
+                var leftVersion = new GameVersion(options.Left);
+                var rightVersion = new GameVersion(options.Right);
 
                 var compareResult = leftVersion.CompareTo(rightVersion);
                 if (compareResult == 0)

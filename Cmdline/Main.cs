@@ -12,7 +12,6 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using CKAN.CmdLine.Action;
 using CKAN.Net;
-using CKAN.Registry;
 using CKAN.Types;
 using log4net;
 using log4net.Config;
