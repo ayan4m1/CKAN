@@ -5,7 +5,7 @@
 all: build
 
 build: FORCE
-	bin/build
+	sh ./build.sh
 
 clean:
 	rm -rf AutoUpdate/bin AutoUpdate/obj \
