@@ -302,6 +302,7 @@ This is a bad idea and there is absolutely no good reason to do it. Please run C
             catch (Exception)
             {
                 // Ignored. This may be fragile and is just a warning method
+                log.Warn("Failed runtime version check!");
             }
         }
 
