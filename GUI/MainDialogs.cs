@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using CKAN.Types;
 
 namespace CKAN
 {

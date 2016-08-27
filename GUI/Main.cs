@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using CKAN.Exporters;
 using CKAN.Net;
 using CKAN.Properties;
+using CKAN.Relationships;
 using CKAN.Types;
 using log4net;
 using Timer = System.Windows.Forms.Timer;
@@ -196,7 +197,7 @@ namespace CKAN
             configuration = Configuration.LoadOrCreateConfiguration
                 (
                     Path.Combine(CurrentInstance.GameDir, "CKAN/GUIConfig.xml"),
-                    Net.Repo.DefaultCkanRepo.ToString()
+                    Repo.DefaultCkanRepo.ToString()
                 );
 
             // Check if there is any other instances already running.
@@ -308,7 +309,7 @@ namespace CKAN
                     log.Info("Making autoupdate call");
                     AutoUpdate.Instance.FetchLatestReleaseInfo();
                     var latest_version = AutoUpdate.Instance.LatestVersion;
-                    var current_version = new Version(Meta.Version());
+                    var current_version = new GameVersion(Meta.Version());
 
                     if (AutoUpdate.Instance.IsFetched() && latest_version.IsGreaterThan(current_version))
                     {
@@ -486,7 +487,7 @@ namespace CKAN
         {
             var module = GetSelectedModule();
 
-            this.AddStatusMessage("");
+            AddStatusMessage("");
 
             ModInfoTabControl.Enabled = module!=null;
             if (module == null) return;
@@ -587,14 +588,14 @@ namespace CKAN
         /// </summary>
         private void ModList_HeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
-            var new_sort_column = this.ModList.Columns[e.ColumnIndex];
-            var current_sort_column = this.ModList.Columns[this.configuration.SortByColumnIndex];
+            var new_sort_column = ModList.Columns[e.ColumnIndex];
+            var current_sort_column = ModList.Columns[configuration.SortByColumnIndex];
             // Reverse the sort order if the current sorting column is clicked again
-            this.configuration.SortDescending = new_sort_column == current_sort_column ? !this.configuration.SortDescending : false;
+            configuration.SortDescending = new_sort_column == current_sort_column ? !configuration.SortDescending : false;
             // Reset the glyph
             current_sort_column.HeaderCell.SortGlyphDirection = SortOrder.None;
-            this.configuration.SortByColumnIndex = new_sort_column.Index;
-            this.UpdateFilters(this);
+            configuration.SortByColumnIndex = new_sort_column.Index;
+            UpdateFilters(this);
         }
 
         /// <summary>
@@ -655,15 +656,15 @@ namespace CKAN
             }
 
             // Determine time passed since last key press
-            TimeSpan interval = DateTime.Now - this.lastSearchTime;
+            TimeSpan interval = DateTime.Now - lastSearchTime;
             if (interval.TotalSeconds < 1)
             {
                 // Last keypress was < 1 sec ago, so combine the last and current keys
-                key = this.lastSearchKey + key;
+                key = lastSearchKey + key;
             }
             // Remember the current time and key
-            this.lastSearchTime = DateTime.Now;
-            this.lastSearchKey = key;
+            lastSearchTime = DateTime.Now;
+            lastSearchKey = key;
 
             if (key.Distinct().Count() == 1)
             {
@@ -1127,7 +1128,7 @@ namespace CKAN
             }
             else
             {
-                this.AddStatusMessage("Not found");
+                AddStatusMessage("Not found");
             }
         }
 

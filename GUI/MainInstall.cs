@@ -6,6 +6,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using CKAN.Net;
+using CKAN.Relationships;
+using CKAN.Types;
 
 namespace CKAN
 {
@@ -508,7 +510,7 @@ namespace CKAN
                 ListViewItem item = new ListViewItem {Tag = module, Checked = !suggested, Text = pair.Key.name};
 
 
-                ListViewItem.ListViewSubItem recommendedBy = new ListViewItem.ListViewSubItem() { Text = pair.Value };
+                ListViewItem.ListViewSubItem recommendedBy = new ListViewItem.ListViewSubItem { Text = pair.Value };
 
                 item.SubItems.Add(recommendedBy);
 

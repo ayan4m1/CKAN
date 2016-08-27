@@ -1,4 +1,5 @@
 ﻿using System;
+using CKAN.Types;
 
 namespace CKAN
 {
@@ -7,7 +8,7 @@ namespace CKAN
 
         public abstract string GetName();
 
-        public abstract Version GetVersion();
+        public abstract GameVersion GetVersion();
 
         public abstract void Initialize();
 

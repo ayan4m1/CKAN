@@ -1,8 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Net;
-using System.Windows.Forms;
 using CKAN.Net;
+using CKAN.Types;
 using Newtonsoft.Json;
 
 namespace CKAN
@@ -67,7 +67,7 @@ namespace CKAN
              * parent.childcontrol.Enabled = true does not necessarily
              * re-enable the parent.*/
             if (_enabled)
-                this.Focus();
+                Focus();
         }
 
 

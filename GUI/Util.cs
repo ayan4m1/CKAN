@@ -2,13 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-
+using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace CKAN
 {
-    using System.Runtime.InteropServices;
-    using System.Windows.Forms;
-
     public static class Util
     {                
         /// <summary>
@@ -90,7 +88,7 @@ namespace CKAN
         {
             // Default prefixes to try if not provided
             if (prefixes == null)
-                prefixes = new string[] {"http://", "https:// "};
+                prefixes = new[] {"http://", "https:// "};
 
             try // opening the page normally
             {

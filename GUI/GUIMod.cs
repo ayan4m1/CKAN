@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Windows.Forms;
 using System.Linq;
+using System.Windows.Forms;
+using CKAN.Types;
 using CKAN.Versioning;
 
 namespace CKAN
@@ -60,7 +61,7 @@ namespace CKAN
             Authors = mod.author == null ? "N/A" : String.Join(",", mod.author);
 
             var installed_version = registry.InstalledVersion(mod.identifier);
-            Version latest_version = null;
+            GameVersion latest_version = null;
             var ksp_version = mod.ksp_version;
 
             try
@@ -90,7 +91,7 @@ namespace CKAN
                 // If we can't find the mod in the CKAN, but we've a CkanModule installed, then
                 // use that.
                 if (IsCKAN)
-                    latest_available_for_any_ksp = (CkanModule) mod;
+                    latest_available_for_any_ksp = mod;
                 
             }
 
@@ -169,7 +170,7 @@ namespace CKAN
         public CkanModule ToCkanModule()
         {
             if (!IsCKAN) throw new InvalidCastException("Method can not be called unless IsCKAN");
-            var mod = Mod as CkanModule;
+            var mod = Mod;
             return mod;
         }
 

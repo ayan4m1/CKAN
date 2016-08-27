@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using CKAN.Relationships;
+using CKAN.Types;
 using CKAN.Versioning;
 
 namespace CKAN
@@ -20,12 +21,12 @@ namespace CKAN
         private IEnumerable<DataGridViewRow> _SortRowsByColumn(IEnumerable<DataGridViewRow> rows)
         {
             // XXX: There should be a better way to identify checkbox columns than hardcoding their indices here
-            if (this.configuration.SortByColumnIndex < 2)
+            if (configuration.SortByColumnIndex < 2)
             {
                 return Sort(rows, CheckboxSorter);
             }
             // XXX: Same for Integer columns
-            else if (this.configuration.SortByColumnIndex == 7)
+            if (configuration.SortByColumnIndex == 7)
             {
                 return Sort(rows, IntegerSorter);
             }
@@ -36,10 +37,10 @@ namespace CKAN
         {
             var get_row_mod_name = new Func<DataGridViewRow, string>(row => ((GUIMod)row.Tag).Name);
             DataGridViewColumnHeaderCell header =
-                this.ModList.Columns[this.configuration.SortByColumnIndex].HeaderCell;
+                ModList.Columns[configuration.SortByColumnIndex].HeaderCell;
 
             // The columns will be sorted by mod name in addition to whatever the current sorting column is
-            if (this.configuration.SortDescending)
+            if (configuration.SortDescending)
             {
                 header.SortGlyphDirection = SortOrder.Descending;
                 return rows.OrderByDescending(sortFunction).ThenBy(get_row_mod_name);
@@ -56,7 +57,7 @@ namespace CKAN
         /// </summary>
         private string DefaultSorter(DataGridViewRow row)
         {
-                return row.Cells[this.configuration.SortByColumnIndex].Value.ToString();
+                return row.Cells[configuration.SortByColumnIndex].Value.ToString();
         }
 
         /// <summary>
@@ -66,7 +67,7 @@ namespace CKAN
         /// </summary>
         private string CheckboxSorter(DataGridViewRow row)
         {
-            var cell = row.Cells[this.configuration.SortByColumnIndex];
+            var cell = row.Cells[configuration.SortByColumnIndex];
             if (cell.ValueType == typeof(bool))
             {
                 return (bool)cell.Value ? "a" : "b";
@@ -82,11 +83,11 @@ namespace CKAN
         /// </summary>
         private int IntegerSorter(DataGridViewRow row)
         {
-            var cell = row.Cells[this.configuration.SortByColumnIndex];
+            var cell = row.Cells[configuration.SortByColumnIndex];
 
             if (cell.Value.ToString() == "N/A")
                 return -1;
-            else if (cell.Value.ToString() == "1<KB")
+            if (cell.Value.ToString() == "1<KB")
                 return 0;
 
             int result = -2;
@@ -119,7 +120,7 @@ namespace CKAN
                 row.Visible = mainModList.IsVisible(mod);
             }
 
-            var sorted = this._SortRowsByColumn(rows.Where(row => row.Visible));
+            var sorted = _SortRowsByColumn(rows.Where(row => row.Visible));
 
             ModList.Rows.AddRange(sorted.ToArray());
 

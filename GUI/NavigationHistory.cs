@@ -1,8 +1,8 @@
-﻿namespace CKAN
-{
-    using System;
-    using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
+namespace CKAN
+{
     /// <summary>
     /// Generic class for keeping a browser-like navigation history.
     /// </summary>

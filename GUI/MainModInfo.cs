@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
-using System.Windows.Forms;
-using System.IO;
 using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Windows.Forms;
 using CKAN.Net;
+using CKAN.Types;
 
 namespace CKAN
 {
@@ -27,7 +28,7 @@ namespace CKAN
             CkanModule module = gui_module.ToModule();
 
             Util.Invoke(MetadataModuleNameLabel, () => MetadataModuleNameLabel.Text = gui_module.Name);
-            Util.Invoke(MetadataModuleVersionLabel, () => MetadataModuleVersionLabel.Text = gui_module.LatestVersion.ToString());
+            Util.Invoke(MetadataModuleVersionLabel, () => MetadataModuleVersionLabel.Text = gui_module.LatestVersion);
             Util.Invoke(MetadataModuleLicenseLabel, () => MetadataModuleLicenseLabel.Text = string.Join(", ",module.license));
             Util.Invoke(MetadataModuleAuthorLabel, () => MetadataModuleAuthorLabel.Text = gui_module.Authors);
             Util.Invoke(MetadataModuleAbstractLabel, () => MetadataModuleAbstractLabel.Text = module.@abstract);
@@ -35,7 +36,7 @@ namespace CKAN
 
             // If we have homepage provided use that, otherwise use the spacedock page or the github repo so that users have somewhere to get more info than just the abstract.
             Util.Invoke(MetadataModuleHomePageLinkLabel,
-                       () => MetadataModuleHomePageLinkLabel.Text = gui_module.Homepage.ToString());
+                       () => MetadataModuleHomePageLinkLabel.Text = gui_module.Homepage);
 
             if (module.resources != null && module.resources.repository != null)
             {
@@ -218,10 +219,7 @@ namespace CKAN
             {
                 return;
             }
-            else
-            {
-                current_mod_contents_module = module;
-            }
+            current_mod_contents_module = module;
             if (!guiMod.IsCached)
             {
                 NotCachedLabel.Text = "This mod is not in the cache, click 'Download' to preview contents";

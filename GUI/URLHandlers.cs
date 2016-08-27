@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using CKAN.Net;
 using IniParser;
 using IniParser.Exceptions;
@@ -53,7 +54,7 @@ namespace CKAN
 Do you want to allow CKAN to do this? If you click no you won't see this message again."))
                         {
                             // we need elevation to write to the registry
-                            ProcessStartInfo startInfo = new ProcessStartInfo(System.Reflection.Assembly.GetEntryAssembly().Location);
+                            ProcessStartInfo startInfo = new ProcessStartInfo(Assembly.GetEntryAssembly().Location);
                             startInfo.Verb = "runas"; // trigger a UAC prompt (if UAC is enabled)
                             startInfo.Arguments = "gui " + UrlRegistrationArgument;
                             Process.Start(startInfo);
@@ -94,7 +95,7 @@ Do you want to allow CKAN to do this? If you click no you won't see this message
                             .OpenSubKey("command")
                             .GetValue("");
 
-                    if (path == (System.Reflection.Assembly.GetExecutingAssembly().Location + " gui %1"))
+                    if (path == (Assembly.GetExecutingAssembly().Location + " gui %1"))
                     {
                         log.InfoFormat("URL handler already exists with the same path");
                         return;
@@ -111,7 +112,7 @@ Do you want to allow CKAN to do this? If you click no you won't see this message
             key.SetValue("", "URL: ckan Protocol");
             key.SetValue("URL Protocol", "");
             key.CreateSubKey("shell").CreateSubKey("open").CreateSubKey("command").SetValue
-                ("", System.Reflection.Assembly.GetExecutingAssembly().Location + " gui %1");
+                ("", Assembly.GetExecutingAssembly().Location + " gui %1");
         }
 
         private static void RegisterURLHandler_Linux()
@@ -127,7 +128,7 @@ Do you want to allow CKAN to do this? If you click no you won't see this message
             if (!File.Exists(MimeAppsListPath))
             {
                 log.InfoFormat("{0} does not exist, trying to create it", MimeAppsListPath);
-                File.WriteAllLines(MimeAppsListPath, new string[] { "[Default Applications]" });
+                File.WriteAllLines(MimeAppsListPath, new[] { "[Default Applications]" });
             }
 
             try
@@ -178,7 +179,7 @@ Do you want to allow CKAN to do this? If you click no you won't see this message
             data.Sections.AddSection("Desktop Entry");
             data["Desktop Entry"].AddKey("Version", "1.0");
             data["Desktop Entry"].AddKey("Type", "Application");
-            data["Desktop Entry"].AddKey("Exec", "mono \"" + System.Reflection.Assembly.GetExecutingAssembly().Location + "\" gui %u");
+            data["Desktop Entry"].AddKey("Exec", "mono \"" + Assembly.GetExecutingAssembly().Location + "\" gui %u");
             data["Desktop Entry"].AddKey("Icon", "ckan");
             data["Desktop Entry"].AddKey("StartupNotify", "true");
             data["Desktop Entry"].AddKey("Terminal", "false");

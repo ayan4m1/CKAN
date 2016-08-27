@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
 using CKAN.Net;
+using CKAN.Types;
 using log4net;
-using log4net.Repository.Hierarchy;
 
 namespace CKAN
 {
@@ -97,7 +94,7 @@ namespace CKAN
                 m_cacheSize / 1024 / 1024
             );
 
-            if (deleteConfirmationDialog.ShowYesNoDialog(confirmationText) == System.Windows.Forms.DialogResult.Yes)
+            if (deleteConfirmationDialog.ShowYesNoDialog(confirmationText) == DialogResult.Yes)
             {
                 Main.Instance.CurrentInstance.Cache.Cleanup();
                 UpdateCacheInfo();
@@ -213,7 +210,7 @@ namespace CKAN
             {
                 AutoUpdate.Instance.FetchLatestReleaseInfo();
                 var latestVersion = AutoUpdate.Instance.LatestVersion;
-                if (latestVersion.IsGreaterThan(new Version(Meta.Version())) && AutoUpdate.Instance.IsFetched())
+                if (latestVersion.IsGreaterThan(new GameVersion(Meta.Version())) && AutoUpdate.Instance.IsFetched())
                 {
                     InstallUpdateButton.Enabled = true;
                 }
