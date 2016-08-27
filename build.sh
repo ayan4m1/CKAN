@@ -34,7 +34,7 @@ else
     echo "Could not find a suitable version of nunit-console to run the tests. Skipping test execution."
 fi
 
-mono Core/packages/ILRepack.1.25.0/tools/ILRepack.exe \
+mono packages/ILRepack.2.0.10/tools/ILRepack.exe \
 	/target:exe \
 	/out:ckan.exe \
 	Cmdline/bin/Debug/CmdLine.exe \
@@ -48,7 +48,7 @@ mono Core/packages/ILRepack.1.25.0/tools/ILRepack.exe \
 	Cmdline/bin/Debug/INIFileParser.dll \
         Cmdline/bin/Debug/CurlSharp.dll
 
-mono Core/packages/ILRepack.1.25.0/tools/ILRepack.exe \
+mono packages/ILRepack.2.0.10/tools/ILRepack.exe \
 	/target:exe \
 	/out:netkan.exe \
 	Netkan/bin/Debug/NetKAN.exe \
