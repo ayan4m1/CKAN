@@ -302,9 +302,8 @@ namespace CKAN
             {
                 // actual magic happens here, we run the installer with our mod list
                 var module_installer = ModuleInstaller.GetInstance(manager.CurrentInstance, GUI.user);
-                module_installer.onReportModInstalled = OnModInstalled;
-                return WasSuccessful(
-                    () => module_installer.InstallList(toInstall.ToList(), options, downloader));
+                module_installer.OnReportModInstalled += OnModInstalled;
+                return WasSuccessful(() => module_installer.InstallList(toInstall.ToList(), options, downloader));
             }
 
             return true;
