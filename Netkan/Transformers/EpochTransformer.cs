@@ -1,5 +1,6 @@
 ﻿using System;
 using CKAN.NetKAN.Model;
+using CKAN.Types;
 using log4net;
 using Newtonsoft.Json.Linq;
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 using CKAN.NetKAN.Model;
+using CKAN.Types;
 using log4net;
 using Newtonsoft.Json.Linq;
 
@@ -120,15 +121,9 @@ namespace CKAN.NetKAN.Transformers
 
                         return new VersionEditInfo((string)versionProp, find, replace, strict);
                     }
-                    else
-                    {
-                        throw new Kraken("`version` property must be a string");
-                    }
+                    throw new Kraken("`version` property must be a string");
                 }
-                else
-                {
-                    throw new Kraken("`version` property does not exist to edit");
-                }
+                throw new Kraken("`version` property does not exist to edit");
             }
 
             return null;

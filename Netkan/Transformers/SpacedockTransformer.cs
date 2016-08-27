@@ -153,11 +153,8 @@ namespace CKAN.NetKAN.Transformers
                 Log.DebugFormat("Escaped to {0}", escaped);
                 return escaped;
             }
-            else
-            {
-                Log.WarnFormat("Could not normalize URL: {0}", uri);
-                return null;
-            }
+            Log.WarnFormat("Could not normalize URL: {0}", uri);
+            return null;
         }
 
         private static List<string> GetAuthors(SpacedockMod mod)

@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using CKAN.NetKAN.Model;
+using CKAN.Types;
 
 namespace CKAN.NetKAN.Sources.Github
 {

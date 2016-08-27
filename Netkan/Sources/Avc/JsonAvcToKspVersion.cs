@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using CKAN.Types;
 using CKAN.Versioning;
 using log4net;
 using Newtonsoft.Json;
@@ -66,7 +67,7 @@ namespace CKAN.NetKAN.Sources.Avc
             {
                 return KspVersion.Any;
             }
-            else if (int.TryParse(minor, out integer) && integer == AvcWildcard)
+            if (int.TryParse(minor, out integer) && integer == AvcWildcard)
             {
                 version = major;
             }
@@ -155,7 +156,7 @@ namespace CKAN.NetKAN.Sources.Avc
                     throw new InvalidCastException("Trying to convert non-JSON object to Version object");
             }
 
-            var components = new List<string>() { major, minor, patch };
+            var components = new List<string> { major, minor, patch };
 
             if (!string.IsNullOrWhiteSpace(build))
             {
@@ -164,7 +165,7 @@ namespace CKAN.NetKAN.Sources.Avc
 
             var version = string.Join(".", components);
             Log.DebugFormat("  extracted version: {0}", version);
-            var result = new Version(version);
+            var result = new GameVersion(version);
             Log.DebugFormat("  generated result: {0}", result);
             return result;
         }

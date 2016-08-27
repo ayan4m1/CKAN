@@ -6,6 +6,7 @@ using CKAN.NetKAN.Extensions;
 using CKAN.NetKAN.Model;
 using CKAN.NetKAN.Services;
 using CKAN.NetKAN.Sources.Avc;
+using CKAN.Types;
 using CKAN.Versioning;
 using log4net;
 using Newtonsoft.Json;
@@ -167,10 +168,7 @@ namespace CKAN.NetKAN.Transformers
 
                 return new Metadata(json);
             }
-            else
-            {
-                return metadata;
-            }
+            return metadata;
         }
     }
 }

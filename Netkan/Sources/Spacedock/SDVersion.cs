@@ -1,6 +1,7 @@
 using System;
 using System.Text.RegularExpressions;
 using CKAN.Net;
+using CKAN.Types;
 using CKAN.Versioning;
 using log4net;
 using Newtonsoft.Json;
@@ -22,7 +23,7 @@ namespace CKAN.NetKAN.Sources.Spacedock
         [JsonConverter(typeof(JsonConvertFromRelativeSdUri))]
         public Uri download_path;
 
-        public Version friendly_version;
+        public GameVersion friendly_version;
         public int id;
 
         public string Download(string identifier, NetFileCache cache)

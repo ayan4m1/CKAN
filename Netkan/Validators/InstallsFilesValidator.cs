@@ -1,5 +1,6 @@
 ﻿using CKAN.NetKAN.Model;
 using CKAN.NetKAN.Services;
+using CKAN.Types;
 
 namespace CKAN.NetKAN.Validators
 {

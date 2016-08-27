@@ -1,7 +1,7 @@
 ﻿using System;
+using CKAN.NetKAN.Extensions;
 using CKAN.NetKAN.Model;
 using CKAN.NetKAN.Services;
-using CKAN.NetKAN.Extensions;
 using log4net;
 using Newtonsoft.Json.Linq;
 

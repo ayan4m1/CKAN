@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 using CKAN.NetKAN.Services;
+using CKAN.Types;
 using log4net;
 using Newtonsoft.Json;
 

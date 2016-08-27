@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using CKAN.Types;
 
 namespace CKAN.NetKAN.Model
 {
@@ -41,10 +42,7 @@ namespace CKAN.NetKAN.Model
             {
                 return new Arguments(match.Groups["source"].Value, match.Groups["id"].Value);
             }
-            else
-            {
-                throw new Kraken(string.Format(@"Could not parse reference: ""{0}""", refToken));
-            }
+            throw new Kraken(string.Format(@"Could not parse reference: ""{0}""", refToken));
         }
 
         private sealed class Arguments

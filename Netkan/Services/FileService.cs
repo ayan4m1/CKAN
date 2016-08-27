@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Security.Cryptography;
+using CKAN.Types;
 
 namespace CKAN.NetKAN.Services
 {
@@ -13,7 +14,7 @@ namespace CKAN.NetKAN.Services
 
         public string GetFileHashSha1(string filePath)
         {
-            using (FileStream fs = new FileStream(@filePath, FileMode.Open))
+            using (FileStream fs = new FileStream(filePath, FileMode.Open))
             using (BufferedStream bs = new BufferedStream(fs))
             using (var sha1 = new SHA1Cng())
             {
@@ -25,7 +26,7 @@ namespace CKAN.NetKAN.Services
 
         public string GetFileHashSha256(string filePath)
         {
-            using (FileStream fs = new FileStream(@filePath, FileMode.Open))
+            using (FileStream fs = new FileStream(filePath, FileMode.Open))
             using (BufferedStream bs = new BufferedStream(fs))
             using (var sha256 = new SHA256Managed())
             {

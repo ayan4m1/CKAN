@@ -1,3 +1,4 @@
+using CKAN.Types;
 using CKAN.Versioning;
 using Newtonsoft.Json;
 
@@ -11,7 +12,7 @@ namespace CKAN.NetKAN.Sources.Avc
         public string Url;
 
         [JsonConverter(typeof(JsonAvcToVersion))]
-        public Version version;
+        public GameVersion version;
 
         [JsonConverter(typeof (JsonAvcToKspVersion))]
         public KspVersion ksp_version;

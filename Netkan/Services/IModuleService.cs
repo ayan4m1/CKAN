@@ -1,4 +1,5 @@
 ﻿using CKAN.NetKAN.Sources.Avc;
+using CKAN.Types;
 using Newtonsoft.Json.Linq;
 
 namespace CKAN.NetKAN.Services

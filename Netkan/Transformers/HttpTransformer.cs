@@ -1,6 +1,7 @@
 ﻿using System;
 using CKAN.Net;
 using CKAN.NetKAN.Model;
+using CKAN.Types;
 using log4net;
 
 namespace CKAN.NetKAN.Transformers
@@ -37,20 +38,11 @@ namespace CKAN.NetKAN.Transformers
 
                         return new Metadata(json);
                     }
-                    else
-                    {
-                        throw new Kraken("Could not resolve HTTP $kref URL, exceeded number of redirects.");
-                    }
+                    throw new Kraken("Could not resolve HTTP $kref URL, exceeded number of redirects.");
                 }
-                else
-                {
-                    throw new Kraken("Invalid URL in HTTP $kref: " + metadata.Kref.Id);
-                }
+                throw new Kraken("Invalid URL in HTTP $kref: " + metadata.Kref.Id);
             }
-            else
-            {
-                return metadata;
-            }
+            return metadata;
         }
     }
 }

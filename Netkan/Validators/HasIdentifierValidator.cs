@@ -1,4 +1,5 @@
 ﻿using CKAN.NetKAN.Model;
+using CKAN.Types;
 using log4net;
 
 namespace CKAN.NetKAN.Validators

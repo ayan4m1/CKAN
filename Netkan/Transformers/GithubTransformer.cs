@@ -107,10 +107,7 @@ namespace CKAN.NetKAN.Transformers
 
                     return new Metadata(json);
                 }
-                else
-                {
-                    Log.WarnFormat("No releases found for {0}", ghRef.Repository);
-                }
+                Log.WarnFormat("No releases found for {0}", ghRef.Repository);
             }
 
             return metadata;

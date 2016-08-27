@@ -1,6 +1,6 @@
-﻿using log4net;
+﻿using System;
+using log4net;
 using Newtonsoft.Json.Linq;
-using System;
 
 namespace CKAN.NetKAN.Extensions
 {

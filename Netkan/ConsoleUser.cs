@@ -2,13 +2,13 @@
 using System.Text.RegularExpressions;
 using log4net;
 
-namespace CKAN
+namespace CKAN.NetKAN
 {
     public class ConsoleUser : NullUser
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(ConsoleUser));
 
-        private bool m_Headless = false;
+        private bool m_Headless;
         public ConsoleUser(bool headless)
         {
             m_Headless = headless;

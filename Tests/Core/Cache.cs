@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using CKAN;
 using CKAN.Net;
+using CKAN.Types;
 using NUnit.Framework;
 using Tests.Data;
 
