@@ -4,22 +4,19 @@ using System.Text.RegularExpressions;
 
 var target = Argument<string>("target", "Build");
 var configuration = Argument<string>("configuration", "Debug");
-var solution = Argument<string>("solution", "CKAN.sln");
+var solution = Argument<string>("solution", "./CKAN.sln");
 
 Task("BuildDotNet")
     .Does(() =>
 {
     var version = GetGitVersion();
-
-    var metaFileContents = TransformTextFile("Core/Meta.cs.in")
-        .WithToken("version", version == null ? "null" : string.Format(@"""{0}""", version))
-        .ToString();
-
-    System.IO.File.WriteAllText("Core/Meta.cs", metaFileContents);
+    System.IO.File.WriteAllText("Core/Meta.cs", TransformTextFile("Core/Meta.cs.in")
+        .WithToken("version", version == null ? "null" : string.Format(@"""{0}""", version)
+	).ToString());
 
     DotNetBuild(solution, settings =>
     {
-        settings.Properties["win32icon"] = new List<string> { MakeAbsolute(File("GUI/assets/ckan.ico")).FullPath };
+        settings.Properties["win32icon"] = new List<string> { MakeAbsolute(File("./GUI/assets/ckan.ico")).FullPath };
 
         if (IsStable())
         {
@@ -38,13 +35,8 @@ Task("BuildCkan")
     ILRepack("ckan.exe", string.Format("Cmdline/bin/{0}/CmdLine.exe", configuration), assemblyPaths,
         new ILRepackSettings
         {
-            Libs = new List<FilePath> { string.Format("Cmdline/bin/{0}", configuration) },
-            // TODO: Cannot use the "TargetPlaform"
-            // Must wait until https://github.com/cake-build/cake/pull/692 is released.
-            ArgumentCustomization = builder => {
-                builder.Append("/targetplatform:v4");
-                return builder;
-            }
+			TargetPlatform = TargetPlatformVersion.v4,
+            Libs = new List<FilePath> { string.Format("Cmdline/bin/{0}", configuration) }
         }
     );
 });
@@ -103,4 +95,11 @@ private string GetGitVersion()
         return output.Single();
     else
         return null;
+}
+
+private void PerformMacPackaging() {
+	StartProcess("macpack", new ProcessSettings
+	{
+		Arguments = "-m:1 -o:../ -i:assets/ckan.icns -n:CKAN -a:../ckan.exe"
+	});
 }
