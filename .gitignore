@@ -1,3 +1,14 @@
+# Misc folders
+[Bb]in/
+[Oo]bj/
+[Pp]ackages/
+# Build related
+tools/Cake/
+tools/NUnit.Runners/
+tools/NUnit.Console/
+tools/NUnit.ConsoleRunner/
+tools/nuget.exe
+tools/packages.config.md5sum
 .build/
 tools/
 Core/Meta.cs
