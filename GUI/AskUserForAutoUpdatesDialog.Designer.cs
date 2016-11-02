@@ -74,10 +74,14 @@
             this.Controls.Add(this.button1);
             this.Controls.Add(this.YesButton);
             this.Controls.Add(this.label1);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MaximizeBox = false;
+            this.MaximumSize = new System.Drawing.Size(578, 118);
+            this.MinimizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(578, 118);
             this.Name = "AskUserForAutoUpdatesDialog";
             this.Text = "Check for updates";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.AskUserForAutoUpdatesDialog_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();
 
