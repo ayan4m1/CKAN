@@ -206,16 +206,17 @@ namespace CKAN.CmdLine
                 return Exit.BADOPT;
             }
 
+            var path = string.Empty;
             try
             {
-                string path = options.path;
+                path = options.path;
                 Manager.AddInstance(options.name, new CKAN.KSP(path, User));
                 User.RaiseMessage("Added \"{0}\" with root \"{1}\" to known installs", options.name, options.path);
                 return Exit.OK;
             }
-            catch (NotKSPDirKraken ex)
+            catch (Exception)
             {
-                User.RaiseMessage("Sorry, {0} does not appear to be a KSP directory", ex.path);
+                User.RaiseMessage("Sorry, {0} does not appear to be a KSP directory", path);
                 return Exit.BADOPT;
             }
         }

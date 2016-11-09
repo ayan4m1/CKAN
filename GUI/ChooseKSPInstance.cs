@@ -57,8 +57,9 @@ namespace CKAN
                 {
                     instance = new KSP(path, GUI.user);
                 }
-                catch (NotKSPDirKraken){
-                    GUI.user.displayError("Directory {0} is not valid KSP directory.", new object[] {path});
+                catch (Exception)
+                {
+                    GUI.user.displayError("Failed to add directory {0} as a valid intance.", new object[] {path});
                     return;
                 }
 

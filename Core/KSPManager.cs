@@ -135,11 +135,6 @@ namespace CKAN
                 log.WarnFormat("Couldn't find the default instance directory {0}", gamedir);
                 return null;
             }
-            catch (NotKSPDirKraken)//Todo check carefully if this is nessesary. 
-            {
-                return null;
-            }
-
             
         }
 
@@ -283,25 +278,17 @@ namespace CKAN
 
             instances.Clear();
 
-            foreach (Tuple<string, string> instance in Win32Registry.GetInstances())
+            foreach (var pair in Win32Registry.GetInstances())
             {
-                var name = instance.Item1;
-                var path = instance.Item2;
-                log.DebugFormat("Loading {0} from {1}", name, path);
-                if (KSP.IsKspDir(path))
-                {
-                    instances.Add(name, new KSP(path, User));
-                    log.DebugFormat("Added {0} at {1}", name, path);
-                }
-                else
-                {
-                    log.WarnFormat("{0} at {1} is not a vaild install", name, path);                    
-                }
+                var name = pair.Item1;
+                var path = pair.Item2;
 
-                //var ksp = new KSP(path, User);
-                //instances.Add(name, ksp);
-
-                
+                instances.Add(name, new KSP(path, User));
+                log.DebugFormat("Added {0} at {1}", name, path);
+                if (!KSP.IsKspDir(path))
+                {
+                    log.WarnFormat("{0} at {1} is not a vaild install", name, path);
+                }
             }
 
             try

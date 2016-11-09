@@ -15,7 +15,7 @@ using log4net;
 
 namespace CKAN
 {
-    
+
     /// <summary>
     ///     Everything for dealing with KSP itself.
     /// </summary>
@@ -38,21 +38,14 @@ namespace CKAN
         /// <summary>
         /// Returns a KSP object, insisting that directory contains a valid KSP install.
         /// Will initialise a CKAN instance in the KSP dir if it does not already exist.
-        /// Throws a NotKSPDirKraken if directory is not a KSP install.
         /// </summary>
         public KSP(string gameDir, IUser user)
         {
             User = user;
 
             // Make sure our path is absolute and has normalised slashes.
-            gameDir = KSPPathUtils.NormalizePath(Path.GetFullPath(gameDir));
+            this.gameDir = KSPPathUtils.NormalizePath(Path.GetFullPath(gameDir));
 
-            if (! IsKspDir(gameDir))
-            {
-                throw new NotKSPDirKraken(gameDir);
-            }
-            
-            this.gameDir = gameDir;
             Init();
         }
 
@@ -93,6 +86,7 @@ namespace CKAN
 
             log.DebugFormat("Initialised {0}", CkanDir());
 
+            // finally, initialize a new backing cache
             Cache = new NetFileCache(DownloadCacheDir());
         }
 
@@ -178,25 +172,20 @@ namespace CKAN
             return Directory.Exists(Path.Combine(directory, "GameData"));
         }
 
-
         /// <summary>
         /// Detects the version of KSP in a given directory.
-        /// Throws a NotKSPDirKraken if anything goes wrong.
         /// </summary>
         private static KspVersion DetectVersion(string directory)
         {
+
             var version = DetectVersionInternal(directory);
 
             if (version != null)
             {
                 log.DebugFormat("Found version {0}", version);
-                return version;
             }
-            else
-            {
-                log.Error("Could not find KSP version");
-                throw new NotKSPDirKraken(directory, "Could not find KSP version in readme.txt");
-            }
+
+            return version;
         }
 
         private static KspVersion DetectVersionInternal(string directory)
@@ -217,7 +206,7 @@ namespace CKAN
                 return readmeVersionProvider.TryGetVersion(directory, out version) ? version : null;
             }
         }
-        
+
         /// <summary>
         /// Rebuilds the "Ships" directory inside the current KSP instance
         /// </summary>
@@ -346,7 +335,7 @@ namespace CKAN
         {
             // TODO: We really should be asking our Cache object to do the
             // cleaning, rather than doing it ourselves.
-            
+
             log.Debug("Cleaning cache directory");
 
             string[] files = Directory.GetFiles(DownloadCacheDir(), "*", SearchOption.AllDirectories);
@@ -397,7 +386,7 @@ namespace CKAN
                 {
                     manager.registry.RegisterDll(this, dll);
                 }
-                    
+
                 tx.Complete();
             }
             manager.Save(enforce_consistency: false);

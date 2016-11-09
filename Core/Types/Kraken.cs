@@ -64,17 +64,6 @@ namespace CKAN
         }
     }
 
-    public class NotKSPDirKraken : Kraken
-    {
-        public string path;
-
-        public NotKSPDirKraken(string path, string reason = null, Exception innerException = null)
-            : base(reason, innerException)
-        {
-            this.path = path;
-        }
-    }
-
     public class TransactionalKraken : Kraken
     {
         public TransactionalKraken(string reason = null, Exception innerException = null)
