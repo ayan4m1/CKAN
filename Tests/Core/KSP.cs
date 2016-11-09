@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using CKAN;
 using NUnit.Framework;
 using Tests.Data;
@@ -28,8 +29,18 @@ namespace Tests.Core
             {
                 ksp.Dispose();
             }
-                    
-            Directory.Delete(ksp_dir, true);
+
+            // this delay prevents an exception when deleting this directory because the lockfile
+            // has not been released yet (seems to be Windows only)
+            DelayedRemove().Wait();
+        }
+
+        private async Task DelayedRemove()
+        {
+            await Task.Delay(500).ContinueWith(_ =>
+            {
+                Directory.Delete(ksp_dir, true);
+            });
         }
 
         [Test]
