@@ -55,12 +55,16 @@ namespace CKAN
         public string module;
         public string version;
 
-        // TODO: Is there a way to set the stringify version of this?
         public ModuleNotFoundKraken(string module, string version = null, string reason = null, Exception innerException = null)
             : base(reason, innerException)
         {
             this.module = module;
             this.version = version;
+        }
+
+        public override string ToString()
+        {
+            return string.Format("Module {0}, v{1}", module, version);
         }
     }
 
