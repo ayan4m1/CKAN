@@ -54,7 +54,6 @@ namespace CKAN
             
             this.gameDir = gameDir;
             Init();
-            Cache = new NetFileCache(DownloadCacheDir());
         }
 
         /// <summary>
@@ -64,7 +63,7 @@ namespace CKAN
         {
             log.DebugFormat("Initialising {0}", CkanDir());
 
-            if (! Directory.Exists(CkanDir()))
+            if (!Directory.Exists(CkanDir()))
             {
                 User.RaiseMessage("Setting up CKAN for the first time...");
                 User.RaiseMessage("Creating {0}", CkanDir());
@@ -74,7 +73,7 @@ namespace CKAN
                 ScanGameData();
             }
 
-            if (! Directory.Exists(DownloadCacheDir()))
+            if (!Directory.Exists(DownloadCacheDir()))
             {
                 User.RaiseMessage("Creating {0}", DownloadCacheDir());
                 Directory.CreateDirectory(DownloadCacheDir());
@@ -88,11 +87,13 @@ namespace CKAN
             if (Directory.Exists(TempDir()))
             {
                 var directory = new DirectoryInfo(TempDir());
-                foreach (FileInfo file in directory.GetFiles()) file.Delete();
-                foreach (DirectoryInfo subDirectory in directory.GetDirectories()) subDirectory.Delete(true);
+                foreach (var file in directory.GetFiles()) file.Delete();
+                foreach (var subDirectory in directory.GetDirectories()) subDirectory.Delete(true);
             }
 
             log.DebugFormat("Initialised {0}", CkanDir());
+
+            Cache = new NetFileCache(DownloadCacheDir());
         }
 
         #endregion

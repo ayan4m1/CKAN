@@ -68,7 +68,7 @@ namespace CKAN
             if (CurrentInstance != null)
             {
                 // TODO: Throw a better exception
-                throw new KSPManagerKraken("Tried to set KSP instance twice!");
+                throw new KSPManagerKraken("Tried to set KSP instance as preferred twice!");
             }
 
             CurrentInstance = _GetPreferredInstance();
@@ -124,14 +124,15 @@ namespace CKAN
             if (instances.Any())
                 throw new KSPManagerKraken("Attempted to scan for defaults with instances in registry");
 
-            string gamedir;
+            var gamedir = string.Empty;
             try
             {
                 gamedir = KSP.FindGameDir();
                 return AddInstance("auto", new KSP(gamedir, User));
             }
-            catch (DirectoryNotFoundException)
+            catch (DirectoryNotFoundException ex)
             {
+                log.WarnFormat("Couldn't find the default instance directory {0}", gamedir);
                 return null;
             }
             catch (NotKSPDirKraken)//Todo check carefully if this is nessesary. 
