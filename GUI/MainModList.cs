@@ -345,7 +345,7 @@ namespace CKAN
             }
         }
 
-        private GUIModFilter _modFilter = GUIModFilter.Compatible;
+        private GUIModFilter _modFilter = GUIModFilter.Available;
         private string _modNameFilter = String.Empty;
         private string _modAuthorFilter = String.Empty;
         private string _modDescriptionFilter = String.Empty;
@@ -465,7 +465,7 @@ namespace CKAN
         {
             switch (filter)
             {
-                case GUIModFilter.Compatible:
+                case GUIModFilter.Available:
                     return Modules.Count(m => !m.IsIncompatible);
                 case GUIModFilter.Installed:
                     return Modules.Count(m => m.IsInstalled);
@@ -580,7 +580,7 @@ namespace CKAN
         {
             switch (ModFilter)
             {
-                case GUIModFilter.Compatible:
+                case GUIModFilter.Available:
                     return !m.IsIncompatible;
                 case GUIModFilter.Installed:
                     return m.IsInstalled;
