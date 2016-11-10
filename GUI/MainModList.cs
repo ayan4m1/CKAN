@@ -186,23 +186,17 @@ namespace CKAN
             mainModList.Modules = new ReadOnlyCollection<GUIMod>(
                 mainModList.full_list_of_mod_rows.Values.Select(row => row.Tag as GUIMod).ToList());
 
-            //TODO Consider using smart enum patten so stuff like this is easier
-            FilterToolButton.DropDownItems[0].Text = String.Format("Compatible ({0})",
-                mainModList.CountModsByFilter(GUIModFilter.Compatible));
-            FilterToolButton.DropDownItems[1].Text = String.Format("Installed ({0})",
-                mainModList.CountModsByFilter(GUIModFilter.Installed));
-            FilterToolButton.DropDownItems[2].Text = String.Format("Upgradeable ({0})",
-                mainModList.CountModsByFilter(GUIModFilter.InstalledUpdateAvailable));
-            FilterToolButton.DropDownItems[3].Text = String.Format("Cached ({0})",
-                mainModList.CountModsByFilter(GUIModFilter.Cached));
-            FilterToolButton.DropDownItems[4].Text = String.Format("New in repository ({0})",
-                mainModList.CountModsByFilter(GUIModFilter.NewInRepository));
-            FilterToolButton.DropDownItems[5].Text = String.Format("Not installed ({0})",
-                mainModList.CountModsByFilter(GUIModFilter.NotInstalled));
-            FilterToolButton.DropDownItems[6].Text = String.Format("Incompatible ({0})",
-                mainModList.CountModsByFilter(GUIModFilter.Incompatible));
-            FilterToolButton.DropDownItems[7].Text = String.Format("All ({0})",
-                mainModList.CountModsByFilter(GUIModFilter.All));
+            var filters = Enum.GetValues(typeof(GUIModFilter)) as GUIModFilter[];
+            if (filters != null)
+            {
+                foreach (var filter in filters)
+                {
+                    var name = FilterLabels.ContainsKey(filter) ? FilterLabels[filter] : filter.ToString();
+                    var label = $"{name} ({mainModList.CountModsByFilter(filter)})";
+                    FilterToolButton.DropDownItems.Add(label);
+                }
+            }
+
             var has_any_updates = gui_mods.Any(mod => mod.HasUpdate);
             UpdateAllToolButton.Enabled = has_any_updates;
             UpdateFilters(this);

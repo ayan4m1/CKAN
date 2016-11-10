@@ -41,6 +41,13 @@ namespace CKAN
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(Main));
 
+        public static readonly Dictionary<GUIModFilter, string> FilterLabels = new Dictionary<GUIModFilter, string>()
+        {
+            {GUIModFilter.InstalledUpdateAvailable, "Upgradable"},
+            {GUIModFilter.NewInRepository, "New in repository"},
+            {GUIModFilter.NotInstalled, "Not Installed"}
+        };
+
         public delegate void ModChangedCallback(CkanModule module, GUIModChangeType change);
 
         public static event ModChangedCallback modChangedCallback;
