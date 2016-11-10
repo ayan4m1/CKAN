@@ -22,8 +22,8 @@ namespace Tests.Core
             ksp = new CKAN.KSP(ksp_dir,NullUser.User);
         }
 
-        [TearDown]
-        public void TearDown()
+        [OneTimeTearDown]
+        public async void TearDown()
         {
             if (ksp != null)
             {
@@ -32,7 +32,7 @@ namespace Tests.Core
 
             // this delay prevents an exception when deleting this directory because the lockfile
             // has not been released yet (seems to be Windows only)
-            DelayedRemove().Wait();
+            await DelayedRemove();
         }
 
         private async Task DelayedRemove()
